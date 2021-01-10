@@ -1,0 +1,36 @@
+﻿<Window x:Class="AIDungeon_Extension.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AIDungeon_Extension"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <ListView x:Name="dialogListView" Margin="10,10,10.333,67.667">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Id" Width="100" DisplayMemberBinding="{Binding id}"/>
+                    <GridViewColumn Header="Id" Width="Auto" DisplayMemberBinding="{Binding dialog}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <TextBox x:Name="sendTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="SendTextBox_PreviewKeyDown"
+                   HorizontalAlignment="Left" Height="53" VerticalAlignment="Top" Width="773" Margin="10,358,0,0"/>
+        <TextBlock x:Name="placeHolderTextBlock" Text="placeholder" IsHitTestVisible="False" 
+                      HorizontalAlignment="Left" Height="53" VerticalAlignment="Top" Width="773" Margin="10,358,0,0">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                    <Setter Property="Foreground" Value="Gray"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Text, ElementName=sendTextBox}" Value="">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+    </Grid>
+</Window>
