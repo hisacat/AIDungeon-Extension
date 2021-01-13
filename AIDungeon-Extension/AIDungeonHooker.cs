@@ -315,7 +315,8 @@ namespace AIDungeon_Extension.Core
             //It might be called when game started. (webpage opened)
             //It sometimes return empty values at last one. (only id and empty message aray exist)
             //Use adventure id for check the game was changed.
-            //Basically, Action id seems like based on ascending.
+            //Basically, Action seems like guaranteed index order but i'm not sure.
+            //Should sort by createdAt? ***id was not related with index***
             this.OnAdventure?.Invoke(adventure);
         }
         //Adventure updated.

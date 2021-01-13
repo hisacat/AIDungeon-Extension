@@ -167,16 +167,16 @@ namespace AIDungeon_Extension.Core
             public string adventureId;
             public string undoneAt;
             public string deletedAt;
-            public string createdAt;
+            public DateTime createdAt;
 
             public string __typename; //Action
 
             public int CompareTo(Action other)
             {
-                if (this.id.Length == other.id.Length)
-                    return this.id.CompareTo(id);
-                else
-                    return this.id.Length.CompareTo(other.id.Length);
+                if (other == null)
+                    return 0;
+
+                return createdAt.CompareTo(other.createdAt);
             }
 
             public int Compare(Action x, Action y)
