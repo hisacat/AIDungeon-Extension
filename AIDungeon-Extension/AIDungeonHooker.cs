@@ -40,10 +40,18 @@ namespace AIDungeon_Extension.Core
 
         private System.Threading.Thread crawlingThread = null;
 
-        public delegate void ActionUpdatedDelegate(List<AIDungeonAction> actions);
-        public event ActionUpdatedDelegate OnAdventureLoaded = null;
-        public event ActionUpdatedDelegate OnActionAdded = null;
-        public event ActionUpdatedDelegate OnActionUpdated = null;
+        public delegate void AdventureDelegate(AIDungeonWrapper.Adventure adventure);
+        public delegate void ScenarioDelegate(AIDungeonWrapper.Scenario scenario);
+        public delegate void ActionsDelegate(List<AIDungeonWrapper.Action> actions);
+        public delegate void ActionDelegate(AIDungeonWrapper.Action action);
+        public event AdventureDelegate OnUpdateAdventureMemory = null;
+        public event ScenarioDelegate OnScenario = null;
+        public event AdventureDelegate OnAdventure = null;
+        public event AdventureDelegate OnAdventureUpdated = null;
+        public event ActionsDelegate OnActionsUndone = null;
+        public event ActionDelegate OnActionAdded = null;
+        public event ActionDelegate OnActionUpdated = null;
+        public event ActionDelegate OnActionRestored = null;
 
         public void Run()
         {
@@ -59,30 +67,6 @@ namespace AIDungeon_Extension.Core
 
             crawlingThread = new System.Threading.Thread(CrawlingScripts);
             crawlingThread.Start();
-        }
-
-        public class AIDungeonAction : IComparer<AIDungeonAction>, IComparable<AIDungeonAction>
-        {
-            public string id { get; set; }
-            public string text { get; set; }
-            public string type { get; set; }
-            public string adventureId { get; set; }
-            public string undoneAt { get; set; }
-            public string deletedAt { get; set; }
-            public string createdAt { get; set; }
-
-            public int CompareTo(AIDungeonAction other)
-            {
-                if (this.id.Length == other.id.Length)
-                    return this.id.CompareTo(id);
-                else
-                    return this.id.Length.CompareTo(other.id.Length);
-            }
-
-            public int Compare(AIDungeonAction x, AIDungeonAction y)
-            {
-                return x.CompareTo(y);
-            }
         }
 
         private void CrawlingScripts()
@@ -223,92 +207,53 @@ namespace AIDungeon_Extension.Core
                         #endregion
                         #region Etc.
                         case "addDeviceToken":
-                            {
-                                var value = data.Value<bool>();
-                            }
+                            OnAddDeviceTokenCallback(data.Value<bool>());
                             break;
                         case "markAsTyping":
-                            {
-                                var value = data.Value<bool>();
-                            }
+                            OnMarkAsTypingCallback(data.Value<bool>());
                             break;
                         case "featureFlags":
-                            {
-                                foreach (var child in data.Children())
-                                {
-                                    var featureFlag = child.ToObject<AIDungeonWrapper.FeatureFlag>();
-                                }
-                            }
+                            OnFeatureFlagsCallback(data.ToObject<List<AIDungeonWrapper.FeatureFlag>>());
                             break;
                         #endregion
                         #region Users
-                        case "createAnonymousAccount": //Create account for not logined user.
-                            {
-                                var user = data.ToObject<AIDungeonWrapper.User>();
-                            }
+                        case "createAnonymousAccount":
+                            OnCreateAnonymousAccountCallback(data.ToObject<AIDungeonWrapper.User>());
                             break;
-                        case "login": //Logined. (When failed. some fields empty)
-                            {
-                                var user = data.ToObject<AIDungeonWrapper.User>();
-                            }
+                        case "login":
+                            OnLoginCallback(data.ToObject<AIDungeonWrapper.User>());
                             break;
-                        case "updateUser": //Current user info updated.
-                            {
-                                var user = data.ToObject<AIDungeonWrapper.User>();
-                            }
+                        case "updateUser":
+                            OnUpdateUserCallback(data.ToObject<AIDungeonWrapper.User>());
                             break;
-                        case "user": //User info updated. *Dont know difference with 'updateUser'
-                            {
-                                var user = data.ToObject<AIDungeonWrapper.User>();
-                            }
+                        case "user":
+                            OnUserCallback(data.ToObject<AIDungeonWrapper.User>());
                             break;
                         #endregion
                         #region Game
-                        case "updateAdventureMemory": //Memoty,Authors Note changed. (Pin, Remember)
-                            {
-                                //memory, memory might be edited.
-                                var adventure = data.ToObject<AIDungeonWrapper.Adventure>();
-                            }
+                        case "scenario":
+                            OnScenarioCallback(data.ToObject<AIDungeonWrapper.Scenario>());
                             break;
-                        case "scenario": //Scenario. It seems like option system.
-                            {
-                                //In scenario. only can select menu and typing option id.
-                                var scenario = data.ToObject<AIDungeonWrapper.Scenario>();
-                            }
+                        case "updateAdventureMemory":
+                            OnUpdateAdventureMemoryCallback(data.ToObject<AIDungeonWrapper.Adventure>());
                             break;
-                        case "adventure": //When adventure start/inited.
-                            {
-                                //It might be called when game started. (webpage opened)
-                                //It sometimes return empty values at last one. (only id and empty message aray exist)
-                                //Use adventure id for check the game was changed.
-                                //Basically, Action id seems like based on ascending.
-                                var adventure = data.ToObject<AIDungeonWrapper.Adventure>();
-                            }
+                        case "adventure":
+                            OnAdventureCallback(data.ToObject<AIDungeonWrapper.Adventure>());
                             break;
-                        case "adventureUpdated": //Adventure updated.
-                            {
-                                var adventure = data.ToObject<AIDungeonWrapper.Adventure>();
-                            }
+                        case "adventureUpdated":
+                            OnAdventureUpdatedCallback(data.ToObject<AIDungeonWrapper.Adventure>());
                             break;
-                        case "actionsUndone": //Remove action from actionWindow.
-                            {
-                                var actions = data.ToObject<List<AIDungeonWrapper.Action>>();
-                            }
+                        case "actionsUndone":
+                            OnActionsUndoneCallback(data.ToObject<List<AIDungeonWrapper.Action>>());
                             break;
-                        case "actionAdded": //Single action added.
-                            {
-                                var action = data.ToObject<AIDungeonWrapper.Action>();
-                            }
+                        case "actionAdded":
+                            OnActionAddedCallback(data.ToObject<AIDungeonWrapper.Action>());
                             break;
-                        case "actionUpdated": //Single action updated. (Current action edited?)
-                            {
-                                var action = data.ToObject<AIDungeonWrapper.Action>();
-                            }
+                        case "actionUpdated":
+                            OnActionUpdatedCallback(data.ToObject<AIDungeonWrapper.Action>());
                             break;
-                        case "actionRestored": //Single action restored. -Text might be changed.
-                            {
-                                var action = data.ToObject<AIDungeonWrapper.Action>();
-                            }
+                        case "actionRestored":
+                            OnActionRestoredCallback(data.ToObject<AIDungeonWrapper.Action>());
                             break;
                         #endregion
                         default:
@@ -320,6 +265,86 @@ namespace AIDungeon_Extension.Core
                 }
             }
         }
+
+        #region Data callbacks
+        #region Etc.
+        public void OnAddDeviceTokenCallback(bool value)
+        {
+        }
+        public void OnMarkAsTypingCallback(bool value)
+        {
+        }
+        public void OnFeatureFlagsCallback(List<AIDungeonWrapper.FeatureFlag> featureFlags)
+        {
+        }
+        #endregion
+        #region Users
+        //Create account for not logined user.
+        public void OnCreateAnonymousAccountCallback(AIDungeonWrapper.User user)
+        {
+        }
+        //Logined. (When failed. some fields empty)
+        public void OnLoginCallback(AIDungeonWrapper.User user)
+        {
+        }
+        //Current user info updated.
+        public void OnUpdateUserCallback(AIDungeonWrapper.User user)
+        {
+        }
+        //User info updated. *Dont know difference with 'updateUser'
+        public void OnUserCallback(AIDungeonWrapper.User user)
+        {
+        }
+        #endregion
+        #region Game
+        //Scenario. It seems like option system.
+        public void OnScenarioCallback(AIDungeonWrapper.Scenario scenario)
+        {
+            //In scenario. only can select menu and typing option id.
+            this.OnScenario?.Invoke(scenario);
+        }
+        //Memoty,Authors Note changed. (Pin, Remember)
+        public void OnUpdateAdventureMemoryCallback(AIDungeonWrapper.Adventure adventure)
+        {
+            //memory, memory might be edited.
+            this.OnUpdateAdventureMemory?.Invoke(adventure);
+        }
+        //When adventure start/inited.
+        public void OnAdventureCallback(AIDungeonWrapper.Adventure adventure)
+        {
+            //It might be called when game started. (webpage opened)
+            //It sometimes return empty values at last one. (only id and empty message aray exist)
+            //Use adventure id for check the game was changed.
+            //Basically, Action id seems like based on ascending.
+            this.OnAdventure?.Invoke(adventure);
+        }
+        //Adventure updated.
+        public void OnAdventureUpdatedCallback(AIDungeonWrapper.Adventure adventure)
+        {
+            this.OnAdventureUpdated?.Invoke(adventure);
+        }
+        //Action removed from actionWindow.
+        public void OnActionsUndoneCallback(List<AIDungeonWrapper.Action> actions)
+        {
+            this.OnActionsUndone?.Invoke(actions);
+        }
+        //Single action added.
+        public void OnActionAddedCallback(AIDungeonWrapper.Action action)
+        {
+            this.OnActionAdded?.Invoke(action);
+        }
+        //Single action updated. (Current action edited?)
+        public void OnActionUpdatedCallback(AIDungeonWrapper.Action action)
+        {
+            this.OnActionUpdated?.Invoke(action);
+        }
+        //Single action restored. -Text might be changed.
+        public void OnActionRestoredCallback(AIDungeonWrapper.Action action)
+        {
+            this.OnActionRestored?.Invoke(action);
+        }
+        #endregion
+        #endregion
 
         public void Dispose()
         {

@@ -159,7 +159,7 @@ namespace AIDungeon_Extension.Core
                 public string __typename; //Scenario
             }
         }
-        public class Action
+        public class Action : IComparer<Action>, IComparable<Action>
         {
             public string id;
             public string text;
@@ -170,6 +170,19 @@ namespace AIDungeon_Extension.Core
             public string createdAt;
 
             public string __typename; //Action
+
+            public int CompareTo(Action other)
+            {
+                if (this.id.Length == other.id.Length)
+                    return this.id.CompareTo(id);
+                else
+                    return this.id.Length.CompareTo(other.id.Length);
+            }
+
+            public int Compare(Action x, Action y)
+            {
+                return x.CompareTo(y);
+            }
         }
     }
 }
