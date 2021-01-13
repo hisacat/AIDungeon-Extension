@@ -14,10 +14,6 @@ namespace AIDungeon_Extension.Core
 {
     public class AIDungeonHooker : IDisposable
     {
-        //Shift Enter : 개행
-        //Enter : 번역하기
-        //Ctrl Enter : 보내기
-
         private const string LogType_Performance = "performance";
         private const string AIDungeonURL = "https://play.aidungeon.io/main/loginRegister";
 
@@ -28,7 +24,7 @@ namespace AIDungeon_Extension.Core
         public delegate void ActionUpdatedDelegate(List<AIDungeonAction> actions);
         public event ActionUpdatedDelegate OnAdventureLoaded = null;
         public event ActionUpdatedDelegate OnActionAdded = null;
-        public event ActionUpdatedDelegate OnActionUpdated= null;
+        public event ActionUpdatedDelegate OnActionUpdated = null;
 
         public void Run()
         {
@@ -46,7 +42,7 @@ namespace AIDungeon_Extension.Core
             crawlingThread.Start();
         }
 
-        public class AIDungeonAction
+        public class AIDungeonAction : IComparer<AIDungeonAction>, IComparable<AIDungeonAction>
         {
             public string id { get; set; }
             public string text { get; set; }
@@ -55,6 +51,19 @@ namespace AIDungeon_Extension.Core
             public string undoneAt { get; set; }
             public string deletedAt { get; set; }
             public string createdAt { get; set; }
+
+            public int CompareTo(AIDungeonAction other)
+            {
+                if (this.id.Length == other.id.Length)
+                    return this.id.CompareTo(id);
+                else
+                    return this.id.Length.CompareTo(other.id.Length);
+            }
+
+            public int Compare(AIDungeonAction x, AIDungeonAction y)
+            {
+                return x.CompareTo(y);
+            }
         }
 
         private void CrawlingScripts()
@@ -71,10 +80,6 @@ namespace AIDungeon_Extension.Core
                         var message = jToken["message"];
                         var method = message["method"].Value<string>();
 
-                        if (message.ToString().Contains("[trackthis]"))
-                        {
-                            Console.WriteLine(message);
-                        }
                         #endregion
 
                         if (string.Equals(method, "Network.webSocketFrameReceived"))
@@ -92,8 +97,6 @@ namespace AIDungeon_Extension.Core
                 {
 
                 }
-
-                //System.Threading.Thread.Sleep(1);
             }
         }
 
@@ -110,56 +113,123 @@ namespace AIDungeon_Extension.Core
                 {
                     var dataType = dataPair.Key;
                     var data = dataPair.Value;
+
+                    var json = data.ToString();
+
+                    //Ignore list - for debug.
+                    bool skip = false;
+                    var ignoreList = new string[] { "sendEvent", "sendExperimentEvent" };
+                    foreach (var ignore in ignoreList)
+                    {
+                        if (dataType.Equals(ignore))
+                        {
+                            skip = true;
+                            break;
+                        }
+                    }
+                    if (skip) continue;
+
                     switch (dataType)
                     {
-                        case "adventure":
+                        #region Bottom control button callbacks
+                        case "editAction": //when Edit.
+                        case "undoAction": //when Undo.
+                        case "retryAction": //when Retry.
+                        case "restoreAction": //when Restore.
+                            break;
+                        #endregion
+                        #region Etc.
+                        case "addDeviceToken":
                             {
-                                var id = data["id"];
-
-                                var actionWindow = JArray.Parse(data["actionWindow"].Value<string>());
-                                var undoneWindow = JArray.Parse(data["undoneWindow"].Value<string>());
-
-                                List<AIDungeonAction> actions = new List<AIDungeonAction>();
-                                foreach (var action in actionWindow)
-                                    actions.Add(ParseAction(action));
-                                foreach (var action in undoneWindow)
-                                    actions.Add(ParseAction(action));
-
-                                OnAdventureLoaded?.Invoke(actions);
+                                var value = data.Value<bool>();
                             }
                             break;
-                        case "actionAdded":
+                        case "markAsTyping":
                             {
-                                List<AIDungeonAction> actions = new List<AIDungeonAction>();
-                                actions.Add(ParseAction(data));
-                                OnActionAdded?.Invoke(actions);
+                                var value = data.Value<bool>();
                             }
                             break;
-                        case "actionUpdated":
+                        case "featureFlags":
                             {
-                                List<AIDungeonAction> actions = new List<AIDungeonAction>();
-                                actions.Add(ParseAction(data));
-                                OnActionUpdated?.Invoke(actions);
+                                foreach (var child in data.Children())
+                                {
+                                    var featureFlag = child.ToObject<AIDungeonWrapper.FeatureFlag>();
+                                }
+                            }
+                            break;
+                        #endregion
+                        #region Users
+                        case "createAnonymousAccount": //Create account for not logined user.
+                            {
+                                var user = data.ToObject<AIDungeonWrapper.User>();
+                            }
+                            break;
+                        case "login": //Logined. (When failed. some fields empty)
+                            {
+                                var user = data.ToObject<AIDungeonWrapper.User>();
+                            }
+                            break;
+                        case "updateUser": //Current user info updated.
+                            {
+                                var user = data.ToObject<AIDungeonWrapper.User>();
+                            }
+                            break;
+                        case "user": //User info updated. *Dont know difference with 'updateUser'
+                            {
+                                var user = data.ToObject<AIDungeonWrapper.User>();
+                            }
+                            break;
+                        #endregion
+                        #region Game
+                        case "updateAdventureMemory": //Memoty,Authors Note changed. (Pin, Remember)
+                            {
+                                //memory, memory might be edited.
+                                var adventure = data.ToObject<AIDungeonWrapper.Adventure>();
+                            }
+                            break;
+                        case "adventure": //When adventure start/inited.
+                            {
+                                //It might be called when game started. (webpage opened)
+                                //It sometimes return empty values at last one. (only id and empty message aray exist)
+                                //Use adventure id for check the game was changed.
+                                //Basically, Action id seems like based on ascending.
+                                var adventure = data.ToObject<AIDungeonWrapper.Adventure>();
+                            }
+                            break;
+                        case "adventureUpdated": //Adventure updated.
+                            {
+                                var adventure = data.ToObject<AIDungeonWrapper.Adventure>();
+                            }
+                            break;
+                        case "actionsUndone": //Remove action from actionWindow.
+                            {
+                                var actions = data.ToObject<List<AIDungeonWrapper.Action>>();
+                            }
+                            break;
+                        case "actionAdded": //Single action added.
+                            {
+                                var action = data.ToObject<AIDungeonWrapper.Action>();
+                            }
+                            break;
+                        case "actionUpdated": //Single action updated. (Current action edited?)
+                            {
+                                var action = data.ToObject<AIDungeonWrapper.Action>();
+                            }
+                            break;
+                        case "actionRestored": //Single action restored. -Text might be changed.
+                            {
+                                var action = data.ToObject<AIDungeonWrapper.Action>();
+                            }
+                            break;
+                        #endregion
+                        default:
+                            {
+                                Console.WriteLine("[TRACE] Unknown dataType : {0}", dataType);
                             }
                             break;
                     }
                 }
             }
-        }
-
-        private AIDungeonAction ParseAction(JToken actionData)
-        {
-            var id = actionData["id"].Value<string>();
-            var text = actionData["text"].Value<string>();
-            var type = actionData["type"].Value<string>();
-            var adventureId = actionData["adventureId"].Value<string>();
-            var undoneAt = actionData["undoneAt"].Value<string>();
-            var deletedAt = actionData["deletedAt"].Value<string>();
-            var createdAt = actionData["createdAt"].Value<string>();
-
-            //Value<DateTime>();
-
-            return new AIDungeonAction() { id = id, text = text, type = type, adventureId = adventureId, undoneAt = undoneAt, deletedAt = deletedAt, createdAt = createdAt };
         }
 
         public void Dispose()
