@@ -51,7 +51,6 @@ namespace AIDungeon_Extension
         {
             if (driver != null)
             {
-                driver.Close();
                 driver.Quit();
                 driver = null;
             }

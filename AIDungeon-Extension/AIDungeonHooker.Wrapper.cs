@@ -156,7 +156,7 @@ namespace AIDungeon_Extension.Core
                 public string publicId;
                 public string title;
 
-                public string __typename; //Option
+                public string __typename; //Scenario
             }
         }
         public class Action

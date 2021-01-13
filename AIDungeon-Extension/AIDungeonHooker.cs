@@ -14,6 +14,16 @@ namespace AIDungeon_Extension.Core
 {
     public class AIDungeonHooker : IDisposable
     {
+        public static class XPaths
+        {
+            public const string Login_IdInput = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[3]/input";
+            public const string Login_PasswordInput = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[4]/input";
+            public const string Login_Button = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[5]/div/div";
+
+            public const string Game_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/textarea";
+            public const string Game_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/div";
+        }
+
         private const string LogType_Performance = "performance";
         private const string AIDungeonURL = "https://play.aidungeon.io/main/loginRegister";
 
@@ -136,6 +146,8 @@ namespace AIDungeon_Extension.Core
                         case "refreshSearchIndex":
                         case "saveContent":
                         case "updateAdventureWorldInfo":
+                        case "scenarioLeaderboard":
+                        case "price":
                             break;
                         #endregion
                         #region Bottom control button callbacks
@@ -196,6 +208,7 @@ namespace AIDungeon_Extension.Core
                             break;
                         case "scenario": //Scenario. It seems like option system.
                             {
+                                //In scenario. only can select menu and typing option id.
                                 var scenario = data.ToObject<AIDungeonWrapper.Scenario>();
                             }
                             break;
@@ -253,7 +266,6 @@ namespace AIDungeon_Extension.Core
             }
             if (driver != null)
             {
-                driver.Close();
                 driver.Quit();
                 driver = null;
             }
