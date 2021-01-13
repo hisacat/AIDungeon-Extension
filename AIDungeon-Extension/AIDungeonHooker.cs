@@ -20,12 +20,21 @@ namespace AIDungeon_Extension.Core
             public const string Login_PasswordInput = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[4]/input";
             public const string Login_Button = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[5]/div/div";
 
-            public const string Game_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/textarea";
-            public const string Game_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/div";
+            //When https://play.aidungeon.io/main/scenarioPlay
+            public const string ScenarioPlay_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[4]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/textarea";
+            public const string ScenarioPlay_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[4]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/div";
+
+            //When https://play.aidungeon.io/main/play
+            public const string Play_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[5]/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/textarea";
+            public const string Play_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[5]/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/div";
+
+            //When https://play.aidungeon.io/main/adventurePlay
+            public const string AdventurePlay_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/textarea";
+            public const string AdventurePlay_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/div";
         }
 
         private const string LogType_Performance = "performance";
-        private const string AIDungeonURL = "https://play.aidungeon.io/main/loginRegister";
+        private const string StartUpURL = "https://play.aidungeon.io/main/loginRegister";
 
         private ChromeDriver driver = null;
 
@@ -46,7 +55,7 @@ namespace AIDungeon_Extension.Core
 
             driver = new ChromeDriver(service, options);
 
-            driver.Navigate().GoToUrl(AIDungeonURL);
+            driver.Navigate().GoToUrl(StartUpURL);
 
             crawlingThread = new System.Threading.Thread(CrawlingScripts);
             crawlingThread.Start();
@@ -108,6 +117,61 @@ namespace AIDungeon_Extension.Core
 
                 }
             }
+        }
+
+        public bool SendText(string text)
+        {
+            var inputTextAreaXPath = string.Empty;
+            var SubmitButtonXPath = string.Empty;
+
+            if (driver.Url.StartsWith("https://play.aidungeon.io/main/scenarioPlay"))
+            {
+                inputTextAreaXPath = XPaths.ScenarioPlay_InputTextArea;
+                SubmitButtonXPath = XPaths.ScenarioPlay_SubmitButton;
+            }
+            else if (driver.Url.StartsWith("https://play.aidungeon.io/main/play"))
+            {
+                inputTextAreaXPath = XPaths.Play_InputTextArea;
+                SubmitButtonXPath = XPaths.Play_SubmitButton;
+            }
+            else if (driver.Url.StartsWith("https://play.aidungeon.io/main/adventurePlay"))
+            {
+                inputTextAreaXPath = XPaths.AdventurePlay_InputTextArea;
+                SubmitButtonXPath = XPaths.AdventurePlay_SubmitButton;
+            }
+            else
+            {
+                //Unknown
+                return false;
+            }
+
+            try
+            {
+                driver.FindElementByXPath(inputTextAreaXPath).Clear();
+                if (!string.IsNullOrEmpty(text))
+                {
+                    text = text.Replace("\r\n", "\r");
+                    var lines = text.Split('\r');
+                    int lineCount = lines.Length;
+
+                    var inputTextBoxElement = driver.FindElementByXPath(inputTextAreaXPath);
+                    for (int i = 0; i < lineCount; i++)
+                    {
+                        inputTextBoxElement.SendKeys(lines[i]);
+                        if (i < lineCount - 1)
+                            inputTextBoxElement.SendKeys(Keys.Shift + Keys.Enter);
+                    }
+                }
+
+                driver.FindElementByXPath(SubmitButtonXPath).Click();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+
+            return true;
         }
 
         private void ParsePayloadData(JToken payloadData)
