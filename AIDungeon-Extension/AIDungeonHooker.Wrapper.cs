@@ -141,6 +141,24 @@ namespace AIDungeon_Extension.Core
                 public string __typename; //Player
             }
         }
+        public class Scenario
+        {
+            public string memory;
+            public string id;
+            public string prompt;
+            public string publicId;
+            public List<Option> options;
+
+            public string __typename; //Scenario
+            public class Option
+            {
+                public string id;
+                public string publicId;
+                public string title;
+
+                public string __typename; //Option
+            }
+        }
         public class Action
         {
             public string id;

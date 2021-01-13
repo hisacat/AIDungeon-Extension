@@ -131,6 +131,13 @@ namespace AIDungeon_Extension.Core
 
                     switch (dataType)
                     {
+                        #region Others
+                        case "search":
+                        case "refreshSearchIndex":
+                        case "saveContent":
+                        case "updateAdventureWorldInfo":
+                            break;
+                        #endregion
                         #region Bottom control button callbacks
                         case "editAction": //when Edit.
                         case "undoAction": //when Undo.
@@ -185,6 +192,11 @@ namespace AIDungeon_Extension.Core
                             {
                                 //memory, memory might be edited.
                                 var adventure = data.ToObject<AIDungeonWrapper.Adventure>();
+                            }
+                            break;
+                        case "scenario": //Scenario. It seems like option system.
+                            {
+                                var scenario = data.ToObject<AIDungeonWrapper.Scenario>();
                             }
                             break;
                         case "adventure": //When adventure start/inited.
