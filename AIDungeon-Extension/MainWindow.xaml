@@ -6,31 +6,60 @@
         xmlns:local="clr-namespace:AIDungeon_Extension"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <ListView x:Name="dialogListView" Margin="10,10,10.333,67.667">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Id" Width="100" DisplayMemberBinding="{Binding id}"/>
-                    <GridViewColumn Header="Id" Width="Auto" DisplayMemberBinding="{Binding dialog}"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <TextBox x:Name="sendTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="SendTextBox_PreviewKeyDown"
-                   HorizontalAlignment="Left" Height="53" VerticalAlignment="Top" Width="773" Margin="10,358,0,0"/>
-        <TextBlock x:Name="placeHolderTextBlock" Text="placeholder" IsHitTestVisible="False" 
-                      HorizontalAlignment="Left" Height="53" VerticalAlignment="Top" Width="773" Margin="10,358,0,0">
-            <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                    <Setter Property="Visibility" Value="Hidden"/>
-                    <Setter Property="Foreground" Value="Gray"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Text, ElementName=sendTextBox}" Value="">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
 
+    <Window.CommandBindings>
+        <CommandBinding Command="local:MainWindow.Reset" Executed="CommandBinding_Executed" />
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Command="local:MainWindow.Reset" Modifiers="Ctrl" Key="R" />
+    </Window.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Menu IsMainMenu="True">
+                <MenuItem Header="Settings" Height="25">
+                    <MenuItem  Header="Reset" Command="local:MainWindow.Reset" InputGestureText="Ctrl + R"/>
+                    <Separator/>
+                    <MenuItem  Header="Restart Hooker" Click="MenuItem_RestartHooker"/>
+                </MenuItem>
+            </Menu>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto"
+                 HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto"
+                 Background="#FF121212" Foreground="#FFE0E0E0" FontSize="12" BorderThickness="2" BorderBrush="#FF3B3B3B" Text="&lt;Actions&gt;"/>
+        </Grid>
+        <Grid Grid.Row="3">
+            <!--FontSize="22"-->
+            <TextBox x:Name="inputTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="InputTextBox_PreviewKeyDown" TextChanged="InputTextBox_TextChanged"
+                 Background="#FF3B3B3B" Foreground="#FFE0E0E0" BorderThickness="2" BorderBrush="#FF3B3B3B"/>
+            <TextBlock x:Name="placeHolderTextBlock" Text="placeholder" IsHitTestVisible="False" Margin="4,2,4,2">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Hidden"/>
+                        <Setter Property="Foreground" Value="#FF999999"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=inputTextBox}" Value="">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+
+
+        <Grid Visibility="Hidden">
+            <TextBox x:Name="translatedInputTextBox" IsReadOnly="True" TextWrapping="Wrap" Text="Translated text" Margin="0,0,0.333,50.667" Height="50" VerticalAlignment="Bottom"
+                 Background="#FF121212" Foreground="#FFE0E0E0" FontSize="22" BorderThickness="2" BorderBrush="#FF3B3B3B"/>
+        </Grid>
+        <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
     </Grid>
 </Window>

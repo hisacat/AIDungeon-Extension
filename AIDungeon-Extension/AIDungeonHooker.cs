@@ -266,6 +266,11 @@ namespace AIDungeon_Extension.Core
             }
         }
 
+        public void Refresh()
+        {
+            this.driver.Navigate().Refresh();
+        }
+
         #region Data callbacks
         #region Etc.
         public void OnAddDeviceTokenCallback(bool value)

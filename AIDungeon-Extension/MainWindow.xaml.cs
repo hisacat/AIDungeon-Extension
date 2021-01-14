@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,95 +14,57 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
+using AIDungeon_Extension.Core;
 
 namespace AIDungeon_Extension
 {
     public partial class MainWindow : Window
     {
-        public class DialogData : IComparable
+        public static readonly RoutedUICommand Reset = new RoutedUICommand("Reset", "Reset", typeof(MainWindow));
+
+        private AIDungeonHooker hooker = null;
+        private Translator actionTranslator = null;
+        //private LiveTranslator inputTextTranslator = null;
+        //private WebBrowserTranslator webBrowserTranslator = null;
+
+        private string currentAdventureId = string.Empty;
+
+        public class DisplayAIDAction : IComparer<DisplayAIDAction>, IComparable<DisplayAIDAction>
         {
-            public string id { get; set; }
-            public string dialog { get; set; }
+            public string Id { get; set; }
+            public AIDungeonWrapper.Action Action { get; set; }
 
-            private static List<DialogData> instance;
-            public static List<DialogData> Instance
+            public List<AIDungeonWrapper.Action> ContinueActions { get; set; }
+            public bool Updated { get; set; }
+            //public string DisplayText { get; set; }
+
+            public int CompareTo(DisplayAIDAction other)
             {
-                get
-                {
-                    if (instance == null)
-                        instance = new List<DialogData>();
-                    return instance;
-                }
+                if (other == null) return 0;
+                return Action.CompareTo(other.Action);
             }
-            public static void Sort()
+            public int Compare(DisplayAIDAction x, DisplayAIDAction y)
             {
-                Instance.Sort();
+                if (x == null) return 0;
+                return x.CompareTo(y);
             }
 
-            int IComparable.CompareTo(object obj)
+            public DisplayAIDAction(AIDungeonWrapper.Action action)
             {
-                if (obj == null) return 1;
-                var target = (DialogData)obj;
+                this.Id = action.id;
+                this.Action = action;
 
-                if (this.id.Length == target.id.Length)
-                    return this.id.CompareTo(target.id);
-                else
-                    return this.id.Length.CompareTo(target.id.Length);
-
+                this.ContinueActions = new List<AIDungeonWrapper.Action>();
+                this.Updated = true;
+                //this.DisplayText = string.Empty;
             }
         }
+        private List<DisplayAIDAction> currentActions = null;
+        private bool actionUpdated = false;
+        private object lockObj = new object();
 
-        public MainWindow()
-        {
-            InitializeComponent();
-
-            UpdateMode(WriteMode.Say);
-
-            DialogData.Instance.Add(new DialogData() { id = "10", dialog = "test1" });
-            DialogData.Instance.Add(new DialogData() { id = "15", dialog = "test2" });
-            DialogData.Instance.Add(new DialogData() { id = "12", dialog = "test3\r\nLine... ok" });
-            DialogData.Instance.Add(new DialogData() { id = "106", dialog = "sgs" });
-
-            DialogData.Instance.Sort();
-
-            this.dialogListView.ItemsSource = DialogData.Instance;
-
-            //dialogListView.Items
-            //System.Environment.Exit(0);
-        }
-        private void SendTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
-            {
-                //Send
-                e.Handled = true;
-            }
-
-            if (e.Key == Key.Space)
-            {
-                if (sendTextBox.Text.StartsWith("/"))
-                {
-                    if (sendTextBox.Text.Equals("/say", StringComparison.OrdinalIgnoreCase))
-                    {
-                        e.Handled = true;
-                        sendTextBox.Text = string.Empty;
-                        UpdateMode(WriteMode.Say);
-                    }
-                    else if (sendTextBox.Text.Equals("/do", StringComparison.OrdinalIgnoreCase))
-                    {
-                        e.Handled = true;
-                        sendTextBox.Text = string.Empty;
-                        UpdateMode(WriteMode.Do);
-                    }
-                    else if (sendTextBox.Text.Equals("/story", StringComparison.OrdinalIgnoreCase))
-                    {
-                        e.Handled = true;
-                        sendTextBox.Text = string.Empty;
-                        UpdateMode(WriteMode.Story);
-                    }
-                }
-            }
-        }
+        private System.Threading.Thread updateThread = null;
 
         public enum WriteMode : int
         {
@@ -108,8 +72,367 @@ namespace AIDungeon_Extension
             Do = 1,
             Story = 2,
         }
+        private WriteMode writeMode = default;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            this.currentActions = new List<DisplayAIDAction>();
+
+            UpdateMode(WriteMode.Say);
+
+            updateThread = new System.Threading.Thread(Update);
+            updateThread.Start();
+
+            hooker = new AIDungeonHooker();
+            hooker.OnScenario += OnScenario;
+            hooker.OnUpdateAdventureMemory += OnUpdateAdventureMemory;
+            hooker.OnAdventure += OnAdventure;
+            hooker.OnAdventureUpdated += OnAdventureUpdated;
+            hooker.OnActionsUndone += OnActionsUndone;
+            hooker.OnActionAdded += OnActionAdded;
+            hooker.OnActionUpdated += OnActionUpdated;
+            hooker.OnActionRestored += OnActionRestored;
+
+            hooker.Run();
+
+            actionTranslator = new Translator();
+            actionTranslator.Run();
+
+            //inputTextTranslator = new LiveTranslator();
+            //inputTextTranslator.Run();
+            //inputTextTranslator.Translated += OnSendTextTranslated;
+
+        }
+
+        private void OnScenario(AIDungeonWrapper.Scenario scenario)
+        {
+        }
+        private void OnUpdateAdventureMemory(AIDungeonWrapper.Adventure adventure)
+        {
+            var memory = adventure.memory;
+            var authorsNote = adventure.authorsNote;
+        }
+        private void OnAdventure(AIDungeonWrapper.Adventure adventure)
+        {
+            UpdateActionFromAdventure(adventure);
+        }
+        private void OnAdventureUpdated(AIDungeonWrapper.Adventure adventure)
+        {
+            UpdateActionFromAdventure(adventure);
+        }
+
+        private void OnActionsUndone(List<AIDungeonWrapper.Action> actions)
+        {
+            lock (lockObj)
+            {
+                foreach (var action in actions)
+                    UpdateAction_Removed(action);
+
+                this.actionUpdated = true;
+            }
+        }
+        private void OnActionAdded(AIDungeonWrapper.Action action)
+        {
+            lock (lockObj)
+            {
+                UpdateAction_Added(action);
+
+                this.actionUpdated = true;
+            }
+        }
+        private void OnActionUpdated(AIDungeonWrapper.Action action)
+        {
+            lock (lockObj)
+            {
+                UpdateAction_Edited(action);
+
+                this.actionUpdated = true;
+            }
+        }
+        private void OnActionRestored(AIDungeonWrapper.Action action)
+        {
+            lock (lockObj)
+            {
+                UpdateAction_Removed(action);
+                UpdateAction_Added(action);
+
+                this.actionUpdated = true;
+            }
+        }
+
+        private void UpdateActionFromAdventure(AIDungeonWrapper.Adventure adventure)
+        {
+            lock (lockObj)
+            {
+                if (currentAdventureId != adventure.id)
+                {
+                    currentAdventureId = adventure.id;
+                    currentActions.Clear();
+                }
+
+                if (adventure.actionWindow == null)
+                    return;
+
+                adventure.actionWindow.Sort();
+                int count = adventure.actionWindow.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    var action = adventure.actionWindow[i];
+                    DisplayAIDAction displayAction = new DisplayAIDAction(action);
+                    displayAction.Updated = true;
+                    if (currentActions.Exists(x => x.Id == action.id))
+                    {
+                        var originAction = currentActions.First(x => x.Id == action.id);
+                        if (originAction.Action.text != action.text)
+                        {
+                            currentActions.RemoveAll(x => x.Id == action.id);
+                            currentActions.Add(displayAction);
+                        }
+                    }
+                    else
+                    {
+                        currentActions.Add(displayAction);
+                    }
+
+                    //Attach to head If next actions are continue action.
+                    {
+                        bool continueActionAdded = false;
+                        for (int j = i + 1; j < count; j++)
+                        {
+                            var continueAction = adventure.actionWindow[j];
+
+                            if (continueAction.type == "continue")
+                            {
+                                displayAction.ContinueActions.RemoveAll(x => x.id == continueAction.id);
+                                displayAction.ContinueActions.Add(continueAction);
+                                continueActionAdded = true;
+
+                                i = j;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        if (continueActionAdded)
+                        {
+                            displayAction.Updated = true;
+                            displayAction.ContinueActions.Sort();
+                            displayAction.Updated = true;
+                        }
+                    }
+                }
+
+                this.actionUpdated = true;
+            }
+        }
+        private void UpdateAction_Removed(AIDungeonWrapper.Action action)
+        {
+            var origin = this.currentActions.FirstOrDefault(x => x.Id == action.id);
+            if (origin != null)
+            {
+                var continueActions = origin.ContinueActions;
+                this.currentActions.Remove(origin);
+
+                //Create new HEAD if inner continueAction exist.
+                if (continueActions.Count > 0)
+                {
+                    var head = new DisplayAIDAction(continueActions[0]);
+                    head.Updated = true;
+
+                    continueActions.RemoveAt(0);
+
+                    //Add remains continueActions to HEAD.
+                    if (continueActions.Count > 0)
+                    {
+                        foreach (var continueAction in continueActions)
+                            head.ContinueActions.Add(continueAction);
+                        head.ContinueActions.Sort();
+                        head.Updated = true;
+                    }
+
+                    this.currentActions.Add(head);
+                    this.currentActions.Sort();
+                }
+            }
+            else
+            {
+                int count = this.currentActions.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    var head = this.currentActions[i];
+                    if (head.ContinueActions.Exists(x => x.id == action.id))
+                    {
+                        head.ContinueActions.RemoveAll(x => x.id == action.id);
+                        head.ContinueActions.Sort();
+
+                        head.Updated = true;
+                        break;
+                    }
+                }
+            }
+
+            this.actionUpdated = true;
+        }
+        private void UpdateAction_Added(AIDungeonWrapper.Action action)
+        {
+            //Add action at last always
+            this.currentActions.RemoveAll(x => x.Id == action.id);
+
+            if (this.currentActions.Count > 0 && action.type == "continue")
+            {
+                var head = this.currentActions[this.currentActions.Count - 1];
+                head.ContinueActions.Add(action);
+                head.Updated = true;
+            }
+            else
+            {
+                this.currentActions.Add(new DisplayAIDAction(action));
+                this.currentActions.Sort();
+            }
+
+            this.actionUpdated = true;
+        }
+        private void UpdateAction_Edited(AIDungeonWrapper.Action action)
+        {
+            var origin = this.currentActions.FirstOrDefault(x => x.Id == action.id);
+            if (origin != null)
+            {
+                var continueActions = origin.ContinueActions;
+                this.currentActions.Remove(origin);
+                var newAction = new DisplayAIDAction(action);
+                newAction.ContinueActions = continueActions;
+                this.currentActions.Add(newAction);
+
+                newAction.Updated = true;
+                this.currentActions.Sort();
+            }
+            else
+            {
+                int count = this.currentActions.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    var head = this.currentActions[i];
+                    if (head.ContinueActions.Exists(x => x.id == action.id))
+                    {
+                        head.ContinueActions.RemoveAll(x => x.id == action.id);
+                        head.ContinueActions.Add(action);
+                        head.ContinueActions.Sort();
+
+                        head.Updated = true;
+                        break;
+                    }
+                }
+            }
+
+            this.actionUpdated = true;
+        }
+
+        private void Update()
+        {
+            while (true)
+            {
+                if (actionUpdated)
+                {
+                    actionUpdated = false;
+
+                    //innertexts. marger.
+                    //영어도 일단 먼저 보여주긴 해야하니까, Translate는 나중에 업데이트되는식으로 뭔가 구상을해야할듯.
+                    //Control 이용할까?
+                    List<string> displayTexts = new List<string>();
+                    lock (lockObj)
+                    {
+                        foreach (var action in currentActions)
+                        {
+                            var text = action.Action.text;
+                            foreach (var continueAction in action.ContinueActions)
+                            {
+                                if (continueAction.text.StartsWith("\n") || continueAction.text.StartsWith("\r\n"))
+                                {
+                                    //Line에 관해서 : Continue일떄 다 붙이는게 아니라, 개행이 아닐떄만 붙이기 ?
+                                    //고민해보자.
+                                }
+                                text += continueAction.text;
+                            }
+                            displayTexts.Add(text);
+                        }
+                    }
+
+                    {
+                        int count = displayTexts.Count;
+                        for (int i = 0; i < count; i++)
+                            displayTexts[i] += Environment.NewLine + actionTranslator.DoTranslate(displayTexts[i]);
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            this.actionsTextBox.Text = string.Empty;
+                            for (int i = 0; i < count; i++)
+                                this.actionsTextBox.Text += displayTexts[i];
+
+                            this.actionsTextBox.ScrollToEnd();
+                        });
+                    }
+                }
+
+                /*
+                if (lastInputTranslated)
+                    return;
+
+                if ((DateTime.Now - lastInputTime).TotalSeconds > 0.5f)
+                {
+                    //inputTextTranslator.Translate(inputTextBox.Text);
+                    lastInputTranslated = true;
+                }
+                */
+
+                System.Threading.Thread.Sleep(1);
+            }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            if (hooker != null)
+            {
+                hooker.Dispose();
+                hooker = null;
+            }
+            if (actionTranslator != null)
+            {
+                actionTranslator.Dispose();
+                actionTranslator = null;
+            }
+            if (updateThread != null)
+            {
+                updateThread.Abort();
+                updateThread = null;
+            }
+        }
+
+        private void OnSendTextTranslated(string text)
+        {
+            translatedInputTextBox.Text = text;
+        }
+
+        /*
+         * Will support.
+         * Say
+         * Do
+         * Story (only in adventure)
+         * Undo (텍스트 직접보냄)
+         * Redo (텍스트 직접보냄)
+         * Retry (대답 다시하기)
+         * Alter (마지막 대화문 수정)
+         * Remember (기억하기 / Style hint descriptive?)
+         * 
+         * ---Report
+         * ---Restore
+         * ---World info
+         */
+
         public void UpdateMode(WriteMode mode)
         {
+            this.writeMode = mode;
             switch (mode)
             {
                 case WriteMode.Say:
@@ -124,8 +447,85 @@ namespace AIDungeon_Extension
             }
         }
 
-        private void SendTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void InputTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
+            {
+                e.Handled = true;
+                var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
+                inputTextBox.Text = string.Empty;
+
+                hooker.SendText(sendText);
+            }
+
+            if (e.Key == Key.Space)
+            {
+                if (inputTextBox.Text.StartsWith("/"))
+                {
+                    if (inputTextBox.Text.Equals("/say", StringComparison.OrdinalIgnoreCase))
+                    {
+                        e.Handled = true;
+                        inputTextBox.Text = string.Empty;
+                        UpdateMode(WriteMode.Say);
+                    }
+                    else if (inputTextBox.Text.Equals("/do", StringComparison.OrdinalIgnoreCase))
+                    {
+                        e.Handled = true;
+                        inputTextBox.Text = string.Empty;
+                        UpdateMode(WriteMode.Do);
+                    }
+                    else if (inputTextBox.Text.Equals("/story", StringComparison.OrdinalIgnoreCase))
+                    {
+                        e.Handled = true;
+                        inputTextBox.Text = string.Empty;
+                        UpdateMode(WriteMode.Story);
+                    }
+                }
+            }
+        }
+
+        DateTime lastInputTime = default;
+        bool lastInputTranslated = false;
+        private void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            lastInputTime = DateTime.Now;
+            lastInputTranslated = false;
+        }
+
+        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            var item = string.Empty;
+            var menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                item = menuItem.Header.ToString();
+            }
+            else
+            {
+                var executedRoutedEventArga = e as ExecutedRoutedEventArgs;
+                if (executedRoutedEventArga != null)
+                {
+                    item = (executedRoutedEventArga.Command as RoutedUICommand).Text;
+                }
+            }
+            if (!string.IsNullOrEmpty(item))
+            {
+                switch (item)
+                {
+                    case "Reset":
+                        {
+                            this.currentActions.Clear();
+                            this.actionsTextBox.Text = string.Empty;
+                            this.hooker.Refresh();
+                        }
+                        break;
+                }
+            }
+        }
+
+        private void MenuItem_RestartHooker(object sender, RoutedEventArgs e)
+        {
+            //Do
         }
     }
 }
