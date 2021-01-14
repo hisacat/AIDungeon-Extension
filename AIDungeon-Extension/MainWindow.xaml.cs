@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -22,8 +23,8 @@ namespace AIDungeon_Extension
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private int fontSize;
-        public int FontSize
+        private double fontSize;
+        public double FontSize
         {
             get { return this.fontSize; }
             set
@@ -43,6 +44,37 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("fontFamily");
             }
         }
+        private FontWeight fontWeight;
+        public FontWeight FontWeight
+        {
+            get { return this.fontWeight; }
+            set
+            {
+                this.fontWeight = value;
+                OnPropertyChanged("fontWeight");
+            }
+        }
+        private FontStyle fontStyle;
+        public FontStyle FontStyle
+        {
+            get { return this.fontStyle; }
+            set
+            {
+                this.fontStyle = value;
+                OnPropertyChanged("fontStyle");
+            }
+        }
+        private TextDecorationCollection textDecorations;
+        public TextDecorationCollection TextDecorations
+        {
+            get { return this.textDecorations; }
+            set
+            {
+                this.textDecorations = value;
+                OnPropertyChanged("textDecorationCollection");
+            }
+        }
+
 
         private Visibility loadingVisibility = Visibility.Hidden;
         public Visibility LoadingVisibility
@@ -53,7 +85,7 @@ namespace AIDungeon_Extension
                 this.loadingVisibility = value;
                 OnPropertyChanged("loadingVisibility");
             }
-        } 
+        }
 
         private Visibility translateLoadingVisibility = Visibility.Visible;
         public Visibility TranslateLoadingVisibility
@@ -105,8 +137,8 @@ namespace AIDungeon_Extension
             public List<AIDungeonWrapper.Action> ContinueActions { get; set; }
 
             public bool OriginalTextChanged { get; set; }
-            public string OriginalText { get; set; }
-            public string TranslatedText { get; set; }
+            public string OriginalText { get; private set; }
+            public string TranslatedText { get; private set; }
 
             public int CompareTo(DisplayAIDAction other)
             {
@@ -145,6 +177,12 @@ namespace AIDungeon_Extension
 
         private const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
 
+        public class TEST
+        {
+            public string OriginalText { get; set; }
+            public string TranslatedText { get; set; }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -156,7 +194,8 @@ namespace AIDungeon_Extension
 
             this.viewModel.LoadingVisibility = Visibility.Hidden;
             this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
-
+            
+            //---
             this.currentActions = new List<DisplayAIDAction>();
 
             UpdateMode(WriteMode.Say);
@@ -442,10 +481,11 @@ namespace AIDungeon_Extension
 
                     {
                         int count = displayTexts.Count;
-                        /*
+
                         for (int i = 0; i < count; i++)
-                            displayTexts[i] += Environment.NewLine + translator.DoTranslate(displayTexts[i]);
-                        */
+                        {
+                            displayTexts[i] += Environment.NewLine + translator.BlockTranslate(displayTexts[i], "en", "ko") + Environment.NewLine;
+                        }
 
                         Dispatcher.Invoke(() =>
                         {
@@ -490,11 +530,6 @@ namespace AIDungeon_Extension
                 updateThread.Abort();
                 updateThread = null;
             }
-        }
-
-        private void OnSendTextTranslated(string text)
-        {
-            translatedInputTextBox.Text = text;
         }
 
         /*
@@ -645,6 +680,10 @@ namespace AIDungeon_Extension
                 var textDecorations = tdc;
 
                 this.viewModel.FontFamily = fontFamily;
+                this.viewModel.FontSize = fontSize;
+                this.viewModel.FontWeight = fontWeight;
+                this.viewModel.FontStyle = fontStyle;
+                this.viewModel.TextDecorations = textDecorations;
             }
         }
 

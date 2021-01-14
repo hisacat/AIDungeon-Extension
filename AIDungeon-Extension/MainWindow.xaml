@@ -79,16 +79,16 @@
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
                     <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto"
-                             FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"
+                             FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto"
                              Background="Transparent" Foreground="#FFE0E0E0" BorderThickness="2" BorderBrush="#FF3B3B3B" Text="Actions here"/>
                 </Grid>
                 <Grid Grid.Row="1">
                     <TextBox x:Name="inputTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="InputTextBox_PreviewKeyDown"
-                             FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"
+                             FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              Background="#FF3B3B3B" Foreground="#FFE0E0E0" BorderBrush="#FF3B3B3B"/>
                     <TextBlock x:Name="placeHolderTextBlock" Text="placeholder" IsHitTestVisible="False" Margin="4,2,4,2"
-                               FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}">
+                             FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Hidden"/>

@@ -53,6 +53,20 @@ namespace AIDungeon_Extension
                 this.finished = finished;
             }
         }
+        public string BlockTranslate(string text, string from, string to, Action<string> failed = null)
+        {
+            bool complited = false;
+            string result = null;
+            Action finished = () => { complited = true; };
+            Action<string> translated = (r) => { result = r; };
+            var work = new TranslateWorker(text, from, to, translated, failed, finished);
+            this.works.Add(work);
+
+            while (!complited)
+                System.Threading.Thread.Sleep(1);
+
+            return result;
+        }
 
         public TranslateWorker Translate(string text, string from, string to, Action<string> translated, Action<string> failed = null, Action finished = null)
         {
