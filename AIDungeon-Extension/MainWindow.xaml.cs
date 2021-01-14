@@ -22,9 +22,14 @@ namespace AIDungeon_Extension
     public partial class MainWindow : Window
     {
         public static readonly RoutedUICommand Reset = new RoutedUICommand("Reset", "Reset", typeof(MainWindow));
+        private bool Loading
+        {
+            get { return this.loadingIndicator.Visibility == Visibility.Visible; }
+            set { this.loadingIndicator.Visibility = value ? Visibility.Visible : Visibility.Hidden; }
+        }
 
         private AIDungeonHooker hooker = null;
-        private Translator actionTranslator = null;
+        private Translator translator = null;
         //private LiveTranslator inputTextTranslator = null;
         //private WebBrowserTranslator webBrowserTranslator = null;
 
@@ -34,10 +39,11 @@ namespace AIDungeon_Extension
         {
             public string Id { get; set; }
             public AIDungeonWrapper.Action Action { get; set; }
-
             public List<AIDungeonWrapper.Action> ContinueActions { get; set; }
-            public bool Updated { get; set; }
-            //public string DisplayText { get; set; }
+
+            public bool OriginalTextChanged { get; set; }
+            public string OriginalText { get; set; }
+            public string TranslatedText { get; set; }
 
             public int CompareTo(DisplayAIDAction other)
             {
@@ -56,7 +62,7 @@ namespace AIDungeon_Extension
                 this.Action = action;
 
                 this.ContinueActions = new List<AIDungeonWrapper.Action>();
-                this.Updated = true;
+                this.OriginalTextChanged = true;
                 //this.DisplayText = string.Empty;
             }
         }
@@ -74,9 +80,16 @@ namespace AIDungeon_Extension
         }
         private WriteMode writeMode = default;
 
+        private const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
+
         public MainWindow()
         {
             InitializeComponent();
+
+            this.Loading = false;
+            this.translateLoadingGrid.Visibility = Visibility.Hidden;
+            this.statusTextBlock.Text = DefaultStatusText;
+
             this.currentActions = new List<DisplayAIDAction>();
 
             UpdateMode(WriteMode.Say);
@@ -96,13 +109,14 @@ namespace AIDungeon_Extension
 
             hooker.Run();
 
-            actionTranslator = new Translator();
-            actionTranslator.Run();
+            translator = new Translator();
+            translator.Run();
 
-            //inputTextTranslator = new LiveTranslator();
-            //inputTextTranslator.Run();
-            //inputTextTranslator.Translated += OnSendTextTranslated;
-
+            /*
+            inputTextTranslator = new LiveTranslator();
+            inputTextTranslator.Run();
+            inputTextTranslator.Translated += OnSendTextTranslated;
+            */
         }
 
         private void OnScenario(AIDungeonWrapper.Scenario scenario)
@@ -180,7 +194,7 @@ namespace AIDungeon_Extension
                 {
                     var action = adventure.actionWindow[i];
                     DisplayAIDAction displayAction = new DisplayAIDAction(action);
-                    displayAction.Updated = true;
+                    displayAction.OriginalTextChanged = true;
                     if (currentActions.Exists(x => x.Id == action.id))
                     {
                         var originAction = currentActions.First(x => x.Id == action.id);
@@ -217,9 +231,9 @@ namespace AIDungeon_Extension
                         }
                         if (continueActionAdded)
                         {
-                            displayAction.Updated = true;
+                            displayAction.OriginalTextChanged = true;
                             displayAction.ContinueActions.Sort();
-                            displayAction.Updated = true;
+                            displayAction.OriginalTextChanged = true;
                         }
                     }
                 }
@@ -239,7 +253,7 @@ namespace AIDungeon_Extension
                 if (continueActions.Count > 0)
                 {
                     var head = new DisplayAIDAction(continueActions[0]);
-                    head.Updated = true;
+                    head.OriginalTextChanged = true;
 
                     continueActions.RemoveAt(0);
 
@@ -249,7 +263,7 @@ namespace AIDungeon_Extension
                         foreach (var continueAction in continueActions)
                             head.ContinueActions.Add(continueAction);
                         head.ContinueActions.Sort();
-                        head.Updated = true;
+                        head.OriginalTextChanged = true;
                     }
 
                     this.currentActions.Add(head);
@@ -267,7 +281,7 @@ namespace AIDungeon_Extension
                         head.ContinueActions.RemoveAll(x => x.id == action.id);
                         head.ContinueActions.Sort();
 
-                        head.Updated = true;
+                        head.OriginalTextChanged = true;
                         break;
                     }
                 }
@@ -284,7 +298,7 @@ namespace AIDungeon_Extension
             {
                 var head = this.currentActions[this.currentActions.Count - 1];
                 head.ContinueActions.Add(action);
-                head.Updated = true;
+                head.OriginalTextChanged = true;
             }
             else
             {
@@ -305,7 +319,7 @@ namespace AIDungeon_Extension
                 newAction.ContinueActions = continueActions;
                 this.currentActions.Add(newAction);
 
-                newAction.Updated = true;
+                newAction.OriginalTextChanged = true;
                 this.currentActions.Sort();
             }
             else
@@ -320,7 +334,7 @@ namespace AIDungeon_Extension
                         head.ContinueActions.Add(action);
                         head.ContinueActions.Sort();
 
-                        head.Updated = true;
+                        head.OriginalTextChanged = true;
                         break;
                     }
                 }
@@ -361,8 +375,10 @@ namespace AIDungeon_Extension
 
                     {
                         int count = displayTexts.Count;
+                        /*
                         for (int i = 0; i < count; i++)
-                            displayTexts[i] += Environment.NewLine + actionTranslator.DoTranslate(displayTexts[i]);
+                            displayTexts[i] += Environment.NewLine + translator.DoTranslate(displayTexts[i]);
+                        */
 
                         Dispatcher.Invoke(() =>
                         {
@@ -397,10 +413,10 @@ namespace AIDungeon_Extension
                 hooker.Dispose();
                 hooker = null;
             }
-            if (actionTranslator != null)
+            if (translator != null)
             {
-                actionTranslator.Dispose();
-                actionTranslator = null;
+                translator.Dispose();
+                translator = null;
             }
             if (updateThread != null)
             {
@@ -449,15 +465,69 @@ namespace AIDungeon_Extension
 
         private void InputTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
+            if (inputTextBox.IsReadOnly)
             {
-                e.Handled = true;
-                var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
-                inputTextBox.Text = string.Empty;
-
-                hooker.SendText(sendText);
+                e.Handled = false;
+                return;
             }
 
+            if (e.Key == Key.Enter)
+            {
+                switch (Keyboard.Modifiers)
+                {
+                    case ModifierKeys.Shift: //New line
+                        {
+                            e.Handled = false;
+                            return;
+                        }
+                    case ModifierKeys.Control: //Send
+                        {
+                            e.Handled = true;
+
+                            var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
+                            inputTextBox.Text = string.Empty;
+
+                            hooker.SendText(sendText);
+                            return;
+                        }
+                    case ModifierKeys.None: //Translate
+                        {
+                            e.Handled = true;
+
+                            inputTextBox.IsReadOnly = true;
+                            translateLoadingGrid.Visibility = Visibility.Visible;
+                            SetStatusText("Translating...");
+                            translator.Translate(inputTextBox.Text, "ko", "en", (translated) =>
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+                                    inputTextBox.Text = translated;
+                                    inputTextBox.CaretIndex = inputTextBox.Text.Length;
+                                    SetStatusText(null);
+                                });
+                            },
+                            failed: (reason) =>
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+                                    SetStatusText(string.Format("Translate error : {0}", reason));
+                                });
+                            },
+                            finished: () =>
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+                                    translateLoadingGrid.Visibility = Visibility.Hidden;
+                                    inputTextBox.IsReadOnly = false;
+                                });
+                            });
+                            return;
+                        }
+                }
+                return;
+            }
+
+            SetStatusText(null);
             if (e.Key == Key.Space)
             {
                 if (inputTextBox.Text.StartsWith("/"))
@@ -482,6 +552,11 @@ namespace AIDungeon_Extension
                     }
                 }
             }
+        }
+
+        public void SetStatusText(string text)
+        {
+            this.statusTextBlock.Text = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
         }
 
         DateTime lastInputTime = default;
@@ -527,5 +602,6 @@ namespace AIDungeon_Extension
         {
             //Do
         }
+
     }
 }

@@ -75,8 +75,15 @@
     </ApplicationDefinition>
     <Compile Include="AIDungeonHooker.Wrapper.cs" />
     <Compile Include="LiveTranslator.cs" />
+    <Compile Include="LoadingIndicatorControl.xaml.cs">
+      <DependentUpon>LoadingIndicatorControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Translator.cs" />
     <Compile Include="WebBrowserTranslator.cs" />
+    <Page Include="LoadingIndicatorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -113,6 +120,13 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="googletrans\client.py" />
+    <None Include="googletrans\constants.py" />
+    <None Include="googletrans\gtoken.py" />
+    <None Include="googletrans\models.py" />
+    <None Include="googletrans\urls.py" />
+    <None Include="googletrans\utils.py" />
+    <None Include="googletrans\__init__.py" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
