@@ -13,100 +13,108 @@
     <Window.InputBindings>
         <KeyBinding Command="local:MainWindow.Reset" Modifiers="Ctrl" Key="R" />
     </Window.InputBindings>
-
+    <Window.DataContext>
+        <local:MainWindowViewModel/>
+    </Window.DataContext>
     <Grid>
         <DockPanel Background="#FF121212">
 
-        <!--Main menus-->
-        <Menu IsMainMenu="True" DockPanel.Dock="Top">
-            <MenuItem Header="Settings" Height="25">
-                <MenuItem  Header="Reset" Command="local:MainWindow.Reset" InputGestureText="Ctrl + R"/>
-                <Separator/>
-                <MenuItem  Header="Restart Hooker" Click="MenuItem_RestartHooker"/>
-            </MenuItem>
-        </Menu>
+            <!--Main menus-->
+            <Menu IsMainMenu="True" DockPanel.Dock="Top">
+                <MenuItem Header="Settings" Height="25">
+                    <MenuItem  Header="Reset" Command="local:MainWindow.Reset" InputGestureText="Ctrl + R"/>
+                    <Separator/>
+                    <MenuItem  Header="Restart Hooker" Click="MenuItem_RestartHooker"/>
+                </MenuItem>
+            </Menu>
 
-        <!--Bottom statusbar-->
-        <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem>
-                <Grid>
-                    <TextBlock Name="statusTextBlock"/>
-                </Grid>
-            </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="verion 0.1"/>
-            </StatusBarItem>
-        </StatusBar>
+            <!--Bottom statusbar-->
+            <StatusBar DockPanel.Dock="Bottom">
+                <StatusBarItem>
+                    <Grid>
+                        <TextBlock/>
+                    </Grid>
+                </StatusBarItem>
+                <StatusBarItem HorizontalAlignment="Right">
+                    <TextBlock Text="verion 0.1"/>
+                </StatusBarItem>
+            </StatusBar>
 
-        <Grid DockPanel.Dock="Right" Width="200" Margin="5,5,5,5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="AIDExtenion v0.1" FontSize="18" HorizontalAlignment="Center" Foreground="White"/>
-                </StackPanel>
-            </Grid>
-            <Grid Grid.Row="1">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <TextBlock Text="XPath" Height="20" Foreground="White"/>
-                        <Grid Height="20">
-                            <TextBlock Text=" Input" Foreground="White"/>
-                            <TextBox Text="" Height="18" Margin="70,0,0,0"/>
-                        </Grid>
-                        <Grid Height="20">
-                            <TextBlock Text=" Submit" Foreground="White"/>
-                            <TextBox Text="" Height="18" Margin="70,0,0,0"/>
-                        </Grid>
+            <Grid DockPanel.Dock="Right" Width="200" Margin="5,5,5,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="AIDExtenion v0.1" FontSize="18" HorizontalAlignment="Center" Foreground="White"/>
                     </StackPanel>
-                </ScrollViewer>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="XPath" Height="20" Foreground="White"/>
+                            <Grid Height="20">
+                                <TextBlock Text=" Input" Foreground="White"/>
+                                <TextBox Text="" Height="18" Margin="70,0,0,0"/>
+                            </Grid>
+                            <Grid Height="20">
+                                <TextBlock Text=" Submit" Foreground="White"/>
+                                <TextBox Text="" Height="18" Margin="70,0,0,0"/>
+                            </Grid>
+                            <Control Height="10"/>
+                            <Button Click="ChangeFontButton_Click">
+                                <TextBlock Text="Change font"/>
+                            </Button>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </Grid>
-        </Grid>
-        
 
-        <!--Contents-->
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="50"/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto"
-                 HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto"
-                 Background="Transparent" Foreground="#FFE0E0E0" FontSize="12" BorderThickness="2" BorderBrush="#FF3B3B3B" Text="&lt;Actions&gt;"/>
-            </Grid>
-            <Grid Grid.Row="1">
-                <TextBox x:Name="inputTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="InputTextBox_PreviewKeyDown" TextChanged="InputTextBox_TextChanged"
-                 Background="#FF3B3B3B" Foreground="#FFE0E0E0" BorderBrush="#FF3B3B3B"/>
-                <TextBlock x:Name="placeHolderTextBlock" Text="placeholder" IsHitTestVisible="False" Margin="4,2,4,2">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Hidden"/>
-                            <Setter Property="Foreground" Value="#FF999999"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Text, ElementName=inputTextBox}" Value="">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-                    <Grid x:Name="translateLoadingGrid" Background="#7F000000" Visibility="Visible">
+            <!--Contents-->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto"
+                             FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"
+                             HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto"
+                             Background="Transparent" Foreground="#FFE0E0E0" BorderThickness="2" BorderBrush="#FF3B3B3B" Text="Actions here"/>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <TextBox x:Name="inputTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="InputTextBox_PreviewKeyDown"
+                             FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"
+                             Background="#FF3B3B3B" Foreground="#FFE0E0E0" BorderBrush="#FF3B3B3B"/>
+                    <TextBlock x:Name="placeHolderTextBlock" Text="placeholder" IsHitTestVisible="False" Margin="4,2,4,2"
+                               FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Hidden"/>
+                                <Setter Property="Foreground" Value="#FF999999"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=inputTextBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Grid Background="#7F000000" Visibility="{Binding TranslateLoadingVisibility}">
                         <TextBlock Text="Translating..." VerticalAlignment="Center" HorizontalAlignment="Center"
                                    Foreground="White"
                                    FontSize="20"/>
                     </Grid>
-            </Grid>
+                </Grid>
 
-            <Grid Visibility="Hidden">
-                <TextBox x:Name="translatedInputTextBox" IsReadOnly="True" TextWrapping="Wrap" Text="Translated text" Margin="0,0,0.333,50.667" Height="50" VerticalAlignment="Bottom"
+                <Grid Visibility="Hidden">
+                    <TextBox x:Name="translatedInputTextBox" IsReadOnly="True" TextWrapping="Wrap" Text="Translated text" Margin="0,0,0.333,50.667" Height="50" VerticalAlignment="Bottom"
                  Background="#FF121212" Foreground="#FFE0E0E0" FontSize="22" BorderThickness="2" BorderBrush="#FF3B3B3B"/>
+                </Grid>
+                <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
             </Grid>
-            <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
-        </Grid>
         </DockPanel>
-        <local:LoadingIndicatorControl x:Name="loadingIndicator" Visibility="Hidden"/>
+        <local:LoadingIndicatorControl x:Name="loadingIndicator" Visibility="{Binding LoadingVisibility}"/>
     </Grid>
 </Window>

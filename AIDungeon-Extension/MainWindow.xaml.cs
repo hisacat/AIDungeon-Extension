@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -19,14 +20,76 @@ using AIDungeon_Extension.Core;
 
 namespace AIDungeon_Extension
 {
+    public class MainWindowViewModel : INotifyPropertyChanged
+    {
+        private int fontSize;
+        public int FontSize
+        {
+            get { return this.fontSize; }
+            set
+            {
+                this.fontSize = value;
+                OnPropertyChanged("fontSize");
+            }
+        }
+
+        private FontFamily fontFamily;
+        public FontFamily FontFamily
+        {
+            get { return this.fontFamily; }
+            set
+            {
+                this.fontFamily = value;
+                OnPropertyChanged("fontFamily");
+            }
+        }
+
+        private Visibility loadingVisibility = Visibility.Hidden;
+        public Visibility LoadingVisibility
+        {
+            get { return this.loadingVisibility; }
+            set
+            {
+                this.loadingVisibility = value;
+                OnPropertyChanged("loadingVisibility");
+            }
+        } 
+
+        private Visibility translateLoadingVisibility = Visibility.Visible;
+        public Visibility TranslateLoadingVisibility
+        {
+            get { return this.translateLoadingVisibility; }
+            set
+            {
+                this.translateLoadingVisibility = value;
+                OnPropertyChanged("translateLoadingVisibility");
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null) { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); }
+        }
+
+        private string statusText;
+        public string StatusText
+        {
+            get { return this.statusText; }
+            set
+            {
+                this.statusText = value;
+                OnPropertyChanged("statusText");
+            }
+        }
+    }
+
     public partial class MainWindow : Window
     {
+        private MainWindowViewModel viewModel = null;
         public static readonly RoutedUICommand Reset = new RoutedUICommand("Reset", "Reset", typeof(MainWindow));
-        private bool Loading
-        {
-            get { return this.loadingIndicator.Visibility == Visibility.Visible; }
-            set { this.loadingIndicator.Visibility = value ? Visibility.Visible : Visibility.Hidden; }
-        }
+
+        public FontFamily actionFont { get; set; }
 
         private AIDungeonHooker hooker = null;
         private Translator translator = null;
@@ -85,10 +148,14 @@ namespace AIDungeon_Extension
         public MainWindow()
         {
             InitializeComponent();
+            this.viewModel = new MainWindowViewModel();
+            this.DataContext = this.viewModel;
 
-            this.Loading = false;
-            this.translateLoadingGrid.Visibility = Visibility.Hidden;
-            this.statusTextBlock.Text = DefaultStatusText;
+            this.actionsTextBox.Text = string.Empty;
+            this.viewModel.StatusText = DefaultStatusText;
+
+            this.viewModel.LoadingVisibility = Visibility.Hidden;
+            this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
 
             this.currentActions = new List<DisplayAIDAction>();
 
@@ -495,7 +562,7 @@ namespace AIDungeon_Extension
                             e.Handled = true;
 
                             inputTextBox.IsReadOnly = true;
-                            translateLoadingGrid.Visibility = Visibility.Visible;
+                            this.viewModel.TranslateLoadingVisibility = Visibility.Visible;
                             SetStatusText("Translating...");
                             translator.Translate(inputTextBox.Text, "ko", "en", (translated) =>
                             {
@@ -517,7 +584,7 @@ namespace AIDungeon_Extension
                             {
                                 Dispatcher.Invoke(() =>
                                 {
-                                    translateLoadingGrid.Visibility = Visibility.Hidden;
+                                    this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
                                     inputTextBox.IsReadOnly = false;
                                 });
                             });
@@ -556,15 +623,29 @@ namespace AIDungeon_Extension
 
         public void SetStatusText(string text)
         {
-            this.statusTextBlock.Text = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
+            this.viewModel.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
         }
 
-        DateTime lastInputTime = default;
-        bool lastInputTranslated = false;
-        private void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void ChangeFontButton_Click(object sender, RoutedEventArgs e)
         {
-            lastInputTime = DateTime.Now;
-            lastInputTranslated = false;
+            var fd = new System.Windows.Forms.FontDialog();
+            var result = fd.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                Debug.WriteLine(fd.Font);
+
+                var fontFamily = new FontFamily(fd.Font.Name);
+                var fontSize = fd.Font.Size * 96.0 / 72.0;
+                var fontWeight = fd.Font.Bold ? FontWeights.Bold : FontWeights.Regular;
+                var fontStyle = fd.Font.Italic ? FontStyles.Italic : FontStyles.Normal;
+
+                TextDecorationCollection tdc = new TextDecorationCollection();
+                if (fd.Font.Underline) tdc.Add(TextDecorations.Underline);
+                if (fd.Font.Strikeout) tdc.Add(TextDecorations.Strikethrough);
+                var textDecorations = tdc;
+
+                this.viewModel.FontFamily = fontFamily;
+            }
         }
 
         private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
