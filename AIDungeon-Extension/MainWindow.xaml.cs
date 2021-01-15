@@ -87,7 +87,7 @@ namespace AIDungeon_Extension
             }
         }
 
-        private Visibility translateLoadingVisibility = Visibility.Visible;
+        private Visibility translateLoadingVisibility = Visibility.Hidden;
         public Visibility TranslateLoadingVisibility
         {
             get { return this.translateLoadingVisibility; }
@@ -97,6 +97,17 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("translateLoadingVisibility");
             }
         }
+        private Visibility inputLoadingVisibility = Visibility.Hidden;
+        public Visibility InputLoadingVisibility
+        {
+            get { return this.inputLoadingVisibility; }
+            set
+            {
+                this.inputLoadingVisibility = value;
+                OnPropertyChanged("inputLoadingVisibility");
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
@@ -136,7 +147,7 @@ namespace AIDungeon_Extension
             public AIDungeonWrapper.Action Action { get; set; }
             public List<AIDungeonWrapper.Action> ContinueActions { get; set; }
 
-            public bool OriginalTextChanged { get; set; }
+            public bool Updated { get; set; }
             public string OriginalText { get; private set; }
             public string TranslatedText { get; private set; }
 
@@ -157,8 +168,21 @@ namespace AIDungeon_Extension
                 this.Action = action;
 
                 this.ContinueActions = new List<AIDungeonWrapper.Action>();
-                this.OriginalTextChanged = true;
+                this.Updated = true;
                 //this.DisplayText = string.Empty;
+            }
+
+            public void Update(Translator translator)
+            {
+                this.OriginalText = Action.text;
+                foreach (var action in ContinueActions)
+                    this.OriginalText += action.text;
+
+                this.Updated = true;
+
+                translator.Translate(this.OriginalText, "ne", "ko",
+                    (translated) => { this.TranslatedText = translated; },
+                    failed: (reason) => { this.TranslatedText = string.Format("Translate failed: {0}", reason); });
             }
         }
         private List<DisplayAIDAction> currentActions = null;
@@ -177,12 +201,6 @@ namespace AIDungeon_Extension
 
         private const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
 
-        public class TEST
-        {
-            public string OriginalText { get; set; }
-            public string TranslatedText { get; set; }
-        }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -194,6 +212,7 @@ namespace AIDungeon_Extension
 
             this.viewModel.LoadingVisibility = Visibility.Hidden;
             this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
+            this.viewModel.InputLoadingVisibility = Visibility.Hidden;
             
             //---
             this.currentActions = new List<DisplayAIDAction>();
@@ -300,7 +319,7 @@ namespace AIDungeon_Extension
                 {
                     var action = adventure.actionWindow[i];
                     DisplayAIDAction displayAction = new DisplayAIDAction(action);
-                    displayAction.OriginalTextChanged = true;
+                    displayAction.Updated = true;
                     if (currentActions.Exists(x => x.Id == action.id))
                     {
                         var originAction = currentActions.First(x => x.Id == action.id);
@@ -337,10 +356,11 @@ namespace AIDungeon_Extension
                         }
                         if (continueActionAdded)
                         {
-                            displayAction.OriginalTextChanged = true;
                             displayAction.ContinueActions.Sort();
-                            displayAction.OriginalTextChanged = true;
+                            displayAction.Updated = true;
                         }
+
+                        displayAction.Update(translator);
                     }
                 }
 
@@ -359,7 +379,7 @@ namespace AIDungeon_Extension
                 if (continueActions.Count > 0)
                 {
                     var head = new DisplayAIDAction(continueActions[0]);
-                    head.OriginalTextChanged = true;
+                    head.Updated = true;
 
                     continueActions.RemoveAt(0);
 
@@ -369,7 +389,9 @@ namespace AIDungeon_Extension
                         foreach (var continueAction in continueActions)
                             head.ContinueActions.Add(continueAction);
                         head.ContinueActions.Sort();
-                        head.OriginalTextChanged = true;
+
+                        head.Updated = true;
+                        head.Update(translator);
                     }
 
                     this.currentActions.Add(head);
@@ -387,7 +409,8 @@ namespace AIDungeon_Extension
                         head.ContinueActions.RemoveAll(x => x.id == action.id);
                         head.ContinueActions.Sort();
 
-                        head.OriginalTextChanged = true;
+                        head.Updated = true;
+                        head.Update(translator);
                         break;
                     }
                 }
@@ -404,12 +427,18 @@ namespace AIDungeon_Extension
             {
                 var head = this.currentActions[this.currentActions.Count - 1];
                 head.ContinueActions.Add(action);
-                head.OriginalTextChanged = true;
+
+                head.Updated = true;
+                head.Update(translator);
             }
             else
             {
-                this.currentActions.Add(new DisplayAIDAction(action));
+                var head = new DisplayAIDAction(action);
+                this.currentActions.Add(head);
                 this.currentActions.Sort();
+
+                head.Updated = true;
+                head.Update(translator);
             }
 
             this.actionUpdated = true;
@@ -425,7 +454,8 @@ namespace AIDungeon_Extension
                 newAction.ContinueActions = continueActions;
                 this.currentActions.Add(newAction);
 
-                newAction.OriginalTextChanged = true;
+                newAction.Updated = true;
+                newAction.Update(translator);
                 this.currentActions.Sort();
             }
             else
@@ -440,7 +470,8 @@ namespace AIDungeon_Extension
                         head.ContinueActions.Add(action);
                         head.ContinueActions.Sort();
 
-                        head.OriginalTextChanged = true;
+                        head.Updated = true;
+                        head.Update(translator);
                         break;
                     }
                 }
@@ -484,7 +515,7 @@ namespace AIDungeon_Extension
 
                         for (int i = 0; i < count; i++)
                         {
-                            displayTexts[i] += Environment.NewLine + translator.BlockTranslate(displayTexts[i], "en", "ko") + Environment.NewLine;
+                            displayTexts[i] += Environment.NewLine + translator.BlockTranslate(displayTexts[i], "en", "ko") + (i < count - 1 ? Environment.NewLine : string.Empty);
                         }
 
                         Dispatcher.Invoke(() =>
@@ -589,7 +620,8 @@ namespace AIDungeon_Extension
                             var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
                             inputTextBox.Text = string.Empty;
 
-                            hooker.SendText(sendText);
+                            if(hooker != null)
+                                hooker.SendText(sendText);
                             return;
                         }
                     case ModifierKeys.None: //Translate
@@ -599,30 +631,33 @@ namespace AIDungeon_Extension
                             inputTextBox.IsReadOnly = true;
                             this.viewModel.TranslateLoadingVisibility = Visibility.Visible;
                             SetStatusText("Translating...");
-                            translator.Translate(inputTextBox.Text, "ko", "en", (translated) =>
+                            if (translator != null)
                             {
-                                Dispatcher.Invoke(() =>
+                                translator.Translate(inputTextBox.Text, "ko", "en", (translated) =>
                                 {
-                                    inputTextBox.Text = translated;
-                                    inputTextBox.CaretIndex = inputTextBox.Text.Length;
-                                    SetStatusText(null);
-                                });
-                            },
-                            failed: (reason) =>
-                            {
-                                Dispatcher.Invoke(() =>
+                                    Dispatcher.Invoke(() =>
+                                    {
+                                        inputTextBox.Text = translated;
+                                        inputTextBox.CaretIndex = inputTextBox.Text.Length;
+                                        SetStatusText(null);
+                                    });
+                                },
+                                failed: (reason) =>
                                 {
-                                    SetStatusText(string.Format("Translate error : {0}", reason));
-                                });
-                            },
-                            finished: () =>
-                            {
-                                Dispatcher.Invoke(() =>
+                                    Dispatcher.Invoke(() =>
+                                    {
+                                        SetStatusText(string.Format("Translate error : {0}", reason));
+                                    });
+                                },
+                                finished: () =>
                                 {
-                                    this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
-                                    inputTextBox.IsReadOnly = false;
+                                    Dispatcher.Invoke(() =>
+                                    {
+                                        this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
+                                        inputTextBox.IsReadOnly = false;
+                                    });
                                 });
-                            });
+                            }
                             return;
                         }
                 }
@@ -723,5 +758,9 @@ namespace AIDungeon_Extension
             //Do
         }
 
+        private void StackPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+
+        }
     }
 }

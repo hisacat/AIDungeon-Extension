@@ -111,7 +111,7 @@
                                         </Style>
                                     </Canvas.Resources>
 
-                                    <Ellipse x:Name="ellipse0" Canvas.Left="1.75" Canvas.Top="21"/>
+                                    <Ellipse x:Name="ellipse0" Canvas.Left="1.75" Canvas.Top="20.75"/>
                                     <Ellipse x:Name="ellipse1" Canvas.Top="7" Canvas.Left="6.5"/>
                                     <Ellipse x:Name="ellipse2" Canvas.Left="20.5" Canvas.Top="0.75"/>
                                     <Ellipse x:Name="ellipse3" Canvas.Left="34.75" Canvas.Top="6.75"/>

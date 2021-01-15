@@ -75,16 +75,18 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
+                <!--Contents Actionss-->
                 <Grid Grid.Row="0">
                     <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto"
                              FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto"
                              Background="Transparent" Foreground="#FFE0E0E0" BorderThickness="2" BorderBrush="#FF3B3B3B" Text="Actions here"/>
                 </Grid>
-                <Grid Grid.Row="1">
-                    <TextBox x:Name="inputTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="InputTextBox_PreviewKeyDown"
+                <!--Contents Input-->
+                <Grid Grid.Row="1" MaxHeight="150">
+                    <TextBox x:Name="inputTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="InputTextBox_PreviewKeyDown" VerticalScrollBarVisibility="Auto"
                              FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              Background="#FF3B3B3B" Foreground="#FFE0E0E0" BorderBrush="#FF3B3B3B"/>
                     <TextBlock x:Name="placeHolderTextBlock" Text="placeholder" IsHitTestVisible="False" Margin="4,2,4,2"
@@ -106,12 +108,13 @@
                                    Foreground="White"
                                    FontSize="20"/>
                     </Grid>
+                    <Grid Background="#7F000000" Visibility="{Binding InputLoadingVisibility}">
+                        <TextBlock Text="Waitting..." VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Foreground="White"
+                                   FontSize="20"/>
+                    </Grid>
                 </Grid>
-
-                <Grid Visibility="Hidden">
-                    <TextBox x:Name="translatedInputTextBox" IsReadOnly="True" TextWrapping="Wrap" Text="Translated text" Margin="0,0,0.333,50.667" Height="50" VerticalAlignment="Bottom"
-                 Background="#FF121212" Foreground="#FFE0E0E0" FontSize="22" BorderThickness="2" BorderBrush="#FF3B3B3B"/>
-                </Grid>
+                
                 <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
             </Grid>
         </DockPanel>
