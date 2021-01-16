@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,8 +24,12 @@ namespace AIDungeon_Extension
 {
     public partial class MainWindow : Window
     {
+        public const string VersionStr = "0.1b";
         private MainWindowViewModel vm = null;
         public static readonly RoutedUICommand Reset = new RoutedUICommand("Reset", "Reset", typeof(MainWindow));
+        public static readonly RoutedUICommand Save = new RoutedUICommand("Save", "Save", typeof(MainWindow));
+        public static readonly RoutedUICommand Exit = new RoutedUICommand("Exit", "Exit", typeof(MainWindow));
+
         private const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
 
         public FontFamily actionFont { get; set; }
@@ -46,17 +51,35 @@ namespace AIDungeon_Extension
         public MainWindow()
         {
             InitializeComponent();
+
+            Settings.BGColor = Color.FromArgb(1, 1, 1, 1);
+
             this.vm = new MainWindowViewModel();
             this.DataContext = this.vm;
 
-            this.actionsTextBox.Text = string.Empty;
+            this.vm.TextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+            this.vm.BGColor = (SolidColorBrush)Application.Current.Resources["AID_Black"];
+            this.vm.InputBoxColor = (SolidColorBrush)Application.Current.Resources["AID_Gray"];
+            this.vm.InputTextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+            this.bgColorPicker.SelectedColor = this.vm.BGColor.Color;
+            this.textColorPicker.SelectedColor = this.vm.TextColor.Color;
+            this.inputBoxColorPicker.SelectedColor = this.vm.InputBoxColor.Color;
+            this.inputTextColorPicker.SelectedColor = this.vm.InputTextColor.Color;
+
+            this.vm.VersionText = VersionStr;
             this.vm.StatusText = DefaultStatusText;
 
-            this.vm.LoadingVisibility = Visibility.Hidden;
+            this.vm.SideMenuVisibility = Visibility.Collapsed;
+            this.vm.SideMenuButtonVisibility = Visibility.Visible;
+            return;
+
+            this.vm.LoadingVisibility = Visibility.Visible;
+            this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
             this.vm.TranslateLoadingVisibility = Visibility.Hidden;
             this.vm.InputLoadingVisibility = Visibility.Hidden;
 
-            //---
+            this.actionsTextBox.Text = string.Empty;
+
             UpdateWriteMode(WriteMode.Say);
 
             translator = new Translator();
@@ -77,6 +100,24 @@ namespace AIDungeon_Extension
             hooker.OnActionRestored += OnActionRestored;
 
             hooker.Run();
+
+            this.Topmost = true;
+            Task.Run(() =>
+            {
+                while (
+                translator == null || !translator.Ready ||
+                hooker == null || !hooker.Ready)
+                    Thread.Sleep(1);
+
+                this.Dispatcher.Invoke(() =>
+                {
+                    this.vm.LoadingVisibility = Visibility.Collapsed;
+                    this.Topmost = false;
+                    this.Activate();
+                });
+            });
+
+            //this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
         }
 
         private void ActionContainer_OnActionsChanged(List<DisplayAIDActionContainer.DisplayAIDAction> actions)
@@ -173,20 +214,6 @@ namespace AIDungeon_Extension
         }
         #endregion
 
-        protected override void OnClosed(EventArgs e)
-        {
-            if (hooker != null)
-            {
-                hooker.Dispose();
-                hooker = null;
-            }
-            if (translator != null)
-            {
-                translator.Dispose();
-                translator = null;
-            }
-        }
-
         /*
          * Will support.
          * Say
@@ -241,11 +268,14 @@ namespace AIDungeon_Extension
                         {
                             e.Handled = true;
 
-                            var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
-                            inputTextBox.Text = string.Empty;
+                            if (hooker.Ready)
+                            {
+                                var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
+                                inputTextBox.Text = string.Empty;
 
-                            if (hooker != null)
-                                hooker.SendText(sendText);
+                                if (hooker != null)
+                                    hooker.SendText(sendText);
+                            }
                             return;
                         }
                     case ModifierKeys.None: //Translate
@@ -315,6 +345,26 @@ namespace AIDungeon_Extension
             }
         }
 
+        private void CheckForUpdateMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = @"https://github.com/hisacat/AIDungeon-Extension",
+                UseShellExecute = true
+            };
+            Process.Start(psi);
+        }
+
+        private void DeveloperMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = @"https://twitter.com/ahisacat",
+                UseShellExecute = true
+            };
+            Process.Start(psi);
+        }
+
         public void SetStatusText(string text)
         {
             this.vm.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
@@ -366,6 +416,15 @@ namespace AIDungeon_Extension
             {
                 switch (item)
                 {
+                    case "Save":
+                        {
+                        }
+                        break;
+                    case "Exit":
+                        {
+                            this.Close();
+                        }
+                        break;
                     case "Reset":
                         {
                             this.actionContainer.Clear();
@@ -382,11 +441,6 @@ namespace AIDungeon_Extension
 
         }
 
-        private void StackPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-
-        }
-
         private void SideMenuButton_Click(object sender, RoutedEventArgs e)
         {
             this.vm.SideMenuVisibility = Visibility.Visible;
@@ -397,5 +451,61 @@ namespace AIDungeon_Extension
             this.vm.SideMenuVisibility = Visibility.Collapsed;
             this.vm.SideMenuButtonVisibility = Visibility.Visible;
         }
+        private void textColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.TextColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void bgColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.BGColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void inputBoxColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.InputBoxColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void inputTextColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.InputTextColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        protected override void OnClosed(EventArgs e)
+        {
+            if (hooker != null)
+            {
+                hooker.Dispose();
+                hooker = null;
+            }
+            if (translator != null)
+            {
+                translator.Dispose();
+                translator = null;
+            }
+
+            Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
+            foreach (var chromeDriverProcess in chromeDriverProcesses)
+            {
+                if (chromeDriverProcess.MainModule.FileName.StartsWith(
+                    System.AppDomain.CurrentDomain.BaseDirectory))
+                {
+                    chromeDriverProcess.Kill();
+                }
+            }
+
+            System.Environment.Exit(0);
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
     }
 }

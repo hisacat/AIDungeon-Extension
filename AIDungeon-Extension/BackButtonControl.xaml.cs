@@ -16,13 +16,19 @@ using System.Windows.Shapes;
 namespace AIDungeon_Extension
 {
     /// <summary>
-    /// MenuButtonControl.xaml에 대한 상호 작용 논리
+    /// BackButtonControl.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class MenuGraphicControl : UserControl
+    public partial class BackButtonControl : UserControl
     {
-        public MenuGraphicControl()
+        public BackButtonControl()
         {
             InitializeComponent();
+        }
+
+        public event RoutedEventHandler Click;
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            Click?.Invoke(this, e);
         }
     }
 }

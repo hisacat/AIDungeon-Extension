@@ -4,10 +4,9 @@
              xmlns:local="clr-namespace:AIDungeon_Extension"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-<!--                <ResourceDictionary Source="Themes/AIDungeon.xaml" /> -->
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+        <SolidColorBrush x:Key="AID_Black" Color="#FF121212"/>
+        <SolidColorBrush x:Key="AID_Gray" Color="#FF3B3B3B"/>
+        <SolidColorBrush x:Key="AID_DarkGray" Color="#FF1A1A1A"/>
+        <SolidColorBrush x:Key="AID_White" Color="#FFE0E0E0"/>
     </Application.Resources>
 </Application>

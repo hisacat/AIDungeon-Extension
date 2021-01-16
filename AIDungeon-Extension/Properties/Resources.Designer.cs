@@ -8,63 +8,244 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AIDungeon_Extension.Properties
-{
-
-
+namespace AIDungeon_Extension.Properties {
+    using System;
+    
+    
     /// <summary>
     ///   지역화된 문자열 등을 찾기 위한 강력한 형식의 리소스 클래스입니다.
     /// </summary>
     // 이 클래스는 ResGen 또는 Visual Studio와 같은 도구를 통해 StronglyTypedResourceBuilder
     // 클래스에서 자동으로 생성되었습니다.
-    // 멤버를 추가하거나 제거하려면 .ResX 파일을 편집한 다음 /str 옵션을 사용하여
-    // ResGen을 다시 실행하거나 VS 프로젝트를 다시 빌드하십시오.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    // 멤버를 추가하거나 제거하려면 .ResX 파일을 편집한 다음 /str 옵션을 사용하여 ResGen을
+    // 다시 실행하거나 VS 프로젝트를 다시 빌드하십시오.
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources
-    {
-
+    public class Resources {
+        
         private static global::System.Resources.ResourceManager resourceMan;
-
+        
         private static global::System.Globalization.CultureInfo resourceCulture;
-
+        
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources()
-        {
+        internal Resources() {
         }
-
+        
         /// <summary>
         ///   이 클래스에서 사용하는 캐시된 ResourceManager 인스턴스를 반환합니다.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager
-        {
-            get
-            {
-                if ((resourceMan == null))
-                {
+        public static global::System.Resources.ResourceManager ResourceManager {
+            get {
+                if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AIDungeon_Extension.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
         ///   이 강력한 형식의 리소스 클래스를 사용하여 모든 리소스 조회에 대해 현재 스레드의 CurrentUICulture 속성을
         ///   재정의합니다.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture
-        {
-            get
-            {
+        public static global::System.Globalization.CultureInfo Culture {
+            get {
                 return resourceCulture;
             }
-            set
-            {
+            set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Initializing...과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string LoadingText_Initializing {
+            get {
+                return ResourceManager.GetString("LoadingText/Initializing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Please start game과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string LoadingText_PleaseStartGame {
+            get {
+                return ResourceManager.GetString("LoadingText/PleaseStartGame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Background과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_BGColor {
+            get {
+                return ResourceManager.GetString("SideMenu/BGColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Color과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Color {
+            get {
+                return ResourceManager.GetString("SideMenu/Color", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Control Panel과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_ControlPanel {
+            get {
+                return ResourceManager.GetString("SideMenu_ControlPanel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Display과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Display {
+            get {
+                return ResourceManager.GetString("SideMenu/Display", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Change Font과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Display_ChangeFont {
+            get {
+                return ResourceManager.GetString("SideMenu/Display/ChangeFont", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Restart Hooker과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Hooker_Restart {
+            get {
+                return ResourceManager.GetString("SideMenu/Hooker/Restart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   InputBox과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_InputBoxColor {
+            get {
+                return ResourceManager.GetString("SideMenu/InputBoxColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   InputText과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_InputText {
+            get {
+                return ResourceManager.GetString("SideMenu/InputText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Reset과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Reset {
+            get {
+                return ResourceManager.GetString("SideMenu/Reset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Text과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_TextColor {
+            get {
+                return ResourceManager.GetString("SideMenu/TextColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Developer과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Developer {
+            get {
+                return ResourceManager.GetString("WindowMenu/Developer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   File과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_File {
+            get {
+                return ResourceManager.GetString("WindowMenu/File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Exit과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_File_Exit {
+            get {
+                return ResourceManager.GetString("WindowMenu/File/Exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Save과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_File_Save {
+            get {
+                return ResourceManager.GetString("WindowMenu/File/Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Help과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Help {
+            get {
+                return ResourceManager.GetString("WindowMenu/Help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Check for update (Open Github)과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Help_CheckUpdate {
+            get {
+                return ResourceManager.GetString("WindowMenu/Help/CheckUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Reset과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Reset {
+            get {
+                return ResourceManager.GetString("WindowMenu/Reset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Restart Hooker과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_RestartHooker {
+            get {
+                return ResourceManager.GetString("WindowMenu/RestartHooker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Settings과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Settings {
+            get {
+                return ResourceManager.GetString("WindowMenu/Settings", resourceCulture);
             }
         }
     }

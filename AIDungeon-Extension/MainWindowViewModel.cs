@@ -62,7 +62,46 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("textDecorationCollection");
             }
         }
-
+        private SolidColorBrush textColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+        public SolidColorBrush TextColor
+        {
+            get { return this.textColor; }
+            set
+            {
+                this.textColor = value;
+                OnPropertyChanged("textColor");
+            }
+        }
+        private SolidColorBrush bgColor = (SolidColorBrush)Application.Current.Resources["AID_Black"];
+        public SolidColorBrush BGColor
+        {
+            get { return this.bgColor; }
+            set
+            {
+                this.bgColor = value;
+                OnPropertyChanged("bgColor");
+            }
+        }
+        private SolidColorBrush inputBoxColor = (SolidColorBrush)Application.Current.Resources["AID_Gray"];
+        public SolidColorBrush InputBoxColor
+        {
+            get { return this.inputBoxColor; }
+            set
+            {
+                this.inputBoxColor = value;
+                OnPropertyChanged("inputBoxColor");
+            }
+        }
+        private SolidColorBrush inputTextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+        public SolidColorBrush InputTextColor
+        {
+            get { return this.inputTextColor; }
+            set
+            {
+                this.inputTextColor = value;
+                OnPropertyChanged("inputTextColor");
+            }
+        }
 
         private Visibility loadingVisibility = Visibility.Hidden;
         public Visibility LoadingVisibility
@@ -74,6 +113,17 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("loadingVisibility");
             }
         }
+        private string loadingText = "loadingText";
+        public string LoadingText
+        {
+            get { return this.loadingText; }
+            set
+            {
+                this.loadingText = value;
+                OnPropertyChanged("loadingText");
+            }
+        }
+
 
         private Visibility translateLoadingVisibility = Visibility.Hidden;
         public Visibility TranslateLoadingVisibility
@@ -103,7 +153,7 @@ namespace AIDungeon_Extension
             if (PropertyChanged != null) { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); }
         }
 
-        private string statusText;
+        private string statusText = "status";
         public string StatusText
         {
             get { return this.statusText; }
@@ -111,6 +161,16 @@ namespace AIDungeon_Extension
             {
                 this.statusText = value;
                 OnPropertyChanged("statusText");
+            }
+        }
+        private string versionText = "version";
+        public string VersionText
+        {
+            get { return this.versionText; }
+            set
+            {
+                this.versionText = value;
+                OnPropertyChanged("versionText");
             }
         }
 

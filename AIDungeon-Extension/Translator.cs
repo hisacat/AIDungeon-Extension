@@ -7,16 +7,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Threading;
+using System.Diagnostics;
 
 namespace AIDungeon_Extension
 {
     public class Translator
     {
-        List<TranslateWorker> works = null;
         ChromeDriver driver = null;
         Thread workThread = null;
+        List<TranslateWorker> works = null;
+
+        public bool Ready { get; private set; }
         public void Run()
         {
+            this.Ready = false;
+
             works = new List<TranslateWorker>();
             workThread = new Thread(Update);
             workThread.Start();
@@ -97,9 +102,28 @@ namespace AIDungeon_Extension
             options.AddArgument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6)" +
                 "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"); //Not bot
 
-            driver = new ChromeDriver(System.Environment.CurrentDirectory, options);
-            driver.Navigate().GoToUrl("http://www.google.com/translate_t?hl=en");
+            var service = ChromeDriverService.CreateDefaultService();
+            service.HideCommandPromptWindow = true;
 
+            try
+            {
+                driver = new ChromeDriver(service, options);
+                driver.Navigate().GoToUrl("http://www.google.com/translate_t?hl=en");
+                this.Ready = true;
+            }
+            catch (Exception e)
+            {
+                Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
+                foreach (var chromeDriverProcess in chromeDriverProcesses)
+                {
+                    if (chromeDriverProcess.MainModule.FileName.StartsWith(
+                        System.AppDomain.CurrentDomain.BaseDirectory))
+                    {
+                        chromeDriverProcess.Kill();
+                    }
+                }
+                System.Environment.Exit(-1);
+            }
             while (true)
             {
                 TranslateWorker currentWork = null;
@@ -152,6 +176,8 @@ namespace AIDungeon_Extension
 
         public void Dispose()
         {
+            this.Ready = false;
+
             if (works != null)
             {
                 lock (works)

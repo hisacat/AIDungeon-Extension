@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Threading;
@@ -37,8 +39,8 @@ namespace AIDungeon_Extension.Core
         private const string StartUpURL = "https://play.aidungeon.io/main/loginRegister";
 
         private ChromeDriver driver = null;
-
-        private System.Threading.Thread crawlingThread = null;
+        private Thread crawlingThread = null;
+        public bool Ready { get; private set; }
 
         public delegate void AdventureDelegate(AIDungeonWrapper.Adventure adventure);
         public delegate void ScenarioDelegate(AIDungeonWrapper.Scenario scenario);
@@ -55,7 +57,8 @@ namespace AIDungeon_Extension.Core
 
         public void Run()
         {
-            crawlingThread = new System.Threading.Thread(CrawlingScripts);
+            this.Ready = false;
+            crawlingThread = new Thread(CrawlingScripts);
             crawlingThread.Start();
         }
 
@@ -70,18 +73,32 @@ namespace AIDungeon_Extension.Core
             var options = new ChromeOptions();
             options.SetLoggingPreference(LogType_Performance, LogLevel.All);
             options.AddArgument("disable-gpu");
+            //options.AddArgument("-homepage \"" + StartUpURL + "\"");
             options.AddArgument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6)" +
                 "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"); //Not bot
-            //options.AddArgument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)" +
-            //                "Chrome/28.0.1500.52 Safari/537.36"); //Not bot
 
             var service = ChromeDriverService.CreateDefaultService();
-            //service.HideCommandPromptWindow = true;
+            service.HideCommandPromptWindow = true;
 
-            driver = new ChromeDriver(service, options);
-
-            driver.Navigate().GoToUrl(StartUpURL);
-
+            try
+            {
+                driver = new ChromeDriver(service, options);
+                driver.Navigate().GoToUrl(StartUpURL);
+                this.Ready = true;
+            }
+            catch (Exception e)
+            {
+                Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
+                foreach (var chromeDriverProcess in chromeDriverProcesses)
+                {
+                    if (chromeDriverProcess.MainModule.FileName.StartsWith(
+                        System.AppDomain.CurrentDomain.BaseDirectory))
+                    {
+                        chromeDriverProcess.Kill();
+                    }
+                }
+                System.Environment.Exit(-1);
+            }
             while (true)
             {
                 try
@@ -365,6 +382,8 @@ namespace AIDungeon_Extension.Core
 
         public void Dispose()
         {
+            this.Ready = false;
+
             if (crawlingThread != null)
             {
                 crawlingThread.Abort();
