@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Threading;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace AIDungeon_Extension
 {
@@ -16,12 +17,14 @@ namespace AIDungeon_Extension
         ChromeDriver driver = null;
         Thread workThread = null;
         List<TranslateWorker> works = null;
+        Dictionary<string, string> translateDictionary = null;
 
         public bool Ready { get; private set; }
         public void Run()
         {
             this.Ready = false;
 
+            this.translateDictionary = new Dictionary<string, string>();
             works = new List<TranslateWorker>();
             workThread = new Thread(Update);
             workThread.Start();
@@ -124,6 +127,9 @@ namespace AIDungeon_Extension
                 }
                 System.Environment.Exit(-1);
             }
+
+            LoadDictionary();
+
             while (true)
             {
                 TranslateWorker currentWork = null;
@@ -149,7 +155,30 @@ namespace AIDungeon_Extension
 
                     try
                     {
-                        string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", HttpUtility.UrlEncode(currentWork.Text), string.Format("{0}|{1}", currentWork.From, currentWork.To));
+                        var targetText = currentWork.Text;
+                        lock (this.translateDictionary)
+                        {
+                            using (var enumerator = this.translateDictionary.Keys.GetEnumerator())
+                            {
+                                var maches = Regex.Matches(targetText, @"(\w+)");
+                                while (enumerator.MoveNext())
+                                {
+                                    var key = enumerator.Current;
+                                    var value = this.translateDictionary[key];
+
+                                    foreach (Match match in maches)
+                                    {
+                                        if (match.Value == key)
+                                        {
+                                            targetText = targetText.Remove(match.Index, key.Length);
+                                            targetText = targetText.Insert(match.Index, value);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", HttpUtility.UrlEncode(targetText), string.Format("{0}|{1}", currentWork.From, currentWork.To));
                         driver.Navigate().GoToUrl(url);
                         IWebElement translatedElement = null;
 
@@ -171,6 +200,35 @@ namespace AIDungeon_Extension
                 }
 
                 System.Threading.Thread.Sleep(1);
+            }
+        }
+
+        public void LoadDictionary()
+        {
+            lock (this.translateDictionary)
+            {
+                this.translateDictionary.Clear();
+                var dictionaryPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Dictionary.txt");
+                if (System.IO.File.Exists(dictionaryPath))
+                {
+                    var lines = System.IO.File.ReadAllLines(dictionaryPath);
+                    foreach (var line in lines)
+                    {
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+
+                        var info = line.Split(':');
+                        if (info.Length == 2)
+                        {
+                            var key = info[0];
+                            var value = info[1];
+                            if (this.translateDictionary.ContainsKey(key))
+                                this.translateDictionary[key] = value;
+                            else
+                                this.translateDictionary.Add(key, value);
+                        }
+                    }
+                }
             }
         }
 

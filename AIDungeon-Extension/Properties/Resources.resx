@@ -123,6 +123,9 @@
   <data name="LoadingText/PleaseStartGame" xml:space="preserve">
     <value>Please start game</value>
   </data>
+  <data name="LoadingText/UpdateDictionary" xml:space="preserve">
+    <value>Load translate dictionary...</value>
+  </data>
   <data name="SideMenu/BGColor" xml:space="preserve">
     <value>Background</value>
   </data>
@@ -158,6 +161,9 @@
   </data>
   <data name="SideMenu/TextColor" xml:space="preserve">
     <value>Text</value>
+  </data>
+  <data name="SideMenu/UpdateDictionary" xml:space="preserve">
+    <value>Update Dictionary</value>
   </data>
   <data name="SideMenu_ControlPanel" xml:space="preserve">
     <value>Control Panel</value>

@@ -125,7 +125,7 @@
                                 <ColumnDefinition Width="25"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Settings" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"/>
-                            <local:BackButtonControl Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25" Click="SideMenuCloseButton_Click"/>
+                            <local:BackButtonControl Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25" Click="CloseSideMenu"/>
                         </Grid>
                     </Grid>
                     <!--Contents-->
@@ -187,6 +187,10 @@
                                 <Control Height="5"/>
                                 <CheckBox Name="detachNewlineTexts" Content="{x:Static prop:Resources.SideMenu_DetachNewlineTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
 
+                                <Control Height="5"/>
+                                <Button Click="UpdateTranslateDictionary" Style="{StaticResource RoundCorner}">
+                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_UpdateDictionary}" Margin="3"/>
+                                </Button>
                                 <Control Height="10"/>
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_ControlPanel}" FontWeight="Bold"/>
                                 <Control Height="5"/>

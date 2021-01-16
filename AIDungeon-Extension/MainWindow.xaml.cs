@@ -162,7 +162,8 @@ namespace AIDungeon_Extension
                             break;
                     }
 
-                    this.actionsTextBox.Text += System.Environment.NewLine;
+                    if (Settings.ShowOriginalTexts)
+                        this.actionsTextBox.Text += System.Environment.NewLine;
                 }
                 this.actionsTextBox.ScrollToEnd();
             });
@@ -405,6 +406,9 @@ namespace AIDungeon_Extension
                             var text = this.actionsTextBox.Text;
 
                             var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+                            saveFileDialog.Title = "Save text";
+                            saveFileDialog.FileName = "AIDungeon.txt";
+                            saveFileDialog.Filter = "Text|*.txt";
                             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                                 File.WriteAllText(saveFileDialog.FileName, text);
                         }
@@ -442,6 +446,25 @@ namespace AIDungeon_Extension
                 UseShellExecute = true
             };
             Process.Start(psi);
+        }
+
+        private void UpdateTranslateDictionary(object sender, RoutedEventArgs e)
+        {
+            if(this.translator != null)
+            {
+                this.vm.LoadingVisibility = Visibility.Visible;
+                this.vm.LoadingText = Properties.Resources.LoadingText_UpdateDictionary;
+
+                Task.Run(() =>
+                {
+                    this.translator.LoadDictionary();
+
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        this.vm.LoadingVisibility = Visibility.Collapsed;
+                    });
+                });
+            }
         }
         private void RestartHooker(object sender, RoutedEventArgs e)
         {
@@ -561,9 +584,5 @@ namespace AIDungeon_Extension
             System.Environment.Exit(0);
         }
 
-        private void SideMenuCloseButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

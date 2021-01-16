@@ -79,6 +79,15 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Load translate dictionary...과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string LoadingText_UpdateDictionary {
+            get {
+                return ResourceManager.GetString("LoadingText/UpdateDictionary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Background과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_BGColor {
@@ -192,6 +201,15 @@ namespace AIDungeon_Extension.Properties {
         public static string SideMenu_TextColor {
             get {
                 return ResourceManager.GetString("SideMenu/TextColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Update Dictionary과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_UpdateDictionary {
+            get {
+                return ResourceManager.GetString("SideMenu/UpdateDictionary", resourceCulture);
             }
         }
         

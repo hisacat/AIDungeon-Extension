@@ -110,7 +110,6 @@ namespace AIDungeon_Extension.Core
                         var jToken = JToken.Parse(log.Message);
                         var message = jToken["message"];
                         var method = message["method"].Value<string>();
-
                         #endregion
 
                         if (string.Equals(method, "Network.webSocketFrameReceived"))
