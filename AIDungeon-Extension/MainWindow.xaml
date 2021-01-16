@@ -87,13 +87,14 @@
                     <MenuItem  Header="{x:Static prop:Resources.WindowMenu_File_Exit}" Command="local:MainWindow.Exit" InputGestureText="Alt+F4"/>
                 </MenuItem>
                 <MenuItem Header="{x:Static prop:Resources.WindowMenu_Settings}">
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_OpenSettings}" Click="OpenSideMenu"/>
                     <MenuItem  Header="{x:Static prop:Resources.WindowMenu_Reset}" Command="local:MainWindow.Reset" InputGestureText="Ctrl+R"/>
                     <!--<Separator/>-->
-                    <MenuItem  Header="{x:Static prop:Resources.WindowMenu_RestartHooker}" Click="MenuItem_RestartHooker" Visibility="Collapsed"/>
+                    <MenuItem  Header="{x:Static prop:Resources.WindowMenu_RestartHooker}" Click="RestartHooker" Visibility="Collapsed"/>
                 </MenuItem>
                 <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help}">
-                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help_CheckUpdate}" Click="CheckForUpdateMenuItem_Click"/>
-                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Developer}" Click="DeveloperMenuItem_Click"/>
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help_CheckUpdate}" Click="Help_CheckForUpdate"/>
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Developer}" Click="Help_Developer"/>
                 </MenuItem>
             </Menu>
 
@@ -110,7 +111,7 @@
             </StatusBar>
 
             <!--SideMenu-->
-            <Grid DockPanel.Dock="Right" Width="200" Visibility="{Binding SideMenuVisibility}">
+            <Grid DockPanel.Dock="Right" Width="220" Visibility="{Binding SideMenuVisibility}">
                 <Grid Margin="0,5,0,5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
@@ -133,7 +134,7 @@
                             <StackPanel Margin="10">
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_Display}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <Button Click="ChangeFontButton_Click" Style="{StaticResource RoundCorner}">
+                                <Button Click="ChangeFont" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_Display_ChangeFont}" Margin="3"/>
                                 </Button>
 
@@ -179,19 +180,23 @@
                                     </Grid>
                                 </StackPanel>
 
-                                <Control Height="20"/>
-                                <TextBlock Text="{x:Static prop:Resources.SideMenu_ControlPanel}"/>
+                                <Control Height="10"/>
+                                <TextBlock Text="{x:Static prop:Resources.SideMenu_Options}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <Button Click="ChangeFontButton_Click" Style="{StaticResource RoundCorner}">
+                                <CheckBox Content="{x:Static prop:Resources.SideMenu_ShowOriginalTexts}" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                                <Control Height="5"/>
+                                <CheckBox Content="{x:Static prop:Resources.SideMenu_DetachNewlineTexts}" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+
+                                <Control Height="10"/>
+                                <TextBlock Text="{x:Static prop:Resources.SideMenu_ControlPanel}" FontWeight="Bold"/>
+                                <Control Height="5"/>
+                                <Button Click="ChangeFont" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_Reset}" Margin="3"/>
                                 </Button>
                                 <Control Height="5"/>
-                                <Button Click="ChangeFontButton_Click" Style="{StaticResource RoundCorner}" Visibility="Collapsed">
+                                <Button Click="RestartHooker" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_Hooker_Restart}" Margin="3"/>
                                 </Button>
-                                <Control Height="5"/>
-
-                                <CheckBox Content="Show original texts" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
 
                             </StackPanel>
                         </ScrollViewer>
@@ -206,23 +211,24 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="50" MinHeight="0"/>
                 </Grid.RowDefinitions>
                 <!--Contents Actionss-->
+
                 <Grid Grid.Row="0">
-                    <Grid Background="{Binding BGColor}" >
+                    <Grid Background="{Binding BGColor}">
                         <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Margin="5"  Background="Transparent" Foreground="{Binding TextColor}"
                              FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
-                    </Grid>
 
-                    <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
+                        <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
                                                  Opacity="0.9"
-                                                 Click="SideMenuButton_Click" Visibility="{Binding SideMenuButtonVisibility}"/>
-
+                                                 Click="OpenSideMenu" Visibility="{Binding SideMenuButtonVisibility}"/>
+                    </Grid>
                 </Grid>
+
                 <!--Contents Input-->
-                <Grid Grid.Row="1" MinHeight="40" MaxHeight="150">
+                <Grid Grid.Row="1">
                     <Grid Background="{Binding InputBoxColor}">
                         <Grid Margin="5">
                             <TextBox x:Name="inputTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="InputTextBox_PreviewKeyDown" VerticalScrollBarVisibility="Auto"
@@ -256,6 +262,7 @@
                         </Grid>
                     </Grid>
                 </Grid>
+                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="5" ShowsPreview="False"  Background="Black" Opacity="0.5"/>
 
                 <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
             </Grid>

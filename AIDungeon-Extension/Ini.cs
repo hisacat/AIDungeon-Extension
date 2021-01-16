@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 public struct IniValue
 {
@@ -123,19 +124,38 @@ public struct IniValue
         }
         return valueIfInvalid;
     }
-
     public bool TryConvertDouble(out double result)
     {
         if (Value == null)
         {
             result = default(double);
-            return false; ;
+            return false;
         }
         if (TryParseDouble(Value.Trim(), out result))
         {
             return true;
         }
         return false;
+    }
+    public bool TryConvertColor(out Color result)
+    {
+        if (Value == null)
+        {
+            result = default(Color);
+            return false;
+        }
+
+        var color = ColorConverter.ConvertFromString(Value.Trim());
+        if (color != null)
+        {
+            result = (Color)color;
+            return true;
+        }
+        else
+        {
+            result = default(Color);
+            return false;
+        }
     }
 
     public string GetString()

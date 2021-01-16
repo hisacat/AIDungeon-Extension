@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace AIDungeon_Extension
@@ -13,12 +14,37 @@ namespace AIDungeon_Extension
         private static Settings Instance { get { if (_instance == null) _instance = new Settings(); return _instance; } }
 
         private IniFile ini = null;
+        private string iniPath = string.Empty;
 
+        private bool showOriginalTexts = false;
+        public static bool ShowOriginalTexts
+        {
+            get
+            {
+                return Instance.showOriginalTexts;
+            }
+            set
+            {
+                Instance.showOriginalTexts = value;
+                Instance.ini["Game"]["showOriginalTexts"] = value;
+                Instance.ini.Save(Instance.iniPath);
+            }
+        }
+        private string font = string.Empty;
+        public static string Font
+        {
+            get
+            {
+                return Instance.font;
+            }
+            set
+            {
+                Instance.font = value;
+                Instance.ini["Display"]["Font"] = value.ToString();
+                Instance.ini.Save(Instance.iniPath);
+            }
+        }
         private Color bgColor = default;
-        private Color textColor = default;
-        private Color inputBoxColor = default;
-        private Color inputTextColor = default;
-
         public static Color BGColor
         {
             get
@@ -29,22 +55,24 @@ namespace AIDungeon_Extension
             {
                 Instance.bgColor = value;
                 Instance.ini["Color"]["BackGround"] = value.ToString();
+                Instance.ini.Save(Instance.iniPath);
             }
         }
 
         private Settings()
         {
             this.ini = new IniFile();
-            var settingsIniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Settings.ini");
+            this.iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Settings.ini");
 
-            if (!System.IO.File.Exists(settingsIniPath))
+            if (!System.IO.File.Exists(iniPath))
             {
                 //Create and initialize new settings.ini
-                ini["Display"]["Font"] = "true";
-                ini.Save(settingsIniPath);
+                Font = string.Empty;
+                BGColor = ((SolidColorBrush)Application.Current.Resources["AID_Black"]).Color;
+                ini.Save(iniPath);
             }else
             {
-                ini.Load(settingsIniPath);
+                ini.Load(iniPath);
             }
         }
     }

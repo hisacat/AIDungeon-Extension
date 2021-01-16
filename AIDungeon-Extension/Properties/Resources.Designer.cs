@@ -106,6 +106,15 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Detach newline texts과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_DetachNewlineTexts {
+            get {
+                return ResourceManager.GetString("SideMenu/DetachNewlineTexts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Display과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_Display {
@@ -151,11 +160,29 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Options과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Options {
+            get {
+                return ResourceManager.GetString("SideMenu/Options", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Reset과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_Reset {
             get {
                 return ResourceManager.GetString("SideMenu/Reset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Show original texts과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_ShowOriginalTexts {
+            get {
+                return ResourceManager.GetString("SideMenu/ShowOriginalTexts", resourceCulture);
             }
         }
         
@@ -219,6 +246,15 @@ namespace AIDungeon_Extension.Properties {
         public static string WindowMenu_Help_CheckUpdate {
             get {
                 return ResourceManager.GetString("WindowMenu/Help/CheckUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Open Settings과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_OpenSettings {
+            get {
+                return ResourceManager.GetString("WindowMenu/OpenSettings", resourceCulture);
             }
         }
         

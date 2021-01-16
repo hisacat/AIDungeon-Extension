@@ -161,6 +161,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Snippet\inipropfull.snippet" />
     <None Include="Snippet\vmpropfull.snippet" />
   </ItemGroup>
   <ItemGroup>

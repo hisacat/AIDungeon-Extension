@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Ini propfull</Title>
+      <Shortcut>inipropfull</Shortcut>
+      <Description>Code snippet for property and backing field</Description>
+      <Author>HisaCat</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>type</ID>
+          <ToolTip>Property type</ToolTip>
+          <Default>int</Default>
+        </Literal>
+        <Literal>
+          <ID>section</ID>
+          <ToolTip>section name</ToolTip>
+          <Default>Section</Default>
+        </Literal>
+        <Literal>
+          <ID>name</ID>
+          <ToolTip>name</ToolTip>
+          <Default>Name</Default>
+        </Literal>
+        <Literal>
+          <ID>field</ID>
+          <ToolTip>The variable backing this property</ToolTip>
+          <Default>myVar</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+      <![CDATA[private $type$ $section$_$name$;
+  public static $type$ $field$
+  {
+    get { return Instance.$section$_$name$;}
+    set
+    {
+      Instance.$section$_$name$ = value;
+      Instance.ini["$section$"]["$name$"] = value;
+      Instance.ini.Save(Instance.iniPath);
+    }
+  }
+  $end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

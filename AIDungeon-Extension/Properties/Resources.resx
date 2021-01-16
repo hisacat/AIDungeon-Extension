@@ -129,6 +129,9 @@
   <data name="SideMenu/Color" xml:space="preserve">
     <value>Color</value>
   </data>
+  <data name="SideMenu/DetachNewlineTexts" xml:space="preserve">
+    <value>Detach newline texts</value>
+  </data>
   <data name="SideMenu/Display" xml:space="preserve">
     <value>Display</value>
   </data>
@@ -144,8 +147,14 @@
   <data name="SideMenu/InputText" xml:space="preserve">
     <value>InputText</value>
   </data>
+  <data name="SideMenu/Options" xml:space="preserve">
+    <value>Options</value>
+  </data>
   <data name="SideMenu/Reset" xml:space="preserve">
     <value>Reset</value>
+  </data>
+  <data name="SideMenu/ShowOriginalTexts" xml:space="preserve">
+    <value>Show original texts</value>
   </data>
   <data name="SideMenu/TextColor" xml:space="preserve">
     <value>Text</value>
@@ -170,6 +179,9 @@
   </data>
   <data name="WindowMenu/Help/CheckUpdate" xml:space="preserve">
     <value>Check for update (Open Github)</value>
+  </data>
+  <data name="WindowMenu/OpenSettings" xml:space="preserve">
+    <value>Open Settings</value>
   </data>
   <data name="WindowMenu/Reset" xml:space="preserve">
     <value>Reset</value>

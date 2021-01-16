@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -52,7 +53,7 @@ namespace AIDungeon_Extension
         {
             InitializeComponent();
 
-            Settings.BGColor = Color.FromArgb(1, 1, 1, 1);
+            //Settings.BGColor = Color.FromArgb(1, 1, 1, 1);
 
             this.vm = new MainWindowViewModel();
             this.DataContext = this.vm;
@@ -71,8 +72,8 @@ namespace AIDungeon_Extension
 
             this.vm.SideMenuVisibility = Visibility.Collapsed;
             this.vm.SideMenuButtonVisibility = Visibility.Visible;
-            return;
 
+            //---
             this.vm.LoadingVisibility = Visibility.Visible;
             this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
             this.vm.TranslateLoadingVisibility = Visibility.Hidden;
@@ -214,22 +215,6 @@ namespace AIDungeon_Extension
         }
         #endregion
 
-        /*
-         * Will support.
-         * Say
-         * Do
-         * Story (only in adventure)
-         * Undo (텍스트 직접보냄)
-         * Redo (텍스트 직접보냄)
-         * Retry (대답 다시하기)
-         * Alter (마지막 대화문 수정)
-         * Remember (기억하기 / Style hint descriptive?)
-         * 
-         * ---Report
-         * ---Restore
-         * ---World info
-         */
-
         public void UpdateWriteMode(WriteMode mode)
         {
             this.writeMode = mode;
@@ -246,9 +231,29 @@ namespace AIDungeon_Extension
                     break;
             }
         }
+        public void SetStatusText(string text)
+        {
+            this.vm.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
+        }
 
         private void InputTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            /*
+             * Will support.
+             * [Done] Say
+             * [Done] Do
+             * [Done] Story (only in adventure)
+             * Undo (텍스트 직접보냄)
+             * Redo (텍스트 직접보냄)
+             * Retry (대답 다시하기)
+             * Alter (마지막 대화문 수정)
+             * Remember (기억하기 / Style hint descriptive?)
+             * 
+             * ---Report
+             * ---Restore
+             * ---World info
+             */
+
             if (inputTextBox.IsReadOnly)
             {
                 e.Handled = false;
@@ -345,7 +350,75 @@ namespace AIDungeon_Extension
             }
         }
 
-        private void CheckForUpdateMenuItem_Click(object sender, RoutedEventArgs e)
+        #region ColorPicker callbacks
+        private void textColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.TextColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void bgColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.BGColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void inputBoxColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.InputBoxColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void inputTextColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.InputTextColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        #endregion
+
+        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            var item = string.Empty;
+            var menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                item = menuItem.Header.ToString();
+            }
+            else
+            {
+                var executedRoutedEventArga = e as ExecutedRoutedEventArgs;
+                if (executedRoutedEventArga != null)
+                {
+                    item = (executedRoutedEventArga.Command as RoutedUICommand).Text;
+                }
+            }
+            if (!string.IsNullOrEmpty(item))
+            {
+                switch (item)
+                {
+                    case "Save":
+                        {
+                            var text = this.actionsTextBox.Text;
+
+                            var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+                            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                                File.WriteAllText(saveFileDialog.FileName, text);
+                        }
+                        break;
+                    case "Exit":
+                        {
+                            this.Close();
+                        }
+                        break;
+                    case "Reset":
+                        {
+                            this.actionContainer.Clear();
+                            this.actionsTextBox.Text = string.Empty;
+                            this.hooker.Refresh();
+                        }
+                        break;
+                }
+            }
+        }
+
+        private void Help_CheckForUpdate(object sender, RoutedEventArgs e)
         {
             var psi = new ProcessStartInfo
             {
@@ -354,8 +427,7 @@ namespace AIDungeon_Extension
             };
             Process.Start(psi);
         }
-
-        private void DeveloperMenuItem_Click(object sender, RoutedEventArgs e)
+        private void Help_Developer(object sender, RoutedEventArgs e)
         {
             var psi = new ProcessStartInfo
             {
@@ -364,13 +436,39 @@ namespace AIDungeon_Extension
             };
             Process.Start(psi);
         }
-
-        public void SetStatusText(string text)
+        private void RestartHooker(object sender, RoutedEventArgs e)
         {
-            this.vm.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
-        }
+            if (this.hooker != null)
+            {
+                this.hooker.Dispose();
+                this.hooker = null;
+            }
 
-        private void ChangeFontButton_Click(object sender, RoutedEventArgs e)
+            this.hooker = new AIDungeonHooker();
+            this.hooker.Run();
+        }
+        private void RestartTranslator(object sender, RoutedEventArgs e)
+        {
+            if (this.translator != null)
+            {
+                this.translator.Dispose();
+                this.hooker = null;
+            }
+
+            this.translator = new Translator();
+            this.translator.Run();
+        }
+        private void OpenSideMenu(object sender, RoutedEventArgs e)
+        {
+            this.vm.SideMenuVisibility = Visibility.Visible;
+            this.vm.SideMenuButtonVisibility = Visibility.Collapsed;
+        }
+        private void CloseSideMenu(object sender, RoutedEventArgs e)
+        {
+            this.vm.SideMenuVisibility = Visibility.Collapsed;
+            this.vm.SideMenuButtonVisibility = Visibility.Visible;
+        }
+        private void ChangeFont(object sender, RoutedEventArgs e)
         {
             var fd = new System.Windows.Forms.FontDialog();
             var result = fd.ShowDialog();
@@ -395,81 +493,13 @@ namespace AIDungeon_Extension
                 this.vm.TextDecorations = textDecorations;
             }
         }
-
-        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            var item = string.Empty;
-            var menuItem = sender as MenuItem;
-            if (menuItem != null)
-            {
-                item = menuItem.Header.ToString();
-            }
-            else
-            {
-                var executedRoutedEventArga = e as ExecutedRoutedEventArgs;
-                if (executedRoutedEventArga != null)
-                {
-                    item = (executedRoutedEventArga.Command as RoutedUICommand).Text;
-                }
-            }
-            if (!string.IsNullOrEmpty(item))
-            {
-                switch (item)
-                {
-                    case "Save":
-                        {
-                        }
-                        break;
-                    case "Exit":
-                        {
-                            this.Close();
-                        }
-                        break;
-                    case "Reset":
-                        {
-                            this.actionContainer.Clear();
-                            this.actionsTextBox.Text = string.Empty;
-                            this.hooker.Refresh();
-                        }
-                        break;
-                }
-            }
-        }
-
-        private void MenuItem_RestartHooker(object sender, RoutedEventArgs e)
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
 
         }
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
 
-        private void SideMenuButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.vm.SideMenuVisibility = Visibility.Visible;
-            this.vm.SideMenuButtonVisibility = Visibility.Collapsed;
-        }
-        private void SideMenuCloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.vm.SideMenuVisibility = Visibility.Collapsed;
-            this.vm.SideMenuButtonVisibility = Visibility.Visible;
-        }
-        private void textColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue.HasValue)
-                this.vm.TextColor = new SolidColorBrush(e.NewValue.Value);
-        }
-        private void bgColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue.HasValue)
-                this.vm.BGColor = new SolidColorBrush(e.NewValue.Value);
-        }
-        private void inputBoxColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue.HasValue)
-                this.vm.InputBoxColor = new SolidColorBrush(e.NewValue.Value);
-        }
-        private void inputTextColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue.HasValue)
-                this.vm.InputTextColor = new SolidColorBrush(e.NewValue.Value);
         }
         protected override void OnClosed(EventArgs e)
         {
@@ -497,15 +527,9 @@ namespace AIDungeon_Extension
             System.Environment.Exit(0);
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void SideMenuCloseButton_Click(object sender, RoutedEventArgs e)
         {
 
         }
-
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
     }
 }
