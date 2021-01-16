@@ -73,6 +73,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DisplayAIDActionContainer.cs" />
     <Compile Include="AIDungeonHooker.Wrapper.cs" />
     <Compile Include="LiveTranslator.cs" />
     <Compile Include="LoadingIndicatorControl.xaml.cs">
@@ -120,6 +121,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="Resources\DXSnUB-KSCpc-EUC-H.ttf" />
     <None Include="googletrans\client.py" />
     <None Include="googletrans\constants.py" />
     <None Include="googletrans\gtoken.py" />

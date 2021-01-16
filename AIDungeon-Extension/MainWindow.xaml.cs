@@ -131,63 +131,18 @@ namespace AIDungeon_Extension
     {
         private MainWindowViewModel viewModel = null;
         public static readonly RoutedUICommand Reset = new RoutedUICommand("Reset", "Reset", typeof(MainWindow));
+        private const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
 
         public FontFamily actionFont { get; set; }
 
         private AIDungeonHooker hooker = null;
+        private DisplayAIDActionContainer actionContainer = null;
+
         private Translator translator = null;
         //private LiveTranslator inputTextTranslator = null;
         //private WebBrowserTranslator webBrowserTranslator = null;
 
         private string currentAdventureId = string.Empty;
-
-        public class DisplayAIDAction : IComparer<DisplayAIDAction>, IComparable<DisplayAIDAction>
-        {
-            public string Id { get; set; }
-            public AIDungeonWrapper.Action Action { get; set; }
-            public List<AIDungeonWrapper.Action> ContinueActions { get; set; }
-
-            public bool Updated { get; set; }
-            public string OriginalText { get; private set; }
-            public string TranslatedText { get; private set; }
-
-            public int CompareTo(DisplayAIDAction other)
-            {
-                if (other == null) return 0;
-                return Action.CompareTo(other.Action);
-            }
-            public int Compare(DisplayAIDAction x, DisplayAIDAction y)
-            {
-                if (x == null) return 0;
-                return x.CompareTo(y);
-            }
-
-            public DisplayAIDAction(AIDungeonWrapper.Action action)
-            {
-                this.Id = action.id;
-                this.Action = action;
-
-                this.ContinueActions = new List<AIDungeonWrapper.Action>();
-                this.Updated = true;
-                //this.DisplayText = string.Empty;
-            }
-
-            public void Update(Translator translator)
-            {
-                this.OriginalText = Action.text;
-                foreach (var action in ContinueActions)
-                    this.OriginalText += action.text;
-
-                this.Updated = true;
-
-                translator.Translate(this.OriginalText, "ne", "ko",
-                    (translated) => { this.TranslatedText = translated; },
-                    failed: (reason) => { this.TranslatedText = string.Format("Translate failed: {0}", reason); });
-            }
-        }
-        private List<DisplayAIDAction> currentActions = null;
-        private bool actionUpdated = false;
-        private object lockObj = new object();
 
         private System.Threading.Thread updateThread = null;
 
@@ -198,8 +153,6 @@ namespace AIDungeon_Extension
             Story = 2,
         }
         private WriteMode writeMode = default;
-
-        private const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
 
         public MainWindow()
         {
@@ -213,14 +166,19 @@ namespace AIDungeon_Extension
             this.viewModel.LoadingVisibility = Visibility.Hidden;
             this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
             this.viewModel.InputLoadingVisibility = Visibility.Hidden;
-            
-            //---
-            this.currentActions = new List<DisplayAIDAction>();
 
+            //---
             UpdateMode(WriteMode.Say);
 
             updateThread = new System.Threading.Thread(Update);
             updateThread.Start();
+
+            translator = new Translator();
+            translator.Run();
+
+            actionContainer = new DisplayAIDActionContainer(translator);
+            actionContainer.OnActionsChanged += ActionContainer_OnActionsChanged;
+            actionContainer.OnTranslated += ActionContainer_OnTranslated;
 
             hooker = new AIDungeonHooker();
             hooker.OnScenario += OnScenario;
@@ -233,15 +191,28 @@ namespace AIDungeon_Extension
             hooker.OnActionRestored += OnActionRestored;
 
             hooker.Run();
+        }
 
-            translator = new Translator();
-            translator.Run();
-
-            /*
-            inputTextTranslator = new LiveTranslator();
-            inputTextTranslator.Run();
-            inputTextTranslator.Translated += OnSendTextTranslated;
-            */
+        private void ActionContainer_OnActionsChanged(List<DisplayAIDActionContainer.DisplayAIDAction> actions)
+        {
+            UpdateActionText(actions);
+        }
+        private void ActionContainer_OnTranslated(List<DisplayAIDActionContainer.DisplayAIDAction> actions, DisplayAIDActionContainer.DisplayAIDAction translated)
+        {
+            UpdateActionText(actions);
+        }
+        private void UpdateActionText(List<DisplayAIDActionContainer.DisplayAIDAction> actions)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this.actionsTextBox.Text = string.Empty;
+                foreach (var action in actions)
+                {
+                    this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
+                    //this.actionsTextBox.Text += action.Translated + System.Environment.NewLine;
+                }
+                this.actionsTextBox.ScrollToEnd();
+            });
         }
 
         private void OnScenario(AIDungeonWrapper.Scenario scenario)
@@ -254,52 +225,43 @@ namespace AIDungeon_Extension
         }
         private void OnAdventure(AIDungeonWrapper.Adventure adventure)
         {
-            UpdateActionFromAdventure(adventure);
+            if (this.currentAdventureId != adventure.id)
+            {
+                actionContainer.Clear();
+                this.currentAdventureId = adventure.id;
+            }
+            actionContainer.AddRange(adventure.actionWindow);
         }
         private void OnAdventureUpdated(AIDungeonWrapper.Adventure adventure)
         {
-            UpdateActionFromAdventure(adventure);
+            if (this.currentAdventureId != adventure.id)
+            {
+                actionContainer.Clear();
+                this.currentAdventureId = adventure.id;
+            }
+            actionContainer.AddRange(adventure.actionWindow);
         }
 
         private void OnActionsUndone(List<AIDungeonWrapper.Action> actions)
         {
-            lock (lockObj)
-            {
-                foreach (var action in actions)
-                    UpdateAction_Removed(action);
-
-                this.actionUpdated = true;
-            }
+            foreach (var action in actions)
+                this.actionContainer.Deleted(action);
         }
         private void OnActionAdded(AIDungeonWrapper.Action action)
         {
-            lock (lockObj)
-            {
-                UpdateAction_Added(action);
-
-                this.actionUpdated = true;
-            }
+            this.actionContainer.Add(action);
         }
         private void OnActionUpdated(AIDungeonWrapper.Action action)
         {
-            lock (lockObj)
-            {
-                UpdateAction_Edited(action);
-
-                this.actionUpdated = true;
-            }
+            this.actionContainer.Edited(action);
         }
         private void OnActionRestored(AIDungeonWrapper.Action action)
         {
-            lock (lockObj)
-            {
-                UpdateAction_Removed(action);
-                UpdateAction_Added(action);
-
-                this.actionUpdated = true;
-            }
+            this.actionContainer.Deleted(action);
+            this.actionContainer.Add(action);
         }
 
+        /*
         private void UpdateActionFromAdventure(AIDungeonWrapper.Adventure adventure)
         {
             lock (lockObj)
@@ -319,7 +281,7 @@ namespace AIDungeon_Extension
                 {
                     var action = adventure.actionWindow[i];
                     DisplayAIDAction displayAction = new DisplayAIDAction(action);
-                    displayAction.Updated = true;
+                    //displayAction.Updated = true;
                     if (currentActions.Exists(x => x.Id == action.id))
                     {
                         var originAction = currentActions.First(x => x.Id == action.id);
@@ -357,14 +319,14 @@ namespace AIDungeon_Extension
                         if (continueActionAdded)
                         {
                             displayAction.ContinueActions.Sort();
-                            displayAction.Updated = true;
+                            //displayAction.Updated = true;
                         }
 
-                        displayAction.Update(translator);
+                        displayAction.Update(this, translator);
                     }
                 }
 
-                this.actionUpdated = true;
+                //this.actionUpdated = true;
             }
         }
         private void UpdateAction_Removed(AIDungeonWrapper.Action action)
@@ -379,7 +341,7 @@ namespace AIDungeon_Extension
                 if (continueActions.Count > 0)
                 {
                     var head = new DisplayAIDAction(continueActions[0]);
-                    head.Updated = true;
+                    //head.Updated = true;
 
                     continueActions.RemoveAt(0);
 
@@ -390,8 +352,8 @@ namespace AIDungeon_Extension
                             head.ContinueActions.Add(continueAction);
                         head.ContinueActions.Sort();
 
-                        head.Updated = true;
-                        head.Update(translator);
+                        //head.Updated = true;
+                        head.Update(this, translator);
                     }
 
                     this.currentActions.Add(head);
@@ -409,8 +371,8 @@ namespace AIDungeon_Extension
                         head.ContinueActions.RemoveAll(x => x.id == action.id);
                         head.ContinueActions.Sort();
 
-                        head.Updated = true;
-                        head.Update(translator);
+                        //head.Updated = true;
+                        head.Update(this, translator);
                         break;
                     }
                 }
@@ -428,8 +390,8 @@ namespace AIDungeon_Extension
                 var head = this.currentActions[this.currentActions.Count - 1];
                 head.ContinueActions.Add(action);
 
-                head.Updated = true;
-                head.Update(translator);
+                //head.Updated = true;
+                head.Update(this, translator);
             }
             else
             {
@@ -437,8 +399,8 @@ namespace AIDungeon_Extension
                 this.currentActions.Add(head);
                 this.currentActions.Sort();
 
-                head.Updated = true;
-                head.Update(translator);
+                //head.Updated = true;
+                head.Update(this, translator);
             }
 
             this.actionUpdated = true;
@@ -454,8 +416,8 @@ namespace AIDungeon_Extension
                 newAction.ContinueActions = continueActions;
                 this.currentActions.Add(newAction);
 
-                newAction.Updated = true;
-                newAction.Update(translator);
+                //newAction.Updated = true;
+                newAction.Update(this, translator);
                 this.currentActions.Sort();
             }
             else
@@ -470,8 +432,8 @@ namespace AIDungeon_Extension
                         head.ContinueActions.Add(action);
                         head.ContinueActions.Sort();
 
-                        head.Updated = true;
-                        head.Update(translator);
+                        //head.Updated = true;
+                        head.Update(this, translator);
                         break;
                     }
                 }
@@ -479,67 +441,12 @@ namespace AIDungeon_Extension
 
             this.actionUpdated = true;
         }
+        */
 
         private void Update()
         {
             while (true)
             {
-                if (actionUpdated)
-                {
-                    actionUpdated = false;
-
-                    //innertexts. marger.
-                    //영어도 일단 먼저 보여주긴 해야하니까, Translate는 나중에 업데이트되는식으로 뭔가 구상을해야할듯.
-                    //Control 이용할까?
-                    List<string> displayTexts = new List<string>();
-                    lock (lockObj)
-                    {
-                        foreach (var action in currentActions)
-                        {
-                            var text = action.Action.text;
-                            foreach (var continueAction in action.ContinueActions)
-                            {
-                                if (continueAction.text.StartsWith("\n") || continueAction.text.StartsWith("\r\n"))
-                                {
-                                    //Line에 관해서 : Continue일떄 다 붙이는게 아니라, 개행이 아닐떄만 붙이기 ?
-                                    //고민해보자.
-                                }
-                                text += continueAction.text;
-                            }
-                            displayTexts.Add(text);
-                        }
-                    }
-
-                    {
-                        int count = displayTexts.Count;
-
-                        for (int i = 0; i < count; i++)
-                        {
-                            displayTexts[i] += Environment.NewLine + translator.BlockTranslate(displayTexts[i], "en", "ko") + (i < count - 1 ? Environment.NewLine : string.Empty);
-                        }
-
-                        Dispatcher.Invoke(() =>
-                        {
-                            this.actionsTextBox.Text = string.Empty;
-                            for (int i = 0; i < count; i++)
-                                this.actionsTextBox.Text += displayTexts[i];
-
-                            this.actionsTextBox.ScrollToEnd();
-                        });
-                    }
-                }
-
-                /*
-                if (lastInputTranslated)
-                    return;
-
-                if ((DateTime.Now - lastInputTime).TotalSeconds > 0.5f)
-                {
-                    //inputTextTranslator.Translate(inputTextBox.Text);
-                    lastInputTranslated = true;
-                }
-                */
-
                 System.Threading.Thread.Sleep(1);
             }
         }
@@ -620,7 +527,7 @@ namespace AIDungeon_Extension
                             var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
                             inputTextBox.Text = string.Empty;
 
-                            if(hooker != null)
+                            if (hooker != null)
                                 hooker.SendText(sendText);
                             return;
                         }
@@ -744,7 +651,7 @@ namespace AIDungeon_Extension
                 {
                     case "Reset":
                         {
-                            this.currentActions.Clear();
+                            this.actionContainer.Clear();
                             this.actionsTextBox.Text = string.Empty;
                             this.hooker.Refresh();
                         }

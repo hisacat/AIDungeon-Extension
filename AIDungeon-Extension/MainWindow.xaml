@@ -29,10 +29,10 @@
             </Menu>
 
             <!--Bottom statusbar-->
-            <StatusBar DockPanel.Dock="Bottom">
+            <StatusBar DockPanel.Dock="Bottom" Margin="0,0,0.333,0">
                 <StatusBarItem>
                     <Grid>
-                        <TextBlock/>
+                        <TextBlock Text="{Binding StatusText}"/>
                     </Grid>
                 </StatusBarItem>
                 <StatusBarItem HorizontalAlignment="Right">
@@ -85,7 +85,7 @@
                              Background="Transparent" Foreground="#FFE0E0E0" BorderThickness="2" BorderBrush="#FF3B3B3B" Text="Actions here"/>
                 </Grid>
                 <!--Contents Input-->
-                <Grid Grid.Row="1" MaxHeight="150">
+                <Grid Grid.Row="1" MinHeight="40" MaxHeight="150">
                     <TextBox x:Name="inputTextBox" Text="" TextWrapping="Wrap" AcceptsReturn="True" PreviewKeyDown="InputTextBox_PreviewKeyDown" VerticalScrollBarVisibility="Auto"
                              FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              Background="#FF3B3B3B" Foreground="#FFE0E0E0" BorderBrush="#FF3B3B3B"/>

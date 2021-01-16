@@ -42,6 +42,12 @@ namespace AIDungeon_Extension
                 this.finished?.Invoke();
             }
 
+            public bool isAborted = false;
+            public void Abort()
+            {
+                this.isAborted = true;
+            }
+
             public TranslateWorker(string text, string from, string to, Action<string> translated, Action<string> failed = null, Action finished = null)
             {
                 this.Text = text;
@@ -51,6 +57,8 @@ namespace AIDungeon_Extension
                 this.translated = translated;
                 this.failed = failed;
                 this.finished = finished;
+
+                this.isAborted = false;
             }
         }
         public string BlockTranslate(string text, string from, string to, Action<string> failed = null)
@@ -85,6 +93,9 @@ namespace AIDungeon_Extension
 
             var options = new ChromeOptions();
             options.AddArgument("headless");
+            options.AddArgument("disable-gpu");
+            options.AddArgument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6)" +
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"); //Not bot
 
             driver = new ChromeDriver(System.Environment.CurrentDirectory, options);
             driver.Navigate().GoToUrl("http://www.google.com/translate_t?hl=en");
@@ -98,6 +109,9 @@ namespace AIDungeon_Extension
                     {
                         currentWork = works[0];
                         works.RemoveAt(0);
+
+                        if (currentWork.isAborted)
+                            continue;
                     }
                 }
 
@@ -121,7 +135,7 @@ namespace AIDungeon_Extension
                             {
                                 translatedElement = driver.FindElementByXPath("//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/c-wiz[2]/div[5]/div/div[3]");
                             }
-                            catch (Exception e) { }
+                            catch (Exception e) { } //Needs timeout
                         } while (translatedElement == null);
 
                         currentWork.TranslatedCallback(translatedElement.GetAttribute("data-text"));

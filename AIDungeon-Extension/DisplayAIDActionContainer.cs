@@ -12,9 +12,8 @@ namespace AIDungeon_Extension
         bool forceNewline = false;
         bool doTranslate = false;
 
-        public class DisplayAIDAction
+        public class DisplayAIDAction : IComparer<DisplayAIDAction>, IComparable<DisplayAIDAction>
         {
-            public string Id { get; set; }
             public AIDungeonWrapper.Action Action { get; set; }
             public List<AIDungeonWrapper.Action> InnerActions { get; set; }
 
@@ -26,8 +25,11 @@ namespace AIDungeon_Extension
 
             public DisplayAIDAction(DisplayAIDActionContainer container, AIDungeonWrapper.Action action)
             {
-                this.container = container;
                 this.Action = action;
+                this.InnerActions = new List<AIDungeonWrapper.Action>();
+
+                this.container = container;
+                this.translateWork = null;
             }
             public void UpdatedCallback()
             {
@@ -62,6 +64,18 @@ namespace AIDungeon_Extension
                     translateWork = null;
                 }
             }
+            public int CompareTo(DisplayAIDAction other)
+            {
+                if (other == null || other.Action == null)
+                    return 0;
+
+                return Action.CompareTo(other.Action);
+            }
+
+            public int Compare(DisplayAIDAction x, DisplayAIDAction y)
+            {
+                return x.CompareTo(y);
+            }
         }
         public List<DisplayAIDAction> Actions { get; private set; }
         private Translator translator = null;
@@ -88,6 +102,7 @@ namespace AIDungeon_Extension
 
         public void AddRange(List<AIDungeonWrapper.Action> actions)
         {
+            if (actions == null) return;
             actions.Sort();
 
             int count = actions.Count;
@@ -107,6 +122,7 @@ namespace AIDungeon_Extension
                     if (targetAction.type != "continue") break;
                     //In force-newline option. make new head when text started with newLine
                     if (forceNewline && !StartsWithNewLine(targetAction.text)) break;
+                    head.InnerActions.RemoveAll(x => x.id == targetAction.id);
                     head.InnerActions.Add(targetAction);
 
                     i = idx;
@@ -122,25 +138,43 @@ namespace AIDungeon_Extension
             if (target == null)
             {
                 target = new DisplayAIDAction(this, action);
-                this.Actions.Add(target);
-                this.Actions.Sort();
 
-                //Find parrent and add to inner action when action type is continue.
                 if (target.Action.type == "continue")
                 {
+                    bool makeNewHead = false;
                     //In force-newline option. starts with newline action is another head.
-                    if (forceNewline && !StartsWithNewLine(target.Action.text))
+                    if (forceNewline)
                     {
-                        var idx = this.Actions.IndexOf(target) - 1;
-                        if (idx > 0)
-                        {
-                            var head = this.Actions[idx];
-                            head.InnerActions.Add(target.Action);
-                            this.Actions.Remove(target);
+                        if (StartsWithNewLine(target.Action.text))
+                            makeNewHead = true;
+                    }
 
+                    if (this.Actions.IndexOf(target) == 0) //First action is always new head.
+                        makeNewHead = true;
+
+                    if (makeNewHead) //Make new head.
+                    {
+                        this.Actions.Add(target);
+                        this.Actions.Sort();
+                        target.UpdatedCallback();
+                    }
+                    else //Attach to parent's inner actions.
+                    {
+                        this.Actions.Add(target); //Add temp action for get index with sort
+                        this.Actions.Sort();
+                        {
+                            var head = this.Actions[this.Actions.IndexOf(target) - 1]; //Parent head(-1 index)
+                            head.InnerActions.RemoveAll(x => x.id == target.Action.id);
+                            head.InnerActions.Add(target.Action);
                             head.UpdatedCallback();
                         }
+                        this.Actions.Remove(target); //Remove temp action
                     }
+                }else
+                {
+                    this.Actions.Add(target);
+                    this.Actions.Sort();
+                    target.UpdatedCallback();
                 }
 
                 OnActionsChanged?.Invoke(this.Actions);
@@ -152,14 +186,15 @@ namespace AIDungeon_Extension
                 Edited(action);
             }
         }
-        public void Delete(AIDungeonWrapper.Action action)
+        public void Deleted(AIDungeonWrapper.Action action)
         {
             var target = this.Actions.FirstOrDefault(x => x.Action.id == action.id);
             if (target != null)
             {
                 var innerActions = target.InnerActions;
                 int idx = this.Actions.IndexOf(target);
-                this.Actions.RemoveAll(x => x.Id == action.id);
+                this.Actions.Remove(target);
+                target.Dispose();
 
                 //Detach innerAction and make to head
                 {
