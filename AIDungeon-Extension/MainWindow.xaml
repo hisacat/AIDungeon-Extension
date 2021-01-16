@@ -183,14 +183,14 @@
                                 <Control Height="10"/>
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_Options}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <CheckBox Content="{x:Static prop:Resources.SideMenu_ShowOriginalTexts}" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                                <CheckBox Name="showOriginalTexts" Content="{x:Static prop:Resources.SideMenu_ShowOriginalTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
                                 <Control Height="5"/>
-                                <CheckBox Content="{x:Static prop:Resources.SideMenu_DetachNewlineTexts}" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                                <CheckBox Name="detachNewlineTexts" Content="{x:Static prop:Resources.SideMenu_DetachNewlineTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
 
                                 <Control Height="10"/>
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_ControlPanel}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <Button Click="ChangeFont" Style="{StaticResource RoundCorner}">
+                                <Button Command="local:MainWindow.Reset" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_Reset}" Margin="3"/>
                                 </Button>
                                 <Control Height="5"/>

@@ -54,6 +54,7 @@ namespace AIDungeon_Extension
             InitializeComponent();
 
             //Settings.BGColor = Color.FromArgb(1, 1, 1, 1);
+            Settings.Init();
 
             this.vm = new MainWindowViewModel();
             this.DataContext = this.vm;
@@ -62,16 +63,19 @@ namespace AIDungeon_Extension
             this.vm.BGColor = (SolidColorBrush)Application.Current.Resources["AID_Black"];
             this.vm.InputBoxColor = (SolidColorBrush)Application.Current.Resources["AID_Gray"];
             this.vm.InputTextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+            this.vm.VersionText = VersionStr;
+            this.vm.StatusText = DefaultStatusText;
+            this.vm.SideMenuVisibility = Visibility.Collapsed;
+            this.vm.SideMenuButtonVisibility = Visibility.Visible;
+
+            #region Init Controls
+            //this.showOriginalTexts.IsChecked = Settings.ShowOriginalTexts;
+            //this.detachNewlineTexts.IsChecked = Settings.DetachNewlineTexts;
             this.bgColorPicker.SelectedColor = this.vm.BGColor.Color;
             this.textColorPicker.SelectedColor = this.vm.TextColor.Color;
             this.inputBoxColorPicker.SelectedColor = this.vm.InputBoxColor.Color;
             this.inputTextColorPicker.SelectedColor = this.vm.InputTextColor.Color;
-
-            this.vm.VersionText = VersionStr;
-            this.vm.StatusText = DefaultStatusText;
-
-            this.vm.SideMenuVisibility = Visibility.Collapsed;
-            this.vm.SideMenuButtonVisibility = Visibility.Visible;
+            #endregion
 
             //---
             this.vm.LoadingVisibility = Visibility.Visible;
@@ -136,7 +140,8 @@ namespace AIDungeon_Extension
                 this.actionsTextBox.Text = string.Empty;
                 foreach (var action in actions)
                 {
-                    this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
+                    if (Settings.ShowOriginalTexts)
+                        this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
 
                     switch (action.TranslateStatus)
                     {
@@ -156,6 +161,8 @@ namespace AIDungeon_Extension
                             this.actionsTextBox.Text += "[번역 준비중]" + System.Environment.NewLine;
                             break;
                     }
+
+                    this.actionsTextBox.Text += System.Environment.NewLine;
                 }
                 this.actionsTextBox.ScrollToEnd();
             });
@@ -493,13 +500,40 @@ namespace AIDungeon_Extension
                 this.vm.TextDecorations = textDecorations;
             }
         }
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void SideMenu_CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-
+            var checkbox = sender as CheckBox;
+            if (checkbox != null)
+            {
+                switch (checkbox.Name)
+                {
+                    case "showOriginalTexts":
+                        Settings.ShowOriginalTexts = true;
+                        this.ActionContainer_OnActionsChanged(this.actionContainer.Actions);
+                        break;
+                    case "detachNewlineTexts":
+                        Settings.DetachNewlineTexts = true;
+                        this.ActionContainer_OnActionsChanged(this.actionContainer.Actions);
+                        Reset.Execute(null, null);
+                        break;
+                }
+            }
         }
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        private void SideMenu_CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-
+            var checkbox = sender as CheckBox;
+            switch (checkbox.Name)
+            {
+                case "showOriginalTexts":
+                    Settings.ShowOriginalTexts = false;
+                    this.ActionContainer_OnActionsChanged(this.actionContainer.Actions);
+                    break;
+                case "detachNewlineTexts":
+                    Settings.DetachNewlineTexts = false;
+                    this.ActionContainer_OnActionsChanged(this.actionContainer.Actions);
+                    Reset.Execute(null, null);
+                    break;
+            }
         }
         protected override void OnClosed(EventArgs e)
         {

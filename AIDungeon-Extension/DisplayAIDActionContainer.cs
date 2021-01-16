@@ -127,6 +127,7 @@ namespace AIDungeon_Extension
 
             this.Actions.Clear();
             OnActionsChanged?.Invoke(this.Actions);
+            return;
         }
 
         public void AddRange(List<AIDungeonWrapper.Action> actions)
@@ -160,6 +161,7 @@ namespace AIDungeon_Extension
                 head.UpdatedCallback();
             }
             OnActionsChanged?.Invoke(this.Actions);
+            return;
         }
         public void Add(AIDungeonWrapper.Action action)
         {
@@ -255,6 +257,9 @@ namespace AIDungeon_Extension
                         }
                     }
                 }
+
+                OnActionsChanged?.Invoke(this.Actions);
+                return;
             }
             else
             {
@@ -266,7 +271,8 @@ namespace AIDungeon_Extension
                         head.InnerActions.Remove(innerAction);
                         head.UpdatedCallback();
 
-                        break;
+                        OnActionsChanged?.Invoke(this.Actions);
+                        return;
                     }
                 }
             }
@@ -278,6 +284,8 @@ namespace AIDungeon_Extension
             {
                 target.Action = action;
                 target.UpdatedCallback();
+
+                OnActionsChanged?.Invoke(this.Actions);
                 return;
             }
             else
@@ -293,11 +301,15 @@ namespace AIDungeon_Extension
                         head.UpdatedCallback();
 
                         finded = true;
-                        break;
+
                     }
                 }
-
-                if (!finded)
+                if(finded)
+                {
+                    OnActionsChanged?.Invoke(this.Actions);
+                    return;
+                }
+                else
                 {
                     //Cannot find action. do add.
                     Add(action);

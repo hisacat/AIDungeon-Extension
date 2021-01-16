@@ -10,26 +10,11 @@ namespace AIDungeon_Extension
 {
     public class Settings
     {
-        private static Settings _instance = null;
-        private static Settings Instance { get { if (_instance == null) _instance = new Settings(); return _instance; } }
+        private static Settings Instance { get; set; }
 
         private IniFile ini = null;
         private string iniPath = string.Empty;
 
-        private bool showOriginalTexts = false;
-        public static bool ShowOriginalTexts
-        {
-            get
-            {
-                return Instance.showOriginalTexts;
-            }
-            set
-            {
-                Instance.showOriginalTexts = value;
-                Instance.ini["Game"]["showOriginalTexts"] = value;
-                Instance.ini.Save(Instance.iniPath);
-            }
-        }
         private string font = string.Empty;
         public static string Font
         {
@@ -59,20 +44,56 @@ namespace AIDungeon_Extension
             }
         }
 
+        private bool showOriginalTexts = true;
+        public static bool ShowOriginalTexts
+        {
+            get
+            {
+                return Instance.showOriginalTexts;
+            }
+            set
+            {
+                Instance.showOriginalTexts = value;
+                Instance.ini["Option"]["showOriginalTexts"] = value;
+                Instance.ini.Save(Instance.iniPath);
+            }
+        }
+        private bool detachNewlineTexts = true;
+        public static bool DetachNewlineTexts
+        {
+            get
+            {
+                return Instance.detachNewlineTexts;
+            }
+            set
+            {
+                Instance.detachNewlineTexts = value;
+                Instance.ini["Option"]["detachNewlineTexts"] = value;
+                Instance.ini.Save(Instance.iniPath);
+            }
+        }
+
         private Settings()
         {
             this.ini = new IniFile();
             this.iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Settings.ini");
+        }
+        public static void Init()
+        {
+            Instance = new Settings();
 
-            if (!System.IO.File.Exists(iniPath))
+            if (!System.IO.File.Exists(Instance.iniPath))
             {
                 //Create and initialize new settings.ini
-                Font = string.Empty;
-                BGColor = ((SolidColorBrush)Application.Current.Resources["AID_Black"]).Color;
-                ini.Save(iniPath);
-            }else
+                Font = Instance.font;
+                BGColor = Instance.bgColor;
+                ShowOriginalTexts = Instance.showOriginalTexts;
+                DetachNewlineTexts = Instance.detachNewlineTexts;
+                Instance.ini.Save(Instance.iniPath);
+            }
+            else
             {
-                ini.Load(iniPath);
+                Instance.ini.Load(Instance.iniPath);
             }
         }
     }
