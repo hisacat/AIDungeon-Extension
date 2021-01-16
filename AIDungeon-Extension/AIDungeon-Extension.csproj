@@ -79,6 +79,10 @@
     <Compile Include="LoadingIndicatorControl.xaml.cs">
       <DependentUpon>LoadingIndicatorControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="MenuGraphicControl.xaml.cs">
+      <DependentUpon>MenuGraphicControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Translator.cs" />
     <Compile Include="WebBrowserTranslator.cs" />
     <Page Include="LoadingIndicatorControl.xaml">
@@ -98,6 +102,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MenuGraphicControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\AIDungeon.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

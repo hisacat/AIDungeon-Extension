@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AIDungeon_Extension"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="AIDungeon Extension" Height="450" Width="800">
 
     <Window.CommandBindings>
         <CommandBinding Command="local:MainWindow.Reset" Executed="CommandBinding_Executed" />
@@ -40,7 +40,7 @@
                 </StatusBarItem>
             </StatusBar>
 
-            <Grid DockPanel.Dock="Right" Width="200" Margin="5,5,5,5">
+            <Grid DockPanel.Dock="Right" Width="200" Margin="10,5,10,5" Visibility="{Binding SideMenuVisibility}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="*"/>
@@ -62,9 +62,19 @@
                                 <TextBlock Text=" Submit" Foreground="White"/>
                                 <TextBox Text="" Height="18" Margin="70,0,0,0"/>
                             </Grid>
-                            <Control Height="10"/>
+
+                            <Control Height="20"/>
+                            <TextBlock Text="Design" Foreground="White"/>
+                            <Control Height="5"/>
                             <Button Click="ChangeFontButton_Click">
                                 <TextBlock Text="Change font"/>
+                            </Button>
+                            
+                            <Control Height="20"/>
+                            <TextBlock Text="Hooker" Foreground="White"/>
+                            <Control Height="5"/>
+                            <Button Click="ChangeFontButton_Click">
+                                <TextBlock Text="Reset"/>
                             </Button>
                         </StackPanel>
                     </ScrollViewer>
@@ -83,6 +93,12 @@
                              FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto"
                              Background="Transparent" Foreground="#FFE0E0E0" BorderThickness="2" BorderBrush="#FF3B3B3B" Text="Actions here"/>
+
+                    <Button VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10" Visibility="{Binding SideMenuButtonVisibility}"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Background="Transparent" Click="SideMenuButton_Click">
+                        <local:MenuGraphicControl/>
+                    </Button>
+
                 </Grid>
                 <!--Contents Input-->
                 <Grid Grid.Row="1" MinHeight="40" MaxHeight="150">
@@ -114,7 +130,7 @@
                                    FontSize="20"/>
                     </Grid>
                 </Grid>
-                
+
                 <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
             </Grid>
         </DockPanel>

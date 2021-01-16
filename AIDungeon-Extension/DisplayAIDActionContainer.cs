@@ -9,8 +9,8 @@ namespace AIDungeon_Extension
 {
     class DisplayAIDActionContainer
     {
-        bool forceNewline = false;
-        bool doTranslate = false;
+        bool forceNewline = true;
+        bool doTranslate = true;
 
         public class DisplayAIDAction : IComparer<DisplayAIDAction>, IComparable<DisplayAIDAction>
         {
@@ -23,6 +23,17 @@ namespace AIDungeon_Extension
             public string Text { get; private set; }
             public string Translated { get; private set; }
 
+            public enum TranslateStatusType : int
+            {
+                Abort = -2,
+                Failed = -1,
+                None = 0,
+                Working = 1,
+                Success = 2,
+            }
+            public TranslateStatusType TranslateStatus { get; private set; }
+            public string TranslateFailedReason { get; private set; }
+
             public DisplayAIDAction(DisplayAIDActionContainer container, AIDungeonWrapper.Action action)
             {
                 this.Action = action;
@@ -30,6 +41,7 @@ namespace AIDungeon_Extension
 
                 this.container = container;
                 this.translateWork = null;
+                this.TranslateStatus = TranslateStatusType.None;
             }
             public void UpdatedCallback()
             {
@@ -39,22 +51,39 @@ namespace AIDungeon_Extension
                 foreach (var action in this.InnerActions)
                     this.Text += action.text;
 
-                //Translate.
+                if (container.forceNewline && StartsWithNewLine(this.Action.text))
+                {
+                    if (this.Text.StartsWith("\n"))
+                        this.Text.Remove(0, 1);
+                    else if (this.Text.StartsWith("\r\n"))
+                        this.Text.Remove(0, 2);
+                }
+
                 if (translateWork != null)
                 {
                     translateWork.Abort();
                     translateWork = null;
                 }
 
-                translateWork = container.translator.Translate(this.Text, "en", "ko", (r) => this.Translated = r,
+                //Translate.
+                if (container.doTranslate)
+                {
+                    this.TranslateStatus = TranslateStatusType.Working;
+                    translateWork = container.translator.Translate(this.Text, "en", "ko", (r) =>
+                    {
+                        this.Translated = r;
+                        this.TranslateStatus = TranslateStatusType.Success;
+                    },
                     failed: (reason) =>
                     {
-                        this.Translated = string.Format("[Error: Translate failed] {0}", reason);
+                        this.TranslateFailedReason = reason;
+                        this.TranslateStatus = TranslateStatusType.Failed;
                     },
                     finished: () =>
                     {
                         container.TranslatedCallback(this);
                     });
+                }
             }
             public void Dispose()
             {
@@ -170,7 +199,8 @@ namespace AIDungeon_Extension
                         }
                         this.Actions.Remove(target); //Remove temp action
                     }
-                }else
+                }
+                else
                 {
                     this.Actions.Add(target);
                     this.Actions.Sort();
@@ -275,7 +305,7 @@ namespace AIDungeon_Extension
             }
         }
 
-        private bool StartsWithNewLine(string str)
+        private static bool StartsWithNewLine(string str)
         {
             return str.StartsWith("\r\n") || str.StartsWith("\n");
         }

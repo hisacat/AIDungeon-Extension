@@ -21,115 +21,9 @@ using AIDungeon_Extension.Core;
 
 namespace AIDungeon_Extension
 {
-    public class MainWindowViewModel : INotifyPropertyChanged
-    {
-        private double fontSize;
-        public double FontSize
-        {
-            get { return this.fontSize; }
-            set
-            {
-                this.fontSize = value;
-                OnPropertyChanged("fontSize");
-            }
-        }
-
-        private FontFamily fontFamily;
-        public FontFamily FontFamily
-        {
-            get { return this.fontFamily; }
-            set
-            {
-                this.fontFamily = value;
-                OnPropertyChanged("fontFamily");
-            }
-        }
-        private FontWeight fontWeight;
-        public FontWeight FontWeight
-        {
-            get { return this.fontWeight; }
-            set
-            {
-                this.fontWeight = value;
-                OnPropertyChanged("fontWeight");
-            }
-        }
-        private FontStyle fontStyle;
-        public FontStyle FontStyle
-        {
-            get { return this.fontStyle; }
-            set
-            {
-                this.fontStyle = value;
-                OnPropertyChanged("fontStyle");
-            }
-        }
-        private TextDecorationCollection textDecorations;
-        public TextDecorationCollection TextDecorations
-        {
-            get { return this.textDecorations; }
-            set
-            {
-                this.textDecorations = value;
-                OnPropertyChanged("textDecorationCollection");
-            }
-        }
-
-
-        private Visibility loadingVisibility = Visibility.Hidden;
-        public Visibility LoadingVisibility
-        {
-            get { return this.loadingVisibility; }
-            set
-            {
-                this.loadingVisibility = value;
-                OnPropertyChanged("loadingVisibility");
-            }
-        }
-
-        private Visibility translateLoadingVisibility = Visibility.Hidden;
-        public Visibility TranslateLoadingVisibility
-        {
-            get { return this.translateLoadingVisibility; }
-            set
-            {
-                this.translateLoadingVisibility = value;
-                OnPropertyChanged("translateLoadingVisibility");
-            }
-        }
-        private Visibility inputLoadingVisibility = Visibility.Hidden;
-        public Visibility InputLoadingVisibility
-        {
-            get { return this.inputLoadingVisibility; }
-            set
-            {
-                this.inputLoadingVisibility = value;
-                OnPropertyChanged("inputLoadingVisibility");
-            }
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null) { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); }
-        }
-
-        private string statusText;
-        public string StatusText
-        {
-            get { return this.statusText; }
-            set
-            {
-                this.statusText = value;
-                OnPropertyChanged("statusText");
-            }
-        }
-    }
-
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel viewModel = null;
+        private MainWindowViewModel vm = null;
         public static readonly RoutedUICommand Reset = new RoutedUICommand("Reset", "Reset", typeof(MainWindow));
         private const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
 
@@ -139,13 +33,8 @@ namespace AIDungeon_Extension
         private DisplayAIDActionContainer actionContainer = null;
 
         private Translator translator = null;
-        //private LiveTranslator inputTextTranslator = null;
-        //private WebBrowserTranslator webBrowserTranslator = null;
 
         private string currentAdventureId = string.Empty;
-
-        private System.Threading.Thread updateThread = null;
-
         public enum WriteMode : int
         {
             Say = 0,
@@ -157,21 +46,18 @@ namespace AIDungeon_Extension
         public MainWindow()
         {
             InitializeComponent();
-            this.viewModel = new MainWindowViewModel();
-            this.DataContext = this.viewModel;
+            this.vm = new MainWindowViewModel();
+            this.DataContext = this.vm;
 
             this.actionsTextBox.Text = string.Empty;
-            this.viewModel.StatusText = DefaultStatusText;
+            this.vm.StatusText = DefaultStatusText;
 
-            this.viewModel.LoadingVisibility = Visibility.Hidden;
-            this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
-            this.viewModel.InputLoadingVisibility = Visibility.Hidden;
+            this.vm.LoadingVisibility = Visibility.Hidden;
+            this.vm.TranslateLoadingVisibility = Visibility.Hidden;
+            this.vm.InputLoadingVisibility = Visibility.Hidden;
 
             //---
-            UpdateMode(WriteMode.Say);
-
-            updateThread = new System.Threading.Thread(Update);
-            updateThread.Start();
+            UpdateWriteMode(WriteMode.Say);
 
             translator = new Translator();
             translator.Run();
@@ -209,12 +95,31 @@ namespace AIDungeon_Extension
                 foreach (var action in actions)
                 {
                     this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
-                    //this.actionsTextBox.Text += action.Translated + System.Environment.NewLine;
+
+                    switch (action.TranslateStatus)
+                    {
+                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Abort:
+                            this.actionsTextBox.Text += "[번역 취소됨]" + System.Environment.NewLine;
+                            break;
+                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Failed:
+                            this.actionsTextBox.Text += "[번역 실패!]:" + action.TranslateFailedReason;
+                            break;
+                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Success:
+                            this.actionsTextBox.Text += action.Translated + System.Environment.NewLine;
+                            break;
+                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Working:
+                            this.actionsTextBox.Text += "[번역중...]" + System.Environment.NewLine;
+                            break;
+                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.None:
+                            this.actionsTextBox.Text += "[번역 준비중]" + System.Environment.NewLine;
+                            break;
+                    }
                 }
                 this.actionsTextBox.ScrollToEnd();
             });
         }
 
+        #region AIDungeonHooker callbacks
         private void OnScenario(AIDungeonWrapper.Scenario scenario)
         {
         }
@@ -241,7 +146,6 @@ namespace AIDungeon_Extension
             }
             actionContainer.AddRange(adventure.actionWindow);
         }
-
         private void OnActionsUndone(List<AIDungeonWrapper.Action> actions)
         {
             foreach (var action in actions)
@@ -253,203 +157,21 @@ namespace AIDungeon_Extension
         }
         private void OnActionUpdated(AIDungeonWrapper.Action action)
         {
-            this.actionContainer.Edited(action);
+            if (string.IsNullOrEmpty(action.deletedAt))
+            {
+                this.actionContainer.Edited(action);
+            }
+            else
+            {
+                this.actionContainer.Deleted(action);
+            }
         }
         private void OnActionRestored(AIDungeonWrapper.Action action)
         {
             this.actionContainer.Deleted(action);
             this.actionContainer.Add(action);
         }
-
-        /*
-        private void UpdateActionFromAdventure(AIDungeonWrapper.Adventure adventure)
-        {
-            lock (lockObj)
-            {
-                if (currentAdventureId != adventure.id)
-                {
-                    currentAdventureId = adventure.id;
-                    currentActions.Clear();
-                }
-
-                if (adventure.actionWindow == null)
-                    return;
-
-                adventure.actionWindow.Sort();
-                int count = adventure.actionWindow.Count;
-                for (int i = 0; i < count; i++)
-                {
-                    var action = adventure.actionWindow[i];
-                    DisplayAIDAction displayAction = new DisplayAIDAction(action);
-                    //displayAction.Updated = true;
-                    if (currentActions.Exists(x => x.Id == action.id))
-                    {
-                        var originAction = currentActions.First(x => x.Id == action.id);
-                        if (originAction.Action.text != action.text)
-                        {
-                            currentActions.RemoveAll(x => x.Id == action.id);
-                            currentActions.Add(displayAction);
-                        }
-                    }
-                    else
-                    {
-                        currentActions.Add(displayAction);
-                    }
-
-                    //Attach to head If next actions are continue action.
-                    {
-                        bool continueActionAdded = false;
-                        for (int j = i + 1; j < count; j++)
-                        {
-                            var continueAction = adventure.actionWindow[j];
-
-                            if (continueAction.type == "continue")
-                            {
-                                displayAction.ContinueActions.RemoveAll(x => x.id == continueAction.id);
-                                displayAction.ContinueActions.Add(continueAction);
-                                continueActionAdded = true;
-
-                                i = j;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        if (continueActionAdded)
-                        {
-                            displayAction.ContinueActions.Sort();
-                            //displayAction.Updated = true;
-                        }
-
-                        displayAction.Update(this, translator);
-                    }
-                }
-
-                //this.actionUpdated = true;
-            }
-        }
-        private void UpdateAction_Removed(AIDungeonWrapper.Action action)
-        {
-            var origin = this.currentActions.FirstOrDefault(x => x.Id == action.id);
-            if (origin != null)
-            {
-                var continueActions = origin.ContinueActions;
-                this.currentActions.Remove(origin);
-
-                //Create new HEAD if inner continueAction exist.
-                if (continueActions.Count > 0)
-                {
-                    var head = new DisplayAIDAction(continueActions[0]);
-                    //head.Updated = true;
-
-                    continueActions.RemoveAt(0);
-
-                    //Add remains continueActions to HEAD.
-                    if (continueActions.Count > 0)
-                    {
-                        foreach (var continueAction in continueActions)
-                            head.ContinueActions.Add(continueAction);
-                        head.ContinueActions.Sort();
-
-                        //head.Updated = true;
-                        head.Update(this, translator);
-                    }
-
-                    this.currentActions.Add(head);
-                    this.currentActions.Sort();
-                }
-            }
-            else
-            {
-                int count = this.currentActions.Count;
-                for (int i = 0; i < count; i++)
-                {
-                    var head = this.currentActions[i];
-                    if (head.ContinueActions.Exists(x => x.id == action.id))
-                    {
-                        head.ContinueActions.RemoveAll(x => x.id == action.id);
-                        head.ContinueActions.Sort();
-
-                        //head.Updated = true;
-                        head.Update(this, translator);
-                        break;
-                    }
-                }
-            }
-
-            this.actionUpdated = true;
-        }
-        private void UpdateAction_Added(AIDungeonWrapper.Action action)
-        {
-            //Add action at last always
-            this.currentActions.RemoveAll(x => x.Id == action.id);
-
-            if (this.currentActions.Count > 0 && action.type == "continue")
-            {
-                var head = this.currentActions[this.currentActions.Count - 1];
-                head.ContinueActions.Add(action);
-
-                //head.Updated = true;
-                head.Update(this, translator);
-            }
-            else
-            {
-                var head = new DisplayAIDAction(action);
-                this.currentActions.Add(head);
-                this.currentActions.Sort();
-
-                //head.Updated = true;
-                head.Update(this, translator);
-            }
-
-            this.actionUpdated = true;
-        }
-        private void UpdateAction_Edited(AIDungeonWrapper.Action action)
-        {
-            var origin = this.currentActions.FirstOrDefault(x => x.Id == action.id);
-            if (origin != null)
-            {
-                var continueActions = origin.ContinueActions;
-                this.currentActions.Remove(origin);
-                var newAction = new DisplayAIDAction(action);
-                newAction.ContinueActions = continueActions;
-                this.currentActions.Add(newAction);
-
-                //newAction.Updated = true;
-                newAction.Update(this, translator);
-                this.currentActions.Sort();
-            }
-            else
-            {
-                int count = this.currentActions.Count;
-                for (int i = 0; i < count; i++)
-                {
-                    var head = this.currentActions[i];
-                    if (head.ContinueActions.Exists(x => x.id == action.id))
-                    {
-                        head.ContinueActions.RemoveAll(x => x.id == action.id);
-                        head.ContinueActions.Add(action);
-                        head.ContinueActions.Sort();
-
-                        //head.Updated = true;
-                        head.Update(this, translator);
-                        break;
-                    }
-                }
-            }
-
-            this.actionUpdated = true;
-        }
-        */
-
-        private void Update()
-        {
-            while (true)
-            {
-                System.Threading.Thread.Sleep(1);
-            }
-        }
+        #endregion
 
         protected override void OnClosed(EventArgs e)
         {
@@ -462,11 +184,6 @@ namespace AIDungeon_Extension
             {
                 translator.Dispose();
                 translator = null;
-            }
-            if (updateThread != null)
-            {
-                updateThread.Abort();
-                updateThread = null;
             }
         }
 
@@ -486,7 +203,7 @@ namespace AIDungeon_Extension
          * ---World info
          */
 
-        public void UpdateMode(WriteMode mode)
+        public void UpdateWriteMode(WriteMode mode)
         {
             this.writeMode = mode;
             switch (mode)
@@ -536,7 +253,7 @@ namespace AIDungeon_Extension
                             e.Handled = true;
 
                             inputTextBox.IsReadOnly = true;
-                            this.viewModel.TranslateLoadingVisibility = Visibility.Visible;
+                            this.vm.TranslateLoadingVisibility = Visibility.Visible;
                             SetStatusText("Translating...");
                             if (translator != null)
                             {
@@ -560,7 +277,7 @@ namespace AIDungeon_Extension
                                 {
                                     Dispatcher.Invoke(() =>
                                     {
-                                        this.viewModel.TranslateLoadingVisibility = Visibility.Hidden;
+                                        this.vm.TranslateLoadingVisibility = Visibility.Hidden;
                                         inputTextBox.IsReadOnly = false;
                                     });
                                 });
@@ -580,19 +297,19 @@ namespace AIDungeon_Extension
                     {
                         e.Handled = true;
                         inputTextBox.Text = string.Empty;
-                        UpdateMode(WriteMode.Say);
+                        UpdateWriteMode(WriteMode.Say);
                     }
                     else if (inputTextBox.Text.Equals("/do", StringComparison.OrdinalIgnoreCase))
                     {
                         e.Handled = true;
                         inputTextBox.Text = string.Empty;
-                        UpdateMode(WriteMode.Do);
+                        UpdateWriteMode(WriteMode.Do);
                     }
                     else if (inputTextBox.Text.Equals("/story", StringComparison.OrdinalIgnoreCase))
                     {
                         e.Handled = true;
                         inputTextBox.Text = string.Empty;
-                        UpdateMode(WriteMode.Story);
+                        UpdateWriteMode(WriteMode.Story);
                     }
                 }
             }
@@ -600,7 +317,7 @@ namespace AIDungeon_Extension
 
         public void SetStatusText(string text)
         {
-            this.viewModel.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
+            this.vm.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
         }
 
         private void ChangeFontButton_Click(object sender, RoutedEventArgs e)
@@ -621,11 +338,11 @@ namespace AIDungeon_Extension
                 if (fd.Font.Strikeout) tdc.Add(TextDecorations.Strikethrough);
                 var textDecorations = tdc;
 
-                this.viewModel.FontFamily = fontFamily;
-                this.viewModel.FontSize = fontSize;
-                this.viewModel.FontWeight = fontWeight;
-                this.viewModel.FontStyle = fontStyle;
-                this.viewModel.TextDecorations = textDecorations;
+                this.vm.FontFamily = fontFamily;
+                this.vm.FontSize = fontSize;
+                this.vm.FontWeight = fontWeight;
+                this.vm.FontStyle = fontStyle;
+                this.vm.TextDecorations = textDecorations;
             }
         }
 
@@ -662,12 +379,23 @@ namespace AIDungeon_Extension
 
         private void MenuItem_RestartHooker(object sender, RoutedEventArgs e)
         {
-            //Do
+
         }
 
         private void StackPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
 
+        }
+
+        private void SideMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.vm.SideMenuVisibility = Visibility.Visible;
+            this.vm.SideMenuButtonVisibility = Visibility.Collapsed;
+        }
+        private void SideMenuCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.vm.SideMenuVisibility = Visibility.Collapsed;
+            this.vm.SideMenuButtonVisibility = Visibility.Visible;
         }
     }
 }

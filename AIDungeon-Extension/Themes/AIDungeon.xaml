@@ -11,23 +11,4 @@
     <Style TargetType="Window">
         <Setter Property="Background" Value="{StaticResource AIDBlack}"/>
     </Style>
-    
-    
-    <Style TargetType="{x:Type GridViewColumnHeader}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
-                    <Border BorderThickness="0,0,0,1" BorderBrush="{StaticResource AIDWhite}" Background="Transparent">
-                        <TextBlock x:Name="ContentHeader" Text="{TemplateBinding Content}" Padding="5,5,5,0" Width="{TemplateBinding Width}" TextAlignment="Center" />
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="OverridesDefaultStyle" Value="True" />
-        <Setter Property="Foreground" Value="{StaticResource AIDWhite}" />
-    </Style>
-
-    <Style TargetType="{x:Type GridViewColumn}">
-        <Setter Property="DocumentViewerBase.Foreground" Value="{StaticResource AIDWhite}"/>
-    </Style>
 </ResourceDictionary>
