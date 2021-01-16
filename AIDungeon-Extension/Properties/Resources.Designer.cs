@@ -88,6 +88,27 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Error과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string MessageBox_ChromeDriverMissing_Caption {
+            get {
+                return ResourceManager.GetString("MessageBox/ChromeDriverMissing/Caption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cannot find chromedriver
+        ///Open download webpage?
+        ///
+        ///Current chrome version: {0}과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string MessageBox_ChromeDriverMissing_Text {
+            get {
+                return ResourceManager.GetString("MessageBox/ChromeDriverMissing/Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Background과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_BGColor {

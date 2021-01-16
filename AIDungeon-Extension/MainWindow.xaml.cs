@@ -53,6 +53,42 @@ namespace AIDungeon_Extension
         {
             InitializeComponent();
 
+            var chromeDriverPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "chromedriver.exe");
+            if (!System.IO.File.Exists(chromeDriverPath))
+            {
+                var chromeVersion = string.Empty;
+                {
+                    const string suffix = @"Google\Chrome\Application\chrome.exe";
+                    var prefixes = new List<string> { Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) };
+                    var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                    var programFilesx86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+                    if (programFilesx86 != programFiles)
+                    {
+                        prefixes.Add(programFiles);
+                    }
+                    else
+                    {
+                        var programFilesDirFromReg = Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion", "ProgramW6432Dir", null) as string;
+                        if (programFilesDirFromReg != null) prefixes.Add(programFilesDirFromReg);
+                    }
+
+                    prefixes.Add(programFilesx86);
+                    var path = prefixes.Distinct().Select(prefix => System.IO.Path.Combine(prefix, suffix)).FirstOrDefault(File.Exists);
+
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        chromeVersion = FileVersionInfo.GetVersionInfo(path.ToString()).FileVersion;
+                    }
+                }
+
+                if (MessageBox.Show(string.Format(Properties.Resources.MessageBox_ChromeDriverMissing_Text, chromeVersion),
+                    Properties.Resources.MessageBox_ChromeDriverMissing_Caption, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    OpenURL(@"https://chromedriver.chromium.org/downloads");
+                }
+                System.Environment.Exit(-1);
+            }
+
             //Settings.BGColor = Color.FromArgb(1, 1, 1, 1);
             Settings.Init();
 
@@ -431,26 +467,16 @@ namespace AIDungeon_Extension
 
         private void Help_CheckForUpdate(object sender, RoutedEventArgs e)
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = @"https://github.com/hisacat/AIDungeon-Extension",
-                UseShellExecute = true
-            };
-            Process.Start(psi);
+            OpenURL(@"https://github.com/hisacat/AIDungeon-Extension");
         }
         private void Help_Developer(object sender, RoutedEventArgs e)
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = @"https://twitter.com/ahisacat",
-                UseShellExecute = true
-            };
-            Process.Start(psi);
+            OpenURL(@"https://twitter.com/ahisacat");
         }
 
         private void UpdateTranslateDictionary(object sender, RoutedEventArgs e)
         {
-            if(this.translator != null)
+            if (this.translator != null)
             {
                 this.vm.LoadingVisibility = Visibility.Visible;
                 this.vm.LoadingText = Properties.Resources.LoadingText_UpdateDictionary;
@@ -557,6 +583,15 @@ namespace AIDungeon_Extension
                     Reset.Execute(null, null);
                     break;
             }
+        }
+        private void OpenURL(string url)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            };
+            Process.Start(psi);
         }
         protected override void OnClosed(EventArgs e)
         {
