@@ -22,17 +22,23 @@ namespace AIDungeon_Extension.Core
             public const string Login_PasswordInput = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[4]/input";
             public const string Login_Button = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[5]/div/div";
 
+            //-----Will managed from txt / options.
+
             //In default case.
             public const string InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/textarea";
             public const string SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/div";
 
             //In survival play.
-            public const string Survival_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[5]/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[2]/div/div/textarea";
-            public const string Survival_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[5]/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[2]/div/div/div";
+            public const string Survival_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[2]/div/div/textarea";
+            public const string Survival_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[2]/div/div/div";
 
-            //In scenario play - enter name, select options etc... (when https://play.aidungeon.io/main/scenarioPlay)
-            public const string Scenario_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[4]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/textarea";
-            public const string Scenario_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[4]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/div";
+            //In scenario play - Select options (when https://play.aidungeon.io/main/scenarioPlay)
+            public const string Scenario_Option_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/textarea";
+            public const string Scenario_Option_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/div";
+
+            //In scenario play - Answer (like input name) (when https://play.aidungeon.io/main/scenarioPlay)
+            public const string Scenario_Answer_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div[2]/div[2]/div/div/textarea";
+            public const string Scenario_Answer_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div[2]/div[2]/div/div/div";
         }
 
         private const string LogType_Performance = "performance";
@@ -136,7 +142,9 @@ namespace AIDungeon_Extension.Core
             catch (Exception e) { }
             try { return driver.FindElementByXPath(XPaths.Survival_InputTextArea); }
             catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_InputTextArea); }
+            try { return driver.FindElementByXPath(XPaths.Scenario_Option_InputTextArea); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Scenario_Answer_InputTextArea); }
             catch (Exception e) { }
             return null;
         }
@@ -146,7 +154,9 @@ namespace AIDungeon_Extension.Core
             catch (Exception e) { }
             try { return driver.FindElementByXPath(XPaths.Survival_SubmitButton); }
             catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_SubmitButton); }
+            try { return driver.FindElementByXPath(XPaths.Scenario_Option_SubmitButton); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Scenario_Answer_SubmitButton); }
             catch (Exception e) { }
             return null;
         }
