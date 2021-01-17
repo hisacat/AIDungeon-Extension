@@ -22,17 +22,17 @@ namespace AIDungeon_Extension.Core
             public const string Login_PasswordInput = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[4]/input";
             public const string Login_Button = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[5]/div/div";
 
-            //When https://play.aidungeon.io/main/scenarioPlay
-            public const string ScenarioPlay_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[4]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/textarea";
-            public const string ScenarioPlay_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[4]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/div";
+            //In default case.
+            public const string InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/textarea";
+            public const string SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/div";
 
-            //When https://play.aidungeon.io/main/play
-            public const string Play_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[5]/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/textarea";
-            public const string Play_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[5]/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/div";
+            //In survival play.
+            public const string Survival_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[5]/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[2]/div/div/textarea";
+            public const string Survival_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[5]/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[2]/div/div/div";
 
-            //When https://play.aidungeon.io/main/adventurePlay
-            public const string AdventurePlay_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/textarea";
-            public const string AdventurePlay_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/div";
+            //In scenario play - enter name, select options etc... (when https://play.aidungeon.io/main/scenarioPlay)
+            public const string Scenario_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[4]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/textarea";
+            public const string Scenario_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[4]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/div";
         }
 
         private const string LogType_Performance = "performance";
@@ -130,51 +130,53 @@ namespace AIDungeon_Extension.Core
             }
         }
 
+        private IWebElement GetInputTextArea()
+        {
+            try { return driver.FindElementByXPath(XPaths.InputTextArea); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Survival_InputTextArea); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Scenario_InputTextArea); }
+            catch (Exception e) { }
+            return null;
+        }
+        private IWebElement GetSubmitButton()
+        {
+            try { return driver.FindElementByXPath(XPaths.SubmitButton); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Survival_SubmitButton); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Scenario_SubmitButton); }
+            catch (Exception e) { }
+            return null;
+        }
+
         public bool SendText(string text)
         {
-            var inputTextAreaXPath = string.Empty;
-            var SubmitButtonXPath = string.Empty;
-
-            if (driver.Url.StartsWith("https://play.aidungeon.io/main/scenarioPlay"))
-            {
-                inputTextAreaXPath = XPaths.ScenarioPlay_InputTextArea;
-                SubmitButtonXPath = XPaths.ScenarioPlay_SubmitButton;
-            }
-            else if (driver.Url.StartsWith("https://play.aidungeon.io/main/play"))
-            {
-                inputTextAreaXPath = XPaths.Play_InputTextArea;
-                SubmitButtonXPath = XPaths.Play_SubmitButton;
-            }
-            else if (driver.Url.StartsWith("https://play.aidungeon.io/main/adventurePlay"))
-            {
-                inputTextAreaXPath = XPaths.AdventurePlay_InputTextArea;
-                SubmitButtonXPath = XPaths.AdventurePlay_SubmitButton;
-            }
-            else
-            {
-                //Unknown
-                return false;
-            }
-
             try
             {
-                driver.FindElementByXPath(inputTextAreaXPath).Clear();
+                var inputTextArea = GetInputTextArea();
+                if (inputTextArea == null) return false;
+
+                inputTextArea.Clear();
                 if (!string.IsNullOrEmpty(text))
                 {
                     text = text.Replace("\r\n", "\r");
                     var lines = text.Split('\r');
                     int lineCount = lines.Length;
 
-                    var inputTextBoxElement = driver.FindElementByXPath(inputTextAreaXPath);
                     for (int i = 0; i < lineCount; i++)
                     {
-                        inputTextBoxElement.SendKeys(lines[i]);
+                        inputTextArea.SendKeys(lines[i]);
                         if (i < lineCount - 1)
-                            inputTextBoxElement.SendKeys(Keys.Shift + Keys.Enter);
+                            inputTextArea.SendKeys(Keys.Shift + Keys.Enter);
                     }
                 }
 
-                driver.FindElementByXPath(SubmitButtonXPath).Click();
+                var submitButton = GetSubmitButton();
+                if (submitButton == null) return false;
+
+                submitButton.Click();
             }
             catch (Exception e)
             {
