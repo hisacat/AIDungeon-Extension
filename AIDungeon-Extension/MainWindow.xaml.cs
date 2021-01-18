@@ -532,7 +532,7 @@ namespace AIDungeon_Extension
 
         private void OnShownOriginTextsChanged()
         {
-            //UpdateActionText(this.actionContainer.Actions);
+            UpdateActionText(this.actionContainer.Actions);
         }
         private void OnDetachNewLineTextsChanged()
         {
