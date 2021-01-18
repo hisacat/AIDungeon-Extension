@@ -103,8 +103,8 @@ namespace AIDungeon_Extension
             this.vm.SideMenuVisibility = Visibility.Collapsed;
             this.vm.SideMenuButtonVisibility = Visibility.Visible;
 
-            return;
-            //---
+            //return;
+
             this.vm.LoadingVisibility = Visibility.Visible;
             this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
             this.vm.TranslateLoadingVisibility = Visibility.Hidden;
@@ -121,35 +121,7 @@ namespace AIDungeon_Extension
             actionContainer.OnActionsChanged += ActionContainer_OnActionsChanged;
             actionContainer.OnTranslated += ActionContainer_OnTranslated;
 
-            hooker = new AIDungeonHooker();
-            hooker.OnScenario += OnScenario;
-            hooker.OnUpdateAdventureMemory += OnUpdateAdventureMemory;
-            hooker.OnAdventure += OnAdventure;
-            hooker.OnAdventureUpdated += OnAdventureUpdated;
-            hooker.OnActionsUndone += OnActionsUndone;
-            hooker.OnActionAdded += OnActionAdded;
-            hooker.OnActionUpdated += OnActionUpdated;
-            hooker.OnActionRestored += OnActionRestored;
-
-            hooker.Run();
-
-            this.Topmost = true;
-            Task.Run(() =>
-            {
-                while (
-                translator == null || !translator.Ready ||
-                hooker == null || !hooker.Ready)
-                    Thread.Sleep(1);
-
-                this.Dispatcher.Invoke(() =>
-                {
-                    this.vm.LoadingVisibility = Visibility.Collapsed;
-                    this.Topmost = false;
-                    this.Activate();
-                });
-            });
-
-            //this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
+            StartHooker();
         }
 
         private void ActionContainer_OnActionsChanged(List<DisplayAIDActionContainer.DisplayAIDAction> actions)
@@ -165,7 +137,7 @@ namespace AIDungeon_Extension
             Dispatcher.Invoke(() =>
             {
                 this.actionsTextBox.Text = string.Empty;
-                foreach (var action in actions)
+                foreach (var action in actions.ToArray())
                 {
                     if (this.vm.ShowOriginTexts)
                         this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
@@ -192,7 +164,7 @@ namespace AIDungeon_Extension
                             break;
                     }
 
-                    if (this.vm.ShowOriginTexts)
+                    if (!this.vm.ShowOriginTexts)
                         this.actionsTextBox.Text += System.Environment.NewLine;
                 }
                 this.actionsTextBox.ScrollToEnd();
@@ -210,6 +182,9 @@ namespace AIDungeon_Extension
         }
         private void OnAdventure(AIDungeonWrapper.Adventure adventure)
         {
+            if (adventure == null)
+                return;
+
             if (this.currentAdventureId != adventure.id)
             {
                 actionContainer.Clear();
@@ -219,6 +194,9 @@ namespace AIDungeon_Extension
         }
         private void OnAdventureUpdated(AIDungeonWrapper.Adventure adventure)
         {
+            if (adventure == null)
+                return;
+
             if (this.currentAdventureId != adventure.id)
             {
                 actionContainer.Clear();
@@ -411,6 +389,33 @@ namespace AIDungeon_Extension
             this.actionsTextBox.Text = string.Empty;
             this.hooker.Refresh();
         }
+        private void StartHooker()
+        {
+            hooker = new AIDungeonHooker();
+            hooker.OnScenario += OnScenario;
+            hooker.OnUpdateAdventureMemory += OnUpdateAdventureMemory;
+            hooker.OnAdventure += OnAdventure;
+            hooker.OnAdventureUpdated += OnAdventureUpdated;
+            hooker.OnActionsUndone += OnActionsUndone;
+            hooker.OnActionAdded += OnActionAdded;
+            hooker.OnActionUpdated += OnActionUpdated;
+            hooker.OnActionRestored += OnActionRestored;
+            hooker.Run();
+
+            this.Topmost = true;
+            Task.Run(() =>
+            {
+                while (!hooker.Ready)
+                    Thread.Sleep(1);
+
+                this.Dispatcher.Invoke(() =>
+                {
+                    this.vm.LoadingVisibility = Visibility.Collapsed;
+                    this.Topmost = false;
+                    this.Activate();
+                });
+            });
+        }
         private void RestartHooker()
         {
             if (this.hooker != null)
@@ -419,8 +424,7 @@ namespace AIDungeon_Extension
                 this.hooker = null;
             }
 
-            this.hooker = new AIDungeonHooker();
-            this.hooker.Run();
+            StartHooker();
         }
         private void OpenTranslateDictionary()
         {
@@ -532,11 +536,13 @@ namespace AIDungeon_Extension
 
         private void OnShownOriginTextsChanged()
         {
-            UpdateActionText(this.actionContainer.Actions);
+            if (this.actionContainer != null)
+                UpdateActionText(this.actionContainer.Actions);
         }
         private void OnDetachNewLineTextsChanged()
         {
-            this.actionContainer.SetForceNewLine(this.vm.DetachNewlineTexts);
+            if (this.actionContainer != null)
+                this.actionContainer.SetForceNewLine(this.vm.DetachNewlineTexts);
         }
         #endregion
 

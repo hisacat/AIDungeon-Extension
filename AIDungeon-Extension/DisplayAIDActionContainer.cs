@@ -171,8 +171,15 @@ namespace AIDungeon_Extension
                 {
                     var targetAction = actions[idx];
                     if (targetAction.type != "continue") break;
-                    //In force-newline option. make new head when text started with newLine
-                    if (forceNewline && !StartsWithNewLine(targetAction.text)) break;
+
+                    //In force-newline option. make new head when parent text started with newLine
+                    if (forceNewline)
+                    {
+                        if (EndsWithNewLine(actions[idx - 1].text) ||
+                            StartsWithNewLine(actions[idx].text))
+                            break;
+                    }
+
                     head.InnerActions.RemoveAll(x => x.id == targetAction.id);
                     head.InnerActions.Add(targetAction);
 
@@ -190,43 +197,44 @@ namespace AIDungeon_Extension
             if (target == null)
             {
                 target = new DisplayAIDAction(this, action);
+                this.Actions.Add(target);
+                this.Actions.Sort();
 
                 if (target.Action.type == "continue")
                 {
+                    var actionIndex = this.Actions.IndexOf(target);
+
                     bool makeNewHead = false;
                     //In force-newline option. starts with newline action is another head.
                     if (forceNewline)
                     {
-                        if (StartsWithNewLine(target.Action.text))
-                            makeNewHead = true;
+                        if (actionIndex > 0)
+                        {
+                            if (EndsWithNewLine(this.Actions[actionIndex - 1].Action.text) ||
+                                StartsWithNewLine(this.Actions[actionIndex].Action.text))
+                                makeNewHead = true;
+                        }
                     }
 
-                    if (this.Actions.IndexOf(target) == 0) //First action is always new head.
+                    if (actionIndex == 0) //First action is always new head.
                         makeNewHead = true;
 
                     if (makeNewHead) //Make new head.
                     {
-                        this.Actions.Add(target);
-                        this.Actions.Sort();
                         target.UpdatedCallback();
                     }
                     else //Attach to parent's inner actions.
                     {
-                        this.Actions.Add(target); //Add temp action for get index with sort
-                        this.Actions.Sort();
-                        {
-                            var head = this.Actions[this.Actions.IndexOf(target) - 1]; //Parent head(-1 index)
-                            head.InnerActions.RemoveAll(x => x.id == target.Action.id);
-                            head.InnerActions.Add(target.Action);
-                            head.UpdatedCallback();
-                        }
+                        var head = this.Actions[actionIndex - 1]; //Parent head(-1 index)
+                        head.InnerActions.RemoveAll(x => x.id == target.Action.id);
+                        head.InnerActions.Add(target.Action);
+                        head.UpdatedCallback();
+
                         this.Actions.Remove(target); //Remove temp action
                     }
                 }
                 else
                 {
-                    this.Actions.Add(target);
-                    this.Actions.Sort();
                     target.UpdatedCallback();
                 }
 
@@ -254,8 +262,8 @@ namespace AIDungeon_Extension
                     if (innerActions.Count > 0)
                     {
                         //Make new head
-                        if (idx <= 0 | //If first idx is always newline.
-                            (forceNewline && StartsWithNewLine(target.Action.text)))
+                        if (idx <= 0 || //If first idx is always newline.
+                            (forceNewline && (EndsWithNewLine(this.Actions[idx - 1].Action.text) || StartsWithNewLine(this.Actions[idx].Action.text))))
                         {
                             //Newline: Make new head.
                             var head = new DisplayAIDAction(this, innerActions[0]);
@@ -325,7 +333,7 @@ namespace AIDungeon_Extension
 
                     }
                 }
-                if(finded)
+                if (finded)
                 {
                     OnActionsChanged?.Invoke(this.Actions);
                     return;
@@ -341,6 +349,10 @@ namespace AIDungeon_Extension
         private static bool StartsWithNewLine(string str)
         {
             return str.StartsWith("\r\n") || str.StartsWith("\n");
+        }
+        private static bool EndsWithNewLine(string str)
+        {
+            return str.EndsWith("\r\n") || str.EndsWith("\n");
         }
 
         private void TranslatedCallback(DisplayAIDAction action)
