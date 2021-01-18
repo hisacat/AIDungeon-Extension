@@ -14,6 +14,9 @@ namespace AIDungeon_Extension
 {
     public class Translator
     {
+        public const int TimeOut = 10;
+        public const string TranslateResultXPath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/c-wiz[2]/div[5]/div/div[3]";
+
         ChromeDriver driver = null;
         Thread workThread = null;
         List<TranslateWorker> works = null;
@@ -137,8 +140,8 @@ namespace AIDungeon_Extension
                 {
                     if (works.Count > 0)
                     {
-                        currentWork = works[0];
-                        works.RemoveAt(0);
+                        currentWork = works[works.Count - 1];
+                        works.RemoveAt(works.Count - 1);
 
                         if (currentWork.isAborted)
                             continue;
@@ -182,11 +185,15 @@ namespace AIDungeon_Extension
                         driver.Navigate().GoToUrl(url);
                         IWebElement translatedElement = null;
 
+                        var startedAt = DateTime.Now;
                         do
                         {
+                            if ((DateTime.Now - startedAt).TotalSeconds > TimeOut)
+                                throw new Exception("Timeout");
+
                             try
                             {
-                                translatedElement = driver.FindElementByXPath("//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/c-wiz[2]/div[5]/div/div[3]");
+                                translatedElement = driver.FindElementByXPath(TranslateResultXPath);
                             }
                             catch (Exception e) { } //Needs timeout
                         } while (translatedElement == null);

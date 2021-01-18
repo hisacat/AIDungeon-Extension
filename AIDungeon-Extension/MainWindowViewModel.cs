@@ -184,7 +184,7 @@ namespace AIDungeon_Extension
             if (PropertyChanged != null) { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); }
         }
 
-        private string statusText = "status";
+        private string statusText = MainWindow.DefaultStatusText;
         public string StatusText
         {
             get { return this.statusText; }
@@ -194,7 +194,7 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("statusText");
             }
         }
-        private string versionText = "version";
+        private string versionText = MainWindow.VersionStr;
         public string VersionText
         {
             get { return this.versionText; }

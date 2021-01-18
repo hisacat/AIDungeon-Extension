@@ -183,6 +183,9 @@ Current chrome version: {0}</value>
   <data name="SideMenu/TextColor" xml:space="preserve">
     <value>Text</value>
   </data>
+  <data name="SideMenu/Translate" xml:space="preserve">
+    <value>Translate</value>
+  </data>
   <data name="SideMenu/UpdateDictionary" xml:space="preserve">
     <value>Update Dictionary</value>
   </data>

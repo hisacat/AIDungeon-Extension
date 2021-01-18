@@ -7,7 +7,8 @@
         xmlns:prop="clr-namespace:AIDungeon_Extension.Properties"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="AIDungeon Extension" Height="600" Width="800" MinHeight="200" MinWidth="400">
+        KeyDown="Window_KeyDown"
+        Title="AIDungeon Extension" Height="700" Width="800" MinHeight="200" MinWidth="400">
 
     <Window.CommandBindings>
         <CommandBinding Command="local:MainWindow.Reset" Executed="CommandBinding_Executed" />
@@ -87,14 +88,14 @@
                     <MenuItem  Header="{x:Static prop:Resources.WindowMenu_File_Exit}" Command="local:MainWindow.Exit" InputGestureText="Alt+F4"/>
                 </MenuItem>
                 <MenuItem Header="{x:Static prop:Resources.WindowMenu_Settings}">
-                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_OpenSettings}" Click="OpenSideMenu"/>
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_OpenSettings}" Click="OpenSideMenuButton_Click"/>
                     <MenuItem  Header="{x:Static prop:Resources.WindowMenu_Reset}" Command="local:MainWindow.Reset" InputGestureText="Ctrl+R"/>
                     <!--<Separator/>-->
-                    <MenuItem  Header="{x:Static prop:Resources.WindowMenu_RestartHooker}" Click="RestartHooker" Visibility="Collapsed"/>
+                    <MenuItem  Header="{x:Static prop:Resources.WindowMenu_RestartHooker}" Click="SideMenu_RestartHookerButton_Click" Visibility="Collapsed"/>
                 </MenuItem>
                 <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help}">
-                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help_CheckUpdate}" Click="Help_CheckForUpdate"/>
-                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Developer}" Click="Help_Developer"/>
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help_CheckUpdate}" Click="Help_CheckForUpdateButton_Click"/>
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Developer}" Click="Help_DeveloperButton_Click"/>
                 </MenuItem>
             </Menu>
 
@@ -126,7 +127,7 @@
                                 <ColumnDefinition Width="25"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Settings" FontWeight="Bold" FontSize="18" HorizontalAlignment="Left"/>
-                            <local:BackButtonControl Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25" Click="CloseSideMenu"/>
+                            <local:BackButtonControl Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25" Click="CloseSideMenuButton_Click"/>
                         </Grid>
                     </Grid>
                     <!--Contents-->
@@ -135,7 +136,7 @@
                             <StackPanel Margin="10">
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_Display}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <Button Click="ChangeFont" Style="{StaticResource RoundCorner}">
+                                <Button Click="SideMenu_ChangeFontButton_Click" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_Display_ChangeFont}" Margin="3"/>
                                 </Button>
 
@@ -180,21 +181,21 @@
                                         <xctk:ColorPicker x:Name="inputTextColorPicker" Grid.Column="1" ColorMode="ColorCanvas" SelectedColorChanged="inputTextColorPicker_SelectedColorChanged"/>
                                     </Grid>
                                     <Control Height="5"/>
-                                    <Button Style="{StaticResource RoundCorner}">
+                                    <Button Style="{StaticResource RoundCorner}" Click="SideMenu_ColorResetToDefaultButton_Click">
                                         <TextBlock Text="{x:Static prop:Resources.SideMenu_ResetToDefault}" Margin="3"/>
                                     </Button>
                                 </StackPanel>
 
                                 <!--Background images-->
                                 <StackPanel Orientation="Vertical">
-                                    <Control Height="5"/>
+                                    <Control Height="10"/>
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_BGImage}" FontWeight="Bold"/>
                                     <Control Height="5"/>
-                                    <Button Style="{StaticResource RoundCorner}" Click="SetBGImageButton_Click">
+                                    <Button Style="{StaticResource RoundCorner}" Click="SideMenu_SetBGImageButton_Click">
                                         <TextBlock Text="{x:Static prop:Resources.SideMenu_SetBGImage}" Margin="3"/>
                                     </Button>
                                     <Control Height="5"/>
-                                    <Button Style="{StaticResource RoundCorner}" Click="ClearBGImageButton_Click">
+                                    <Button Style="{StaticResource RoundCorner}" Click="SideMenu_ClearBGImageButton_Click">
                                         <TextBlock Text="{x:Static prop:Resources.SideMenu_ClearBGImage}" Margin="3"/>
                                     </Button>
                                 </StackPanel>
@@ -206,18 +207,25 @@
                                 <Control Height="5"/>
                                 <CheckBox Tag="DetachNewlineTexts" IsChecked="{Binding DetachNewlineTexts}" Content="{x:Static prop:Resources.SideMenu_DetachNewlineTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
 
+                                <Control Height="10"/>
+                                <TextBlock Text="{x:Static prop:Resources.SideMenu_Translate}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <Button Click="UpdateTranslateDictionary" Style="{StaticResource RoundCorner}">
+                                <Button Click="SideMenu_OpenDictionaryButton_Click" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_UpdateDictionary}" Margin="3"/>
                                 </Button>
+                                <Control Height="5"/>
+                                <Button Click="SideMenu_UpdateTranslateDictionaryButton_Click" Style="{StaticResource RoundCorner}">
+                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_UpdateDictionary}" Margin="3"/>
+                                </Button>
+                                
                                 <Control Height="10"/>
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_ControlPanel}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <Button Command="local:MainWindow.Reset" Style="{StaticResource RoundCorner}">
+                                <Button Click="SideMenu_ResetHookerButton_Click" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_Reset}" Margin="3"/>
                                 </Button>
                                 <Control Height="5"/>
-                                <Button Click="RestartHooker" Style="{StaticResource RoundCorner}">
+                                <Button Click="SideMenu_RestartHookerButton_Click" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_Hooker_Restart}" Margin="3"/>
                                 </Button>
 
@@ -245,7 +253,7 @@
 
                         <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
                                                  Opacity="0.9"
-                                                 Click="OpenSideMenu" Visibility="{Binding SideMenuButtonVisibility}"/>
+                                                 Click="OpenSideMenuButton_Click" Visibility="{Binding SideMenuButtonVisibility}"/>
                     </Grid>
                 </Grid>
 

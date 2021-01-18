@@ -37,7 +37,7 @@ namespace AIDungeon_Extension
         public static readonly RoutedUICommand Save = new RoutedUICommand("Save", "Save", typeof(MainWindow));
         public static readonly RoutedUICommand Exit = new RoutedUICommand("Exit", "Exit", typeof(MainWindow));
 
-        private const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
+        public const string DefaultStatusText = "[Tips] Press 'Enter' to translate, 'Ctrl+Z' to revert to original text, 'Ctrl+Enter' to send, 'Shift+Enter' to newline,";
 
         public FontFamily actionFont { get; set; }
 
@@ -100,23 +100,10 @@ namespace AIDungeon_Extension
             this.vm = new MainWindowViewModel();
             this.DataContext = this.vm;
 
-            this.vm.TextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
-            this.vm.BGColor = (SolidColorBrush)Application.Current.Resources["AID_Black"];
-            this.vm.InputBoxColor = (SolidColorBrush)Application.Current.Resources["AID_Gray"];
-            this.vm.InputTextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
-            this.vm.VersionText = VersionStr;
-            this.vm.StatusText = DefaultStatusText;
+            UpdateColorPickerColorsFromViewModel();
+
             this.vm.SideMenuVisibility = Visibility.Collapsed;
             this.vm.SideMenuButtonVisibility = Visibility.Visible;
-
-            #region Init Controls
-            //this.showOriginalTexts.IsChecked = Settings.ShowOriginalTexts;
-            //this.detachNewlineTexts.IsChecked = Settings.DetachNewlineTexts;
-            this.bgColorPicker.SelectedColor = this.vm.BGColor.Color;
-            this.textColorPicker.SelectedColor = this.vm.TextColor.Color;
-            this.inputBoxColorPicker.SelectedColor = this.vm.InputBoxColor.Color;
-            this.inputTextColorPicker.SelectedColor = this.vm.InputTextColor.Color;
-            #endregion
 
             return;
             //---
@@ -268,27 +255,7 @@ namespace AIDungeon_Extension
         }
         #endregion
 
-        public void UpdateWriteMode(WriteMode mode)
-        {
-            this.writeMode = mode;
-            switch (mode)
-            {
-                case WriteMode.Say:
-                    placeHolderTextBlock.Text = "What do you say?";
-                    break;
-                case WriteMode.Do:
-                    placeHolderTextBlock.Text = "What do you do?";
-                    break;
-                case WriteMode.Story:
-                    placeHolderTextBlock.Text = "What happens next?";
-                    break;
-            }
-        }
-        public void SetStatusText(string text)
-        {
-            this.vm.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
-        }
-
+        private Translator.TranslateWorker inputTranslateWork = null;
         private void InputTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             /*
@@ -345,21 +312,24 @@ namespace AIDungeon_Extension
                             SetStatusText("Translating...");
                             if (translator != null)
                             {
-                                translator.Translate(inputTextBox.Text, "ko", "en", (translated) =>
+                                this.inputTranslateWork = translator.Translate(inputTextBox.Text, "ko", "en", (translated) =>
                                 {
                                     Dispatcher.Invoke(() =>
-                                    {
-                                        inputTextBox.Text = translated;
-                                        inputTextBox.CaretIndex = inputTextBox.Text.Length;
-                                        SetStatusText(null);
-                                    });
+                                   {
+                                       inputTextBox.Text = translated;
+                                       inputTextBox.CaretIndex = inputTextBox.Text.Length;
+                                       SetStatusText(null);
+                                   });
                                 },
                                 failed: (reason) =>
                                 {
-                                    Dispatcher.Invoke(() =>
+                                    if (!inputTranslateWork.isAborted)
                                     {
-                                        SetStatusText(string.Format("Translate error : {0}", reason));
-                                    });
+                                        Dispatcher.Invoke(() =>
+                                        {
+                                            SetStatusText(string.Format("Translate error : {0}", reason));
+                                        });
+                                    }
                                 },
                                 finished: () =>
                                 {
@@ -368,6 +338,7 @@ namespace AIDungeon_Extension
                                         this.vm.TranslateLoadingVisibility = Visibility.Hidden;
                                         inputTextBox.IsReadOnly = false;
                                     });
+                                    this.inputTranslateWork = null;
                                 });
                             }
                             return;
@@ -403,87 +374,57 @@ namespace AIDungeon_Extension
             }
         }
 
-        #region ColorPicker callbacks
-        private void textColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        #region Functions
+        public void UpdateWriteMode(WriteMode mode)
         {
-            if (e.NewValue.HasValue)
-                this.vm.TextColor = new SolidColorBrush(e.NewValue.Value);
-        }
-        private void bgColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue.HasValue)
-                this.vm.BGColor = new SolidColorBrush(e.NewValue.Value);
-        }
-        private void inputBoxColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue.HasValue)
-                this.vm.InputBoxColor = new SolidColorBrush(e.NewValue.Value);
-        }
-        private void inputTextColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue.HasValue)
-                this.vm.InputTextColor = new SolidColorBrush(e.NewValue.Value);
-        }
-        #endregion
-
-        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            var item = string.Empty;
-            var menuItem = sender as MenuItem;
-            if (menuItem != null)
+            this.writeMode = mode;
+            switch (mode)
             {
-                item = menuItem.Header.ToString();
-            }
-            else
-            {
-                var executedRoutedEventArga = e as ExecutedRoutedEventArgs;
-                if (executedRoutedEventArga != null)
-                {
-                    item = (executedRoutedEventArga.Command as RoutedUICommand).Text;
-                }
-            }
-            if (!string.IsNullOrEmpty(item))
-            {
-                switch (item)
-                {
-                    case "Save":
-                        {
-                            var text = this.actionsTextBox.Text;
-
-                            var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-                            saveFileDialog.Title = "Save text";
-                            saveFileDialog.FileName = "AIDungeon.txt";
-                            saveFileDialog.Filter = "Text|*.txt";
-                            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                                File.WriteAllText(saveFileDialog.FileName, text);
-                        }
-                        break;
-                    case "Exit":
-                        {
-                            this.Close();
-                        }
-                        break;
-                    case "Reset":
-                        {
-                            this.actionContainer.Clear();
-                            this.actionsTextBox.Text = string.Empty;
-                            this.hooker.Refresh();
-                        }
-                        break;
-                }
+                case WriteMode.Say:
+                    placeHolderTextBlock.Text = "What do you say?";
+                    break;
+                case WriteMode.Do:
+                    placeHolderTextBlock.Text = "What do you do?";
+                    break;
+                case WriteMode.Story:
+                    placeHolderTextBlock.Text = "What happens next?";
+                    break;
             }
         }
-
-        private void Help_CheckForUpdate(object sender, RoutedEventArgs e)
+        public void SetStatusText(string text)
         {
-            OpenURL(@"https://github.com/hisacat/AIDungeon-Extension");
-        }
-        private void Help_Developer(object sender, RoutedEventArgs e)
-        {
-            OpenURL(@"https://twitter.com/ahisacat");
+            this.vm.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
         }
 
-        private void UpdateTranslateDictionary(object sender, RoutedEventArgs e)
+        private void SaveGameTexts()
+        {
+            var text = this.actionsTextBox.Text;
+
+            var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            saveFileDialog.Title = "Save text";
+            saveFileDialog.FileName = "AIDungeon.txt";
+            saveFileDialog.Filter = "Text|*.txt";
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                File.WriteAllText(saveFileDialog.FileName, text);
+        }
+        private void ResetHooker()
+        {
+            this.actionContainer.Clear();
+            this.actionsTextBox.Text = string.Empty;
+            this.hooker.Refresh();
+        }
+        private void RestartHooker()
+        {
+            if (this.hooker != null)
+            {
+                this.hooker.Dispose();
+                this.hooker = null;
+            }
+
+            this.hooker = new AIDungeonHooker();
+            this.hooker.Run();
+        }
+        private void UpdateTranslateDictionary()
         {
             if (this.translator != null)
             {
@@ -501,39 +442,17 @@ namespace AIDungeon_Extension
                 });
             }
         }
-        private void RestartHooker(object sender, RoutedEventArgs e)
-        {
-            if (this.hooker != null)
-            {
-                this.hooker.Dispose();
-                this.hooker = null;
-            }
-
-            this.hooker = new AIDungeonHooker();
-            this.hooker.Run();
-        }
-        private void RestartTranslator(object sender, RoutedEventArgs e)
-        {
-            if (this.translator != null)
-            {
-                this.translator.Dispose();
-                this.hooker = null;
-            }
-
-            this.translator = new Translator();
-            this.translator.Run();
-        }
-        private void OpenSideMenu(object sender, RoutedEventArgs e)
+        private void OpenSideMenu()
         {
             this.vm.SideMenuVisibility = Visibility.Visible;
             this.vm.SideMenuButtonVisibility = Visibility.Collapsed;
         }
-        private void CloseSideMenu(object sender, RoutedEventArgs e)
+        private void CloseSideMenu()
         {
             this.vm.SideMenuVisibility = Visibility.Collapsed;
             this.vm.SideMenuButtonVisibility = Visibility.Visible;
         }
-        private void ChangeFont(object sender, RoutedEventArgs e)
+        private void OpenChangeFontDialog()
         {
             var fd = new System.Windows.Forms.FontDialog();
             var result = fd.ShowDialog();
@@ -556,31 +475,47 @@ namespace AIDungeon_Extension
                 this.vm.TextDecorations = textDecorations;
             }
         }
-        private void SideMenu_CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void OpenSelectBGImageDialog()
         {
-            SideMenu_CheckBox_IsCheckedChanged(sender, e);
-        }
-        private void SideMenu_CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            SideMenu_CheckBox_IsCheckedChanged(sender, e);
-        }
-        private void SideMenu_CheckBox_IsCheckedChanged(object sender, RoutedEventArgs e)
-        {
-            var cb = sender as CheckBox;
-            switch (cb.Tag)
+            var openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            openFileDialog.Title = "Open image";
+            openFileDialog.DefaultExt = "jpg";
+            openFileDialog.Filter = "Images Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png)|*.jpg;*.jpeg;*.gif;*.bmp;*.png";
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                case "ShowOriginTexts":
-                    {
-                        //vm.ShowOriginTexts changed.
-                        UpdateActionText(this.actionContainer.Actions);
-                    }
-                    break;
-                case "DetachNewlineTexts":
-                    {
-                        //vm.DetachNewlineTexts changed.
-                        this.actionContainer.SetForceNewLine(this.vm.DetachNewlineTexts);
-                    }
-                    break;
+                this.vm.BGImage = openFileDialog.FileName;
+            }
+        }
+        private void ClearBGImage()
+        {
+            this.vm.BGImage = null;
+        }
+        private void ResetColorToDefault()
+        {
+            this.vm.TextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+            this.vm.BGColor = (SolidColorBrush)Application.Current.Resources["AID_Black"];
+            this.vm.InputBoxColor = (SolidColorBrush)Application.Current.Resources["AID_Gray"];
+            this.vm.InputTextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+
+            UpdateColorPickerColorsFromViewModel();
+        }
+        private void UpdateColorPickerColorsFromViewModel()
+        {
+            this.bgColorPicker.SelectedColor = this.vm.BGColor.Color;
+            this.textColorPicker.SelectedColor = this.vm.TextColor.Color;
+            this.inputBoxColorPicker.SelectedColor = this.vm.InputBoxColor.Color;
+            this.inputTextColorPicker.SelectedColor = this.vm.InputTextColor.Color;
+        }
+        private void CancelInputTranslate()
+        {
+            if (this.inputTranslateWork != null)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this.vm.TranslateLoadingVisibility = Visibility.Hidden;
+                    inputTextBox.IsReadOnly = false;
+                });
+                this.inputTranslateWork.Abort();
             }
         }
         private void OpenURL(string url)
@@ -591,6 +526,49 @@ namespace AIDungeon_Extension
                 UseShellExecute = true
             };
             Process.Start(psi);
+        }
+        #endregion
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.Escape:
+                    CancelInputTranslate();
+                    break;
+            }
+        }
+        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            var item = string.Empty;
+            var menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                item = menuItem.Header.ToString();
+            }
+            else
+            {
+                var executedRoutedEventArga = e as ExecutedRoutedEventArgs;
+                if (executedRoutedEventArga != null)
+                {
+                    item = (executedRoutedEventArga.Command as RoutedUICommand).Text;
+                }
+            }
+            if (!string.IsNullOrEmpty(item))
+            {
+                switch (item)
+                {
+                    case "Save":
+                        SaveGameTexts();
+                        break;
+                    case "Exit":
+                        this.Close();
+                        break;
+                    case "Reset":
+                        ResetHooker();
+                        break;
+                }
+            }
         }
         protected override void OnClosed(EventArgs e)
         {
@@ -620,21 +598,111 @@ namespace AIDungeon_Extension
             System.Environment.Exit(0);
         }
 
-        private void SetBGImageButton_Click(object sender, RoutedEventArgs e)
+        #region ColorPicker callbacks
+        private void textColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            var openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            openFileDialog.Title = "Open image";
-            openFileDialog.DefaultExt = "jpg";
-            openFileDialog.Filter = "Images Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png)|*.jpg;*.jpeg;*.gif;*.bmp;*.png"; 
-            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (e.NewValue.HasValue)
+                this.vm.TextColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void bgColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.BGColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void inputBoxColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.InputBoxColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        private void inputTextColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue.HasValue)
+                this.vm.InputTextColor = new SolidColorBrush(e.NewValue.Value);
+        }
+        #endregion
+        #region Button callbacks
+        #region Menu
+        private void Help_CheckForUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenURL(@"https://github.com/hisacat/AIDungeon-Extension");
+        }
+        private void Help_DeveloperButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenURL(@"https://twitter.com/ahisacat");
+        }
+        #endregion
+        private void OpenSideMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenSideMenu();
+        }
+        private void CloseSideMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseSideMenu();
+        }
+        #region SideMenu
+        private void SideMenu_ChangeFontButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenChangeFontDialog();
+        }
+        private void SideMenu_ColorResetToDefaultButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetColorToDefault();
+        }
+        private void SideMenu_SetBGImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenSelectBGImageDialog();
+        }
+        private void SideMenu_ClearBGImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClearBGImage();
+        }
+        private void SideMenu_OpenDictionaryButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void SideMenu_UpdateTranslateDictionaryButton_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateTranslateDictionary();
+        }
+        private void SideMenu_ResetHookerButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetHooker();
+        }
+        private void SideMenu_RestartHookerButton_Click(object sender, RoutedEventArgs e)
+        {
+            RestartHooker();
+        }
+        #endregion
+        #endregion
+        #region Checkbox callbacks
+        private void SideMenu_CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            SideMenu_CheckBox_IsCheckedChanged(sender, e);
+        }
+        private void SideMenu_CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SideMenu_CheckBox_IsCheckedChanged(sender, e);
+        }
+        private void SideMenu_CheckBox_IsCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            var cb = sender as CheckBox;
+            switch (cb.Tag)
             {
-                this.vm.BGImage = openFileDialog.FileName;
+                case "ShowOriginTexts":
+                    {
+                        //vm.ShowOriginTexts changed.
+                        UpdateActionText(this.actionContainer.Actions);
+                    }
+                    break;
+                case "DetachNewlineTexts":
+                    {
+                        //vm.DetachNewlineTexts changed.
+                        this.actionContainer.SetForceNewLine(this.vm.DetachNewlineTexts);
+                    }
+                    break;
             }
         }
+        #endregion
 
-        private void ClearBGImageButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.vm.BGImage = null;
-        }
     }
 }

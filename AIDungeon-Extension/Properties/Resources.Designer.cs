@@ -262,6 +262,15 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Translate과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Translate {
+            get {
+                return ResourceManager.GetString("SideMenu/Translate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Update Dictionary과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_UpdateDictionary {
