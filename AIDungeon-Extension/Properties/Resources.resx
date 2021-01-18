@@ -165,6 +165,9 @@ Current chrome version: {0}</value>
   <data name="SideMenu/InputText" xml:space="preserve">
     <value>InputText</value>
   </data>
+  <data name="SideMenu/OpenTranslateDictionary" xml:space="preserve">
+    <value>Open Dictionary</value>
+  </data>
   <data name="SideMenu/Options" xml:space="preserve">
     <value>Options</value>
   </data>
@@ -175,7 +178,7 @@ Current chrome version: {0}</value>
     <value>Reset to default</value>
   </data>
   <data name="SideMenu/SetBGImage" xml:space="preserve">
-    <value>Set image</value>
+    <value>Load image</value>
   </data>
   <data name="SideMenu/ShowOriginalTexts" xml:space="preserve">
     <value>Show original texts</value>
@@ -186,7 +189,7 @@ Current chrome version: {0}</value>
   <data name="SideMenu/Translate" xml:space="preserve">
     <value>Translate</value>
   </data>
-  <data name="SideMenu/UpdateDictionary" xml:space="preserve">
+  <data name="SideMenu/UpdateTranslateDictionary" xml:space="preserve">
     <value>Update Dictionary</value>
   </data>
   <data name="SideMenu_ControlPanel" xml:space="preserve">

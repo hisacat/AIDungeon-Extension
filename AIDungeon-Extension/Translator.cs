@@ -209,7 +209,12 @@ namespace AIDungeon_Extension
                 System.Threading.Thread.Sleep(1);
             }
         }
-
+        public static void OpenDictionary()
+        {
+            var dictionaryPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Dictionary.txt");
+            if (!System.IO.File.Exists(dictionaryPath)) System.IO.File.Create(dictionaryPath);
+            Process.Start(dictionaryPath);
+        }
         public void LoadDictionary()
         {
             lock (this.translateDictionary)

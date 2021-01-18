@@ -155,7 +155,7 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("inputLoadingVisibility");
             }
         }
-        private bool showOriginTexts;
+        private bool showOriginTexts = false;
         public bool ShowOriginTexts
         {
             get { return this.showOriginTexts; }
@@ -165,7 +165,7 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("showOriginTexts");
             }
         }
-        private bool detachNewlineTexts;
+        private bool detachNewlineTexts = true;
         public bool DetachNewlineTexts
         {
             get { return this.detachNewlineTexts; }
@@ -174,14 +174,6 @@ namespace AIDungeon_Extension
                 this.detachNewlineTexts = value;
                 OnPropertyChanged("detachNewlineTexts");
             }
-        }
-
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null) { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); }
         }
 
         private string statusText = MainWindow.DefaultStatusText;
@@ -223,6 +215,100 @@ namespace AIDungeon_Extension
             {
                 this.sideMenuVisibility = value;
                 OnPropertyChanged("sideMenuVisibility");
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null) { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); }
+
+            switch(propertyName)
+            {
+                case "fontFamily":
+                    ini["Font"]["fontFamily"] = this.fontFamily == null ? null : this.fontFamily.Source;
+                    break;
+                case "fontWeight":
+                    ini["Font"]["fontWeight"] = this.fontWeight.ToString();
+                    break;
+                case "fontStyle":
+                    ini["Font"]["fontStyle"] = this.fontStyle.ToString();
+                    break;
+                case "textDecorations":
+                    ini["Font"]["textDecorations"] = this.textDecorations.ToString();
+                    break;
+
+                case "textColor":
+                    ini["Color"]["textColor"] = this.textColor.ToString();
+                    break;
+                case "bgColor":
+                    ini["Color"]["bgColor"] = this.bgColor.ToString();
+                    break;
+                case "inputBoxColor":
+                    ini["Color"]["inputBoxColor"] = this.InputBoxColor.ToString();
+                    break;
+                case "inputTextColor":
+                    ini["Color"]["inputTextColor"] = this.inputTextColor.ToString();
+                    break;
+
+                case "bgImage":
+                    ini["Image"]["bgImage"] = this.bgImage;
+                    break;
+
+                case "showOriginTexts":
+                    ini["Option"]["showOriginTexts"] = this.showOriginTexts;
+                    break;
+                case "detachNewlineTexts":
+                    ini["Option"]["detachNewlineTexts"] = this.detachNewlineTexts;
+                    break;
+            }
+
+            ini.Save(this.iniPath);
+        }
+
+        private IniFile ini = null;
+        private string iniPath = string.Empty;
+        public MainWindowViewModel()
+        {
+            this.ini = new IniFile();
+            this.iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Settings.ini");
+
+            if (System.IO.File.Exists(this.iniPath))
+            {
+                this.ini.Load(this.iniPath);
+
+                string font;
+                font = this.ini["Font"]["fontFamily"].ToString();
+                if (!string.IsNullOrEmpty(font)) this.fontFamily = new FontFamily(font);
+                
+                int weight;
+                if (this.ini["Font"]["fontWeight"].TryConvertInt(out weight))
+                    this.fontWeight = System.Windows.FontWeight.FromOpenTypeWeight(weight);
+
+                this.ini["Font"]["fontStyle"].ToString();
+                this.ini["Font"]["textDecorations"].ToString();
+
+                Color color;
+                {
+                    if (this.ini["Color"]["textColor"].TryConvertColor(out color))
+                        this.textColor = new SolidColorBrush(color);
+                    if (this.ini["Color"]["bgColor"].TryConvertColor(out color))
+                        this.bgColor = new SolidColorBrush(color);
+                    if (this.ini["Color"]["InputBoxColor"].TryConvertColor(out color))
+                        this.InputBoxColor = new SolidColorBrush(color);
+                    if (this.ini["Color"]["inputTextColor"].TryConvertColor(out color))
+                        this.inputTextColor = new SolidColorBrush(color);
+                }
+
+                this.bgImage = this.ini["Image"]["bgimage"].ToString();
+
+                bool isOn;
+                {
+                    if (this.ini["Option"]["showOriginTexts"].TryConvertBool(out isOn))
+                        this.showOriginTexts = isOn;
+                    if (this.ini["Option"]["detachNewlineTexts"].TryConvertBool(out isOn))
+                        this.detachNewlineTexts = isOn;
+                }
             }
         }
     }

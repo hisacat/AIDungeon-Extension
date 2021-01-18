@@ -211,11 +211,11 @@
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_Translate}" FontWeight="Bold"/>
                                 <Control Height="5"/>
                                 <Button Click="SideMenu_OpenDictionaryButton_Click" Style="{StaticResource RoundCorner}">
-                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_UpdateDictionary}" Margin="3"/>
+                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_OpenTranslateDictionary}" Margin="3"/>
                                 </Button>
                                 <Control Height="5"/>
                                 <Button Click="SideMenu_UpdateTranslateDictionaryButton_Click" Style="{StaticResource RoundCorner}">
-                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_UpdateDictionary}" Margin="3"/>
+                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_UpdateTranslateDictionary}" Margin="3"/>
                                 </Button>
                                 
                                 <Control Height="10"/>

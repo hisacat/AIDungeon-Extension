@@ -208,6 +208,15 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Open Dictionary과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_OpenTranslateDictionary {
+            get {
+                return ResourceManager.GetString("SideMenu/OpenTranslateDictionary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Options과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_Options {
@@ -235,7 +244,7 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
-        ///   Set image과(와) 유사한 지역화된 문자열을 찾습니다.
+        ///   Load image과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_SetBGImage {
             get {
@@ -273,9 +282,9 @@ namespace AIDungeon_Extension.Properties {
         /// <summary>
         ///   Update Dictionary과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
-        public static string SideMenu_UpdateDictionary {
+        public static string SideMenu_UpdateTranslateDictionary {
             get {
-                return ResourceManager.GetString("SideMenu/UpdateDictionary", resourceCulture);
+                return ResourceManager.GetString("SideMenu/UpdateTranslateDictionary", resourceCulture);
             }
         }
         

@@ -95,8 +95,6 @@ namespace AIDungeon_Extension
                 System.Environment.Exit(-1);
             }
 
-            Settings.Init();
-
             this.vm = new MainWindowViewModel();
             this.DataContext = this.vm;
 
@@ -424,6 +422,10 @@ namespace AIDungeon_Extension
             this.hooker = new AIDungeonHooker();
             this.hooker.Run();
         }
+        private void OpenTranslateDictionary()
+        {
+            Translator.OpenDictionary();
+        }
         private void UpdateTranslateDictionary()
         {
             if (this.translator != null)
@@ -526,6 +528,15 @@ namespace AIDungeon_Extension
                 UseShellExecute = true
             };
             Process.Start(psi);
+        }
+
+        private void OnShownOriginTextsChanged()
+        {
+            //UpdateActionText(this.actionContainer.Actions);
+        }
+        private void OnDetachNewLineTextsChanged()
+        {
+            this.actionContainer.SetForceNewLine(this.vm.DetachNewlineTexts);
         }
         #endregion
 
@@ -658,7 +669,7 @@ namespace AIDungeon_Extension
         }
         private void SideMenu_OpenDictionaryButton_Click(object sender, RoutedEventArgs e)
         {
-
+            OpenTranslateDictionary();
         }
         private void SideMenu_UpdateTranslateDictionaryButton_Click(object sender, RoutedEventArgs e)
         {
@@ -689,20 +700,13 @@ namespace AIDungeon_Extension
             switch (cb.Tag)
             {
                 case "ShowOriginTexts":
-                    {
-                        //vm.ShowOriginTexts changed.
-                        UpdateActionText(this.actionContainer.Actions);
-                    }
+                    OnShownOriginTextsChanged();
                     break;
                 case "DetachNewlineTexts":
-                    {
-                        //vm.DetachNewlineTexts changed.
-                        this.actionContainer.SetForceNewLine(this.vm.DetachNewlineTexts);
-                    }
+                    OnDetachNewLineTextsChanged();
                     break;
             }
         }
         #endregion
-
     }
 }
