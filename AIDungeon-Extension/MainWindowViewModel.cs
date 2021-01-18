@@ -102,6 +102,16 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("inputTextColor");
             }
         }
+        private string bgImage;
+        public string BGImage
+        {
+            get { return this.bgImage; }
+            set
+            {
+                this.bgImage = value;
+                OnPropertyChanged("bgImage");
+            }
+        }
 
         private Visibility loadingVisibility = Visibility.Hidden;
         public Visibility LoadingVisibility
@@ -145,6 +155,27 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("inputLoadingVisibility");
             }
         }
+        private bool showOriginTexts;
+        public bool ShowOriginTexts
+        {
+            get { return this.showOriginTexts; }
+            set
+            {
+                this.showOriginTexts = value;
+                OnPropertyChanged("showOriginTexts");
+            }
+        }
+        private bool detachNewlineTexts;
+        public bool DetachNewlineTexts
+        {
+            get { return this.detachNewlineTexts; }
+            set
+            {
+                this.detachNewlineTexts = value;
+                OnPropertyChanged("detachNewlineTexts");
+            }
+        }
+
 
 
         public event PropertyChangedEventHandler PropertyChanged;

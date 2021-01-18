@@ -118,6 +118,24 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Background image과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_BGImage {
+            get {
+                return ResourceManager.GetString("SideMenu/BGImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Clear image과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_ClearBGImage {
+            get {
+                return ResourceManager.GetString("SideMenu/ClearBGImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Color과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_Color {
@@ -204,6 +222,24 @@ namespace AIDungeon_Extension.Properties {
         public static string SideMenu_Reset {
             get {
                 return ResourceManager.GetString("SideMenu/Reset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Reset to default과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_ResetToDefault {
+            get {
+                return ResourceManager.GetString("SideMenu/ResetToDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Set image과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_SetBGImage {
+            get {
+                return ResourceManager.GetString("SideMenu/SetBGImage", resourceCulture);
             }
         }
         

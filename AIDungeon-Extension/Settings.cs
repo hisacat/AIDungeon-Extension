@@ -29,49 +29,6 @@ namespace AIDungeon_Extension
                 Instance.ini.Save(Instance.iniPath);
             }
         }
-        private Color bgColor = default;
-        public static Color BGColor
-        {
-            get
-            {
-                return Instance.bgColor;
-            }
-            set
-            {
-                Instance.bgColor = value;
-                Instance.ini["Color"]["BackGround"] = value.ToString();
-                Instance.ini.Save(Instance.iniPath);
-            }
-        }
-
-        private bool showOriginalTexts = true;
-        public static bool ShowOriginalTexts
-        {
-            get
-            {
-                return Instance.showOriginalTexts;
-            }
-            set
-            {
-                Instance.showOriginalTexts = value;
-                Instance.ini["Option"]["showOriginalTexts"] = value;
-                Instance.ini.Save(Instance.iniPath);
-            }
-        }
-        private bool detachNewlineTexts = true;
-        public static bool DetachNewlineTexts
-        {
-            get
-            {
-                return Instance.detachNewlineTexts;
-            }
-            set
-            {
-                Instance.detachNewlineTexts = value;
-                Instance.ini["Option"]["detachNewlineTexts"] = value;
-                Instance.ini.Save(Instance.iniPath);
-            }
-        }
 
         private Settings()
         {
@@ -86,10 +43,6 @@ namespace AIDungeon_Extension
             {
                 //Create and initialize new settings.ini
                 Font = Instance.font;
-                BGColor = Instance.bgColor;
-                ShowOriginalTexts = Instance.showOriginalTexts;
-                DetachNewlineTexts = Instance.detachNewlineTexts;
-                Instance.ini.Save(Instance.iniPath);
             }
             else
             {

@@ -7,7 +7,7 @@
         xmlns:prop="clr-namespace:AIDungeon_Extension.Properties"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="AIDungeon Extension" Height="450" Width="800" MinHeight="200" MinWidth="400">
+        Title="AIDungeon Extension" Height="600" Width="800" MinHeight="200" MinWidth="400">
 
     <Window.CommandBindings>
         <CommandBinding Command="local:MainWindow.Reset" Executed="CommandBinding_Executed" />
@@ -76,9 +76,9 @@
             <Setter Property="Height" Value="25"/>
         </Style>
     </Window.Resources>
-    <Grid Background="{StaticResource AID_Black}">
+    <Grid Background="{Binding BGColor}">
+        <Image Source="{Binding BGImage}" Stretch="UniformToFill"/>
         <DockPanel Background="Transparent">
-
             <!--Main menus-->
             <Menu IsMainMenu="True" DockPanel.Dock="Top" VerticalContentAlignment="Center">
                 <MenuItem Header="{x:Static prop:Resources.WindowMenu_File}">
@@ -112,6 +112,7 @@
 
             <!--SideMenu-->
             <Grid DockPanel.Dock="Right" Width="220" Visibility="{Binding SideMenuVisibility}">
+                <Rectangle Fill="{StaticResource AID_Black}" Opacity="0.9"/>
                 <Grid Margin="0,5,0,5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
@@ -178,14 +179,32 @@
                                         <TextBlock Text="{x:Static prop:Resources.SideMenu_InputText}" VerticalAlignment="Center" Grid.Column="0"/>
                                         <xctk:ColorPicker x:Name="inputTextColorPicker" Grid.Column="1" ColorMode="ColorCanvas" SelectedColorChanged="inputTextColorPicker_SelectedColorChanged"/>
                                     </Grid>
+                                    <Control Height="5"/>
+                                    <Button Style="{StaticResource RoundCorner}">
+                                        <TextBlock Text="{x:Static prop:Resources.SideMenu_ResetToDefault}" Margin="3"/>
+                                    </Button>
+                                </StackPanel>
+
+                                <!--Background images-->
+                                <StackPanel Orientation="Vertical">
+                                    <Control Height="5"/>
+                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_BGImage}" FontWeight="Bold"/>
+                                    <Control Height="5"/>
+                                    <Button Style="{StaticResource RoundCorner}" Click="SetBGImageButton_Click">
+                                        <TextBlock Text="{x:Static prop:Resources.SideMenu_SetBGImage}" Margin="3"/>
+                                    </Button>
+                                    <Control Height="5"/>
+                                    <Button Style="{StaticResource RoundCorner}" Click="ClearBGImageButton_Click">
+                                        <TextBlock Text="{x:Static prop:Resources.SideMenu_ClearBGImage}" Margin="3"/>
+                                    </Button>
                                 </StackPanel>
 
                                 <Control Height="10"/>
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_Options}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <CheckBox Name="showOriginalTexts" Content="{x:Static prop:Resources.SideMenu_ShowOriginalTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
+                                <CheckBox Tag="ShowOriginTexts" IsChecked="{Binding ShowOriginTexts}" Content="{x:Static prop:Resources.SideMenu_ShowOriginalTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
                                 <Control Height="5"/>
-                                <CheckBox Name="detachNewlineTexts" Content="{x:Static prop:Resources.SideMenu_DetachNewlineTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
+                                <CheckBox Tag="DetachNewlineTexts" IsChecked="{Binding DetachNewlineTexts}" Content="{x:Static prop:Resources.SideMenu_DetachNewlineTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
 
                                 <Control Height="5"/>
                                 <Button Click="UpdateTranslateDictionary" Style="{StaticResource RoundCorner}">
@@ -218,9 +237,8 @@
                     <RowDefinition Height="50" MinHeight="0"/>
                 </Grid.RowDefinitions>
                 <!--Contents Actionss-->
-
                 <Grid Grid.Row="0">
-                    <Grid Background="{Binding BGColor}">
+                    <Grid>
                         <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Margin="5"  Background="Transparent" Foreground="{Binding TextColor}"
                              FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>

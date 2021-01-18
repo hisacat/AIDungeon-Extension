@@ -138,6 +138,12 @@ Current chrome version: {0}</value>
   <data name="SideMenu/BGColor" xml:space="preserve">
     <value>Background</value>
   </data>
+  <data name="SideMenu/BGImage" xml:space="preserve">
+    <value>Background image</value>
+  </data>
+  <data name="SideMenu/ClearBGImage" xml:space="preserve">
+    <value>Clear image</value>
+  </data>
   <data name="SideMenu/Color" xml:space="preserve">
     <value>Color</value>
   </data>
@@ -164,6 +170,12 @@ Current chrome version: {0}</value>
   </data>
   <data name="SideMenu/Reset" xml:space="preserve">
     <value>Reset</value>
+  </data>
+  <data name="SideMenu/ResetToDefault" xml:space="preserve">
+    <value>Reset to default</value>
+  </data>
+  <data name="SideMenu/SetBGImage" xml:space="preserve">
+    <value>Set image</value>
   </data>
   <data name="SideMenu/ShowOriginalTexts" xml:space="preserve">
     <value>Show original texts</value>

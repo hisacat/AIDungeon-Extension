@@ -21,6 +21,12 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using AIDungeon_Extension.Core;
 
+//Todo : 번역 도중 esc로 취소하는 기능
+//Todo : 원문에 빈 라인 있으면 번역에도 추가
+//Todo : Adventure(Game)이 바뀌었는지 체크를 URL의 변경을 통해서도 하자
+//Todo : 게임 리스트 불러오기.
+
+//AI가 입력중입니다. 텍스트 띄우기 로딩중.
 namespace AIDungeon_Extension
 {
     public partial class MainWindow : Window
@@ -89,7 +95,6 @@ namespace AIDungeon_Extension
                 System.Environment.Exit(-1);
             }
 
-            //Settings.BGColor = Color.FromArgb(1, 1, 1, 1);
             Settings.Init();
 
             this.vm = new MainWindowViewModel();
@@ -113,6 +118,7 @@ namespace AIDungeon_Extension
             this.inputTextColorPicker.SelectedColor = this.vm.InputTextColor.Color;
             #endregion
 
+            return;
             //---
             this.vm.LoadingVisibility = Visibility.Visible;
             this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
@@ -176,7 +182,7 @@ namespace AIDungeon_Extension
                 this.actionsTextBox.Text = string.Empty;
                 foreach (var action in actions)
                 {
-                    if (Settings.ShowOriginalTexts)
+                    if (this.vm.ShowOriginTexts)
                         this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
 
                     switch (action.TranslateStatus)
@@ -191,14 +197,17 @@ namespace AIDungeon_Extension
                             this.actionsTextBox.Text += action.Translated + System.Environment.NewLine;
                             break;
                         case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Working:
-                            this.actionsTextBox.Text += "[번역중...]" + System.Environment.NewLine;
+                            if (this.vm.ShowOriginTexts)
+                                this.actionsTextBox.Text += "[번역중...]" + System.Environment.NewLine;
+                            else
+                                this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
                             break;
                         case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.None:
                             this.actionsTextBox.Text += "[번역 준비중]" + System.Environment.NewLine;
                             break;
                     }
 
-                    if (Settings.ShowOriginalTexts)
+                    if (this.vm.ShowOriginTexts)
                         this.actionsTextBox.Text += System.Environment.NewLine;
                 }
                 this.actionsTextBox.ScrollToEnd();
@@ -530,8 +539,6 @@ namespace AIDungeon_Extension
             var result = fd.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
-                Debug.WriteLine(fd.Font);
-
                 var fontFamily = new FontFamily(fd.Font.Name);
                 var fontSize = fd.Font.Size * 96.0 / 72.0;
                 var fontWeight = fd.Font.Bold ? FontWeights.Bold : FontWeights.Regular;
@@ -551,36 +558,28 @@ namespace AIDungeon_Extension
         }
         private void SideMenu_CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            var checkbox = sender as CheckBox;
-            if (checkbox != null)
-            {
-                switch (checkbox.Name)
-                {
-                    case "showOriginalTexts":
-                        Settings.ShowOriginalTexts = true;
-                        this.ActionContainer_OnActionsChanged(this.actionContainer.Actions);
-                        break;
-                    case "detachNewlineTexts":
-                        Settings.DetachNewlineTexts = true;
-                        this.ActionContainer_OnActionsChanged(this.actionContainer.Actions);
-                        Reset.Execute(null, null);
-                        break;
-                }
-            }
+            SideMenu_CheckBox_IsCheckedChanged(sender, e);
         }
         private void SideMenu_CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            var checkbox = sender as CheckBox;
-            switch (checkbox.Name)
+            SideMenu_CheckBox_IsCheckedChanged(sender, e);
+        }
+        private void SideMenu_CheckBox_IsCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            var cb = sender as CheckBox;
+            switch (cb.Tag)
             {
-                case "showOriginalTexts":
-                    Settings.ShowOriginalTexts = false;
-                    this.ActionContainer_OnActionsChanged(this.actionContainer.Actions);
+                case "ShowOriginTexts":
+                    {
+                        //vm.ShowOriginTexts changed.
+                        UpdateActionText(this.actionContainer.Actions);
+                    }
                     break;
-                case "detachNewlineTexts":
-                    Settings.DetachNewlineTexts = false;
-                    this.ActionContainer_OnActionsChanged(this.actionContainer.Actions);
-                    Reset.Execute(null, null);
+                case "DetachNewlineTexts":
+                    {
+                        //vm.DetachNewlineTexts changed.
+                        this.actionContainer.SetForceNewLine(this.vm.DetachNewlineTexts);
+                    }
                     break;
             }
         }
@@ -595,6 +594,8 @@ namespace AIDungeon_Extension
         }
         protected override void OnClosed(EventArgs e)
         {
+            //Dispose...
+
             if (hooker != null)
             {
                 hooker.Dispose();
@@ -619,5 +620,21 @@ namespace AIDungeon_Extension
             System.Environment.Exit(0);
         }
 
+        private void SetBGImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            openFileDialog.Title = "Open image";
+            openFileDialog.DefaultExt = "jpg";
+            openFileDialog.Filter = "Images Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png)|*.jpg;*.jpeg;*.gif;*.bmp;*.png"; 
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                this.vm.BGImage = openFileDialog.FileName;
+            }
+        }
+
+        private void ClearBGImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.vm.BGImage = null;
+        }
     }
 }

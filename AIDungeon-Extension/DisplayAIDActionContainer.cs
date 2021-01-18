@@ -9,8 +9,8 @@ namespace AIDungeon_Extension
 {
     class DisplayAIDActionContainer
     {
-        bool forceNewline = true;
-        bool doTranslate = true;
+        private bool forceNewline = true;
+        private bool doTranslate = true;
 
         public class DisplayAIDAction : IComparer<DisplayAIDAction>, IComparable<DisplayAIDAction>
         {
@@ -119,6 +119,27 @@ namespace AIDungeon_Extension
             this.Actions = new List<DisplayAIDAction>();
             this.translator = translator;
         }
+
+        public void SetForceNewLine(bool isOn)
+        {
+            if (this.forceNewline == isOn)
+                return;
+
+            this.forceNewline = isOn;
+
+            var actions = new List<AIDungeonWrapper.Action>();
+
+            foreach (var head in this.Actions)
+            {
+                actions.Add(head.Action);
+                foreach (var inner in head.InnerActions)
+                    actions.Add(inner);
+            }
+
+            Clear();
+            AddRange(actions);
+        }
+
 
         public void Clear()
         {
