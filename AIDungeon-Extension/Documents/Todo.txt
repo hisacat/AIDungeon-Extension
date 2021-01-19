@@ -23,6 +23,9 @@ Todo
 	Next feature:
 		*Main:
 			Refactor XPaths
+			inputText: //*[@class="css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox"]/textarea[@placeholder]
+			sendButton: //*[@class="css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox"]/*[@role="button" and @aria-label="Submit"]
+			***use ender instead sendbutton!***
 		*Translation:
 			Refactor cancel input translation
 		*Design:
