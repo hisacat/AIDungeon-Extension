@@ -461,6 +461,27 @@ namespace AIDungeon_Extension
         private void OpenChangeFontDialog()
         {
             var fd = new System.Windows.Forms.FontDialog();
+
+            //Select current font
+            if (this.vm.FontFamily != null)
+            {
+                var isBold = this.vm.FontWeight == FontWeights.Bold ? true : false;
+                var isItalic = this.vm.FontStyle == FontStyles.Italic ? true : false;
+                var fdFontSize = (float)((this.vm.FontSize * 72.0) / 96.0);
+                var fdFontStyle = System.Drawing.FontStyle.Regular;
+                if (isBold) fdFontStyle = fdFontStyle | System.Drawing.FontStyle.Bold;
+                if (isItalic) fdFontStyle = fdFontStyle | System.Drawing.FontStyle.Italic;
+
+                if (fdFontSize <= 0)
+                    fdFontSize = 9;
+
+                string fdFontName = this.vm.FontFamily == null ? null : this.vm.FontFamily.Source;
+
+                var fdFont = new System.Drawing.Font(fdFontName, fdFontSize, fdFontStyle);
+
+                fd.Font = fdFont;
+            }
+
             var result = fd.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
