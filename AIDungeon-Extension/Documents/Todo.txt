@@ -1,0 +1,45 @@
+Todo
+	Done:
+		*Main:
+			Command - /Say
+			Command - /Do
+			Command - /Story
+		*Translation:
+			Translation dictionary
+			Cancel input translation
+		*Design:
+			Window design
+		*Etc:
+			Change theme
+			Save options
+
+	Next feature:
+		*Main:
+			Command - /Undo
+			Command - /Redo
+			Command - /Retry
+			Button - Redo
+			Button - Undo
+			Button - Retry
+		*Translation:
+			Refactor cancel input translation
+		*Design:
+		*Etc:
+			Hide control menu
+		
+	Planned:
+		*Main:
+			Wait AI input (loading)
+			Command - /Alter (edit)
+			Command - /Remember (pin)
+			Button - Edit (alter)
+			Button - Pin (Remember)
+			Button - Restore
+			Show current world info
+			Edit world info
+		*Translation:
+			Better performance logic
+		*Design:
+		*Etc:
+			Export/Load theme
+			Input text enter key binding
