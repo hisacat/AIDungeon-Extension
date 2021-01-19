@@ -4,6 +4,12 @@ Todo
 			Command - /Say
 			Command - /Do
 			Command - /Story
+			Command - /Undo
+			Command - /Redo
+			Command - /Retry
+			Button - Redo
+			Button - Undo
+			Button - Retry
 		*Translation:
 			Translation dictionary
 			Cancel input translation
@@ -12,20 +18,15 @@ Todo
 		*Etc:
 			Change theme
 			Save options
+			Hide control menu
 
 	Next feature:
 		*Main:
-			Command - /Undo
-			Command - /Redo
-			Command - /Retry
-			Button - Redo
-			Button - Undo
-			Button - Retry
+			Refactor XPaths
 		*Translation:
 			Refactor cancel input translation
 		*Design:
 		*Etc:
-			Hide control menu
 		
 	Planned:
 		*Main:
@@ -37,6 +38,7 @@ Todo
 			Button - Restore
 			Show current world info
 			Edit world info
+			Say, Do, Story buttons
 		*Translation:
 			Better performance logic
 		*Design:
