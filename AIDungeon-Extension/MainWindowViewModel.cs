@@ -113,14 +113,14 @@ namespace AIDungeon_Extension
             }
         }
 
-        private Visibility loadingVisibility = Visibility.Hidden;
-        public Visibility LoadingVisibility
+        private bool showLoading;
+        public bool ShowLoading
         {
-            get { return this.loadingVisibility; }
+            get { return this.showLoading; }
             set
             {
-                this.loadingVisibility = value;
-                OnPropertyChanged("loadingVisibility");
+                this.showLoading = value;
+                OnPropertyChanged("showLoading");
             }
         }
         private string loadingText = "loadingText";
@@ -134,25 +134,24 @@ namespace AIDungeon_Extension
             }
         }
 
-
-        private Visibility translateLoadingVisibility = Visibility.Hidden;
-        public Visibility TranslateLoadingVisibility
+        private bool showInputTranslateLoading;
+        public bool ShowInputTranslateLoading
         {
-            get { return this.translateLoadingVisibility; }
+            get { return this.showInputTranslateLoading; }
             set
             {
-                this.translateLoadingVisibility = value;
-                OnPropertyChanged("translateLoadingVisibility");
+                this.showInputTranslateLoading = value;
+                OnPropertyChanged("showInputTranslateLoading");
             }
         }
-        private Visibility inputLoadingVisibility = Visibility.Hidden;
-        public Visibility InputLoadingVisibility
+        private bool showInputLoading;
+        public bool ShowInputLoading
         {
-            get { return this.inputLoadingVisibility; }
+            get { return this.showInputLoading; }
             set
             {
-                this.inputLoadingVisibility = value;
-                OnPropertyChanged("inputLoadingVisibility");
+                this.showInputLoading = value;
+                OnPropertyChanged("showInputLoading");
             }
         }
         private bool showOriginTexts = false;
@@ -197,26 +196,37 @@ namespace AIDungeon_Extension
             }
         }
 
-        private Visibility sideMenuButtonVisibility;
-        public Visibility SideMenuButtonVisibility
+        private bool showSideMenuButton = true;
+        public bool ShowSideMenuButton
         {
-            get { return this.sideMenuButtonVisibility; }
+            get { return this.showSideMenuButton; }
             set
             {
-                this.sideMenuButtonVisibility = value;
-                OnPropertyChanged("sideMenuButtonVisibility");
+                this.showSideMenuButton = value;
+                OnPropertyChanged("showSideMenuButton");
             }
         }
-        private Visibility sideMenuVisibility;
-        public Visibility SideMenuVisibility
+        private bool showSideMenu = true;
+        public bool ShowSideMenu
         {
-            get { return this.sideMenuVisibility; }
+            get { return this.showSideMenu; }
             set
             {
-                this.sideMenuVisibility = value;
-                OnPropertyChanged("sideMenuVisibility");
+                this.showSideMenu = value;
+                OnPropertyChanged("showSideMenu");
             }
         }
+        private bool showControlMenus = true;
+        public bool ShowControlMenus
+        {
+            get { return this.showControlMenus; }
+            set
+            {
+                this.showControlMenus = value;
+                OnPropertyChanged("showControlMenus");
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)

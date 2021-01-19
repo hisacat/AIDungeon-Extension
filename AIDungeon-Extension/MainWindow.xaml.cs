@@ -100,15 +100,13 @@ namespace AIDungeon_Extension
 
             UpdateColorPickerColorsFromViewModel();
 
-            this.vm.SideMenuVisibility = Visibility.Collapsed;
-            this.vm.SideMenuButtonVisibility = Visibility.Visible;
+            CloseSideMenu();
 
             //return;
 
-            this.vm.LoadingVisibility = Visibility.Visible;
             this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
-            this.vm.TranslateLoadingVisibility = Visibility.Hidden;
-            this.vm.InputLoadingVisibility = Visibility.Hidden;
+            this.vm.ShowInputTranslateLoading = false;
+            this.vm.ShowInputLoading = false;
 
             this.actionsTextBox.Text = string.Empty;
 
@@ -231,6 +229,18 @@ namespace AIDungeon_Extension
         }
         #endregion
 
+        private bool CheckItCommandText(string input, string command)
+        {
+            if (input.StartsWith(command, StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(input.Remove(0, command.Length)))
+                    return true;
+                else
+                    return false;
+            }
+            return false;
+        }
+
         private Translator.TranslateWorker inputTranslateWork = null;
         private void InputTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -269,13 +279,38 @@ namespace AIDungeon_Extension
                         {
                             e.Handled = true;
 
-                            if (hooker.Ready)
+                            if (this.hooker != null && this.hooker.Ready)
                             {
+                                #region Check it command
+                                if (inputTextBox.Text.StartsWith("/"))
+                                {
+                                    if (CheckItCommandText(inputTextBox.Text, "/redo"))
+                                    {
+                                        inputTextBox.Text = string.Empty;
+                                        this.hooker.Command_Redo();
+                                        return;
+                                    }
+                                    if (CheckItCommandText(inputTextBox.Text, "/undo"))
+                                    {
+                                        inputTextBox.Text = string.Empty;
+                                        this.hooker.Command_Undo();
+                                        return;
+                                    }
+                                    if (CheckItCommandText(inputTextBox.Text, "/retry"))
+                                    {
+                                        inputTextBox.Text = string.Empty;
+                                        this.hooker.Command_Retry();
+                                        return;
+                                    }
+                                }
+                                #endregion
+
+
                                 var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
                                 inputTextBox.Text = string.Empty;
 
-                                if (hooker != null)
-                                    hooker.SendText(sendText);
+                                if (this.hooker != null)
+                                    this.hooker.SendText(sendText);
                             }
                             return;
                         }
@@ -284,7 +319,7 @@ namespace AIDungeon_Extension
                             e.Handled = true;
 
                             inputTextBox.IsReadOnly = true;
-                            this.vm.TranslateLoadingVisibility = Visibility.Visible;
+                            this.vm.ShowInputTranslateLoading = true;
                             SetStatusText("Translating...");
                             if (translator != null)
                             {
@@ -311,7 +346,7 @@ namespace AIDungeon_Extension
                                 {
                                     Dispatcher.Invoke(() =>
                                     {
-                                        this.vm.TranslateLoadingVisibility = Visibility.Hidden;
+                                        this.vm.ShowInputTranslateLoading = false;
                                         inputTextBox.IsReadOnly = false;
                                     });
                                     this.inputTranslateWork = null;
@@ -403,6 +438,7 @@ namespace AIDungeon_Extension
             hooker.Run();
 
             this.Topmost = true;
+            this.vm.ShowLoading = true;
             Task.Run(() =>
             {
                 while (!hooker.Ready)
@@ -410,7 +446,7 @@ namespace AIDungeon_Extension
 
                 this.Dispatcher.Invoke(() =>
                 {
-                    this.vm.LoadingVisibility = Visibility.Collapsed;
+                    this.vm.ShowLoading = false;
                     this.Topmost = false;
                     this.Activate();
                 });
@@ -434,7 +470,7 @@ namespace AIDungeon_Extension
         {
             if (this.translator != null)
             {
-                this.vm.LoadingVisibility = Visibility.Visible;
+                this.vm.ShowLoading = true;
                 this.vm.LoadingText = Properties.Resources.LoadingText_UpdateDictionary;
 
                 Task.Run(() =>
@@ -443,20 +479,20 @@ namespace AIDungeon_Extension
 
                     this.Dispatcher.Invoke(() =>
                     {
-                        this.vm.LoadingVisibility = Visibility.Collapsed;
+                        this.vm.ShowLoading = false;
                     });
                 });
             }
         }
         private void OpenSideMenu()
         {
-            this.vm.SideMenuVisibility = Visibility.Visible;
-            this.vm.SideMenuButtonVisibility = Visibility.Collapsed;
+            this.vm.ShowSideMenu = true;
+            this.vm.ShowSideMenuButton = !this.vm.ShowSideMenu;
         }
         private void CloseSideMenu()
         {
-            this.vm.SideMenuVisibility = Visibility.Collapsed;
-            this.vm.SideMenuButtonVisibility = Visibility.Visible;
+            this.vm.ShowSideMenu = false;
+            this.vm.ShowSideMenuButton = !this.vm.ShowSideMenu;
         }
         private void OpenChangeFontDialog()
         {
@@ -539,7 +575,7 @@ namespace AIDungeon_Extension
             {
                 Dispatcher.Invoke(() =>
                 {
-                    this.vm.TranslateLoadingVisibility = Visibility.Hidden;
+                    this.vm.ShowInputTranslateLoading = false;
                     inputTextBox.IsReadOnly = false;
                 });
                 this.inputTranslateWork.Abort();
@@ -567,6 +603,27 @@ namespace AIDungeon_Extension
         }
         #endregion
 
+        private void ControlMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as AIDMenuButtonControl;
+            if (button == null) return;
+            switch (button.Tag)
+            {
+                case "redo":
+                    if (this.hooker != null && this.hooker.Ready)
+                        this.hooker.Command_Redo();
+                    break;
+                case "undo":
+                    if (this.hooker != null && this.hooker.Ready)
+                        this.hooker.Command_Undo();
+                    break;
+                case "retry":
+                    if (this.hooker != null && this.hooker.Ready)
+                        this.hooker.Command_Retry();
+                    break;
+            }
+        }
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
@@ -576,6 +633,7 @@ namespace AIDungeon_Extension
                     break;
             }
         }
+
         private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             var item = string.Empty;

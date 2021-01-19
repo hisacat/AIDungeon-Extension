@@ -136,67 +136,6 @@ namespace AIDungeon_Extension.Core
             }
         }
 
-        private IWebElement GetInputTextArea()
-        {
-            try { return driver.FindElementByXPath(XPaths.InputTextArea); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Survival_InputTextArea); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_Option_InputTextArea); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_Answer_InputTextArea); }
-            catch (Exception e) { }
-            return null;
-        }
-        private IWebElement GetSubmitButton()
-        {
-            try { return driver.FindElementByXPath(XPaths.SubmitButton); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Survival_SubmitButton); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_Option_SubmitButton); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_Answer_SubmitButton); }
-            catch (Exception e) { }
-            return null;
-        }
-
-        public bool SendText(string text)
-        {
-            try
-            {
-                var inputTextArea = GetInputTextArea();
-                if (inputTextArea == null) return false;
-
-                inputTextArea.Clear();
-                if (!string.IsNullOrEmpty(text))
-                {
-                    text = text.Replace("\r\n", "\r");
-                    var lines = text.Split('\r');
-                    int lineCount = lines.Length;
-
-                    for (int i = 0; i < lineCount; i++)
-                    {
-                        inputTextArea.SendKeys(lines[i]);
-                        if (i < lineCount - 1)
-                            inputTextArea.SendKeys(Keys.Shift + Keys.Enter);
-                    }
-                }
-
-                var submitButton = GetSubmitButton();
-                if (submitButton == null) return false;
-
-                submitButton.Click();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
-
-            return true;
-        }
-
         private void ParsePayloadData(JToken payloadData)
         {
             var payloadDataType = payloadData["type"].Value<string>();
@@ -305,9 +244,101 @@ namespace AIDungeon_Extension.Core
             }
         }
 
-        public void Refresh()
+        private IWebElement GetInputTextArea()
         {
-            this.driver.Navigate().Refresh();
+            try { return driver.FindElementByXPath(XPaths.InputTextArea); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Survival_InputTextArea); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Scenario_Option_InputTextArea); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Scenario_Answer_InputTextArea); }
+            catch (Exception e) { }
+            return null;
+        }
+        private IWebElement GetSubmitButton()
+        {
+            try { return driver.FindElementByXPath(XPaths.SubmitButton); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Survival_SubmitButton); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Scenario_Option_SubmitButton); }
+            catch (Exception e) { }
+            try { return driver.FindElementByXPath(XPaths.Scenario_Answer_SubmitButton); }
+            catch (Exception e) { }
+            return null;
+        }
+
+        public bool SendText(string text)
+        {
+            if (!this.Ready)
+                return false;
+
+            try
+            {
+                var inputTextArea = GetInputTextArea();
+                if (inputTextArea == null) return false;
+
+                inputTextArea.Clear();
+                if (!string.IsNullOrEmpty(text))
+                {
+                    text = text.Replace("\r\n", "\r");
+                    var lines = text.Split('\r');
+                    int lineCount = lines.Length;
+
+                    for (int i = 0; i < lineCount; i++)
+                    {
+                        inputTextArea.SendKeys(lines[i]);
+                        if (i < lineCount - 1)
+                            inputTextArea.SendKeys(Keys.Shift + Keys.Enter);
+                    }
+                }
+
+                inputTextArea.SendKeys(Keys.Enter);
+                /*
+                var submitButton = GetSubmitButton();
+                if (submitButton == null) return false;
+
+                submitButton.Click();
+                */
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+
+            return true;
+        }
+        public bool Command_Redo()
+        {
+            return SendText("/redo");
+        }
+        public bool Command_Undo()
+        {
+            return SendText("/undo");
+        }
+        public bool Command_Retry()
+        {
+            return SendText("/retry");
+        }
+
+        public bool Refresh()
+        {
+            if (!this.Ready)
+                return false;
+
+            try
+            {
+                this.driver.Navigate().Refresh();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+
+            return true;
         }
 
         #region Data callbacks

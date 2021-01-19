@@ -154,6 +154,15 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Design과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Design {
+            get {
+                return ResourceManager.GetString("SideMenu/Design", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Detach newline texts과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_DetachNewlineTexts {
@@ -249,6 +258,15 @@ namespace AIDungeon_Extension.Properties {
         public static string SideMenu_SetBGImage {
             get {
                 return ResourceManager.GetString("SideMenu/SetBGImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Show Command Buttons과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_ShowCommandButtons {
+            get {
+                return ResourceManager.GetString("SideMenu/ShowCommandButtons", resourceCulture);
             }
         }
         

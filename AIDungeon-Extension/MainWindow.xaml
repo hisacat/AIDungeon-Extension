@@ -24,6 +24,7 @@
         <local:MainWindowViewModel/>
     </Window.DataContext>
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <Style x:Key="RoundCorner" TargetType="{x:Type Button}">
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
@@ -51,7 +52,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style TargetType="Button">
             <Setter Property="Background" Value="{StaticResource AID_Gray}"/>
         </Style>
@@ -112,7 +112,7 @@
             </StatusBar>
 
             <!--SideMenu-->
-            <Grid DockPanel.Dock="Right" Width="220" Visibility="{Binding SideMenuVisibility}">
+            <Grid DockPanel.Dock="Right" Width="220" Visibility="{Binding ShowSideMenu, Converter={StaticResource BoolToVis}}">
                 <Rectangle Fill="{StaticResource AID_Black}" Opacity="0.9"/>
                 <Grid Margin="0,5,0,5">
                     <Grid.RowDefinitions>
@@ -134,7 +134,7 @@
                     <Grid Grid.Row="1">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel Margin="10">
-                                <TextBlock Text="{x:Static prop:Resources.SideMenu_Display}" FontWeight="Bold"/>
+                                <TextBlock Text="{x:Static prop:Resources.SideMenu_Design}" FontWeight="Bold"/>
                                 <Control Height="5"/>
                                 <Button Click="SideMenu_ChangeFontButton_Click" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_Display_ChangeFont}" Margin="3"/>
@@ -198,6 +198,10 @@
                                     <Button Style="{StaticResource RoundCorner}" Click="SideMenu_ClearBGImageButton_Click">
                                         <TextBlock Text="{x:Static prop:Resources.SideMenu_ClearBGImage}" Margin="3"/>
                                     </Button>
+                                    <Control Height="5"/>
+                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_Display}" FontWeight="Bold"/>
+                                    <Control Height="5"/>
+                                    <CheckBox IsChecked="{Binding ShowControlMenus}" Content="{x:Static prop:Resources.SideMenu_ShowCommandButtons}"/>
                                 </StackPanel>
 
                                 <Control Height="10"/>
@@ -217,7 +221,7 @@
                                 <Button Click="SideMenu_UpdateTranslateDictionaryButton_Click" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_UpdateTranslateDictionary}" Margin="3"/>
                                 </Button>
-                                
+
                                 <Control Height="10"/>
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_ControlPanel}" FontWeight="Bold"/>
                                 <Control Height="5"/>
@@ -246,15 +250,25 @@
                 </Grid.RowDefinitions>
                 <!--Contents Actionss-->
                 <Grid Grid.Row="0">
-                    <Grid>
-                        <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Margin="5"  Background="Transparent" Foreground="{Binding TextColor}"
+                    <DockPanel LastChildFill="True">
+                        <Grid DockPanel.Dock="Bottom" >
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="8" Visibility="{Binding ShowControlMenus, Converter={StaticResource BoolToVis}}">
+                                <local:AIDMenuButtonControl Tag="undo"  IconText="󰕌" Text="UNDO" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
+                                <local:AIDMenuButtonControl Tag="redo"  IconText="󰑎" Text="REDO" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
+                                <local:AIDMenuButtonControl Tag="retry"  IconText="󰜉" Text="RETRY" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid DockPanel.Dock="Top">
+                            <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Margin="5,5,5,0"  Background="Transparent" Foreground="{Binding TextColor}"
                              FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
 
-                        <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
+                            <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
                                                  Opacity="0.9"
-                                                 Click="OpenSideMenuButton_Click" Visibility="{Binding SideMenuButtonVisibility}"/>
-                    </Grid>
+                                                 Click="OpenSideMenuButton_Click" Visibility="{Binding ShowSideMenuButton, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </DockPanel>
+
                 </Grid>
 
                 <!--Contents Input-->
@@ -280,12 +294,12 @@
                             </TextBlock>
                         </Grid>
 
-                        <Grid Background="#7F000000" Visibility="{Binding TranslateLoadingVisibility}">
+                        <Grid Background="#7F000000" Visibility="{Binding ShowInputTranslateLoading, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="Translating..." VerticalAlignment="Center" HorizontalAlignment="Center"
                                    Foreground="White"
                                    FontSize="20"/>
                         </Grid>
-                        <Grid Background="#7F000000" Visibility="{Binding InputLoadingVisibility}">
+                        <Grid Background="#7F000000" Visibility="{Binding ShowInputLoading, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="Waitting..." VerticalAlignment="Center" HorizontalAlignment="Center"
                                    Foreground="White"
                                    FontSize="20"/>
@@ -297,7 +311,7 @@
                 <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
             </Grid>
         </DockPanel>
-        <Grid Visibility="{Binding LoadingVisibility}">
+        <Grid Visibility="{Binding ShowLoading, Converter={StaticResource BoolToVis}}">
             <local:LoadingIndicatorControl Visibility="Visible"/>
             <TextBlock Text="{Binding LoadingText}" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center" Height="50" Margin="0,100,0,0"/>
         </Grid>
