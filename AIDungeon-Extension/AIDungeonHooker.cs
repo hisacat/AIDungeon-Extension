@@ -149,7 +149,7 @@ namespace AIDungeon_Extension.Core
                 tempToken = payloadData["id"]; if (tempToken == null) return;
                 var payloadDataId = tempToken.Value<string>();
 
-                tempToken = payloadData["data"]; if (tempToken == null) return;
+                tempToken = payloadData["payload"]; if (tempToken == null) return;
                 var payload = tempToken;
 
                 if (payload.HasValues)
