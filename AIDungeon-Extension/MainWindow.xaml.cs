@@ -490,7 +490,7 @@ namespace AIDungeon_Extension
         }
         private void OpenTranslateDictionary()
         {
-            Translator.OpenDictionary();
+            Translator.OpenDictionaryFile();
         }
         private void UpdateTranslateDictionary()
         {

@@ -22,30 +22,13 @@ namespace AIDungeon_Extension.Core
         public delegate void OnInputLoadingChangedDelegate(bool isOn);
         public event OnInputLoadingChangedDelegate OnInputLoadingChanged = null;
 
-        public static class XPaths
-        {
-            public const string Login_IdInput = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[3]/input";
-            public const string Login_PasswordInput = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[4]/input";
-            public const string Login_Button = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[5]/div/div";
-
-            //-----Will managed from txt / options.
-
-            //In default case.
-            public const string InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/textarea";
-            public const string SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[3]/div/div/div";
-
-            //In survival play.
-            public const string Survival_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[2]/div/div/textarea";
-            public const string Survival_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div[3]/div[2]/div/div/div";
-
-            //In scenario play - Select options (when https://play.aidungeon.io/main/scenarioPlay)
-            public const string Scenario_Option_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/textarea";
-            public const string Scenario_Option_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div[2]/div/div/div";
-
-            //In scenario play - Answer (like input name) (when https://play.aidungeon.io/main/scenarioPlay)
-            public const string Scenario_Answer_InputTextArea = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div[2]/div[2]/div/div/textarea";
-            public const string Scenario_Answer_SubmitButton = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[1]/div/div/div/div[2]/div[2]/div/div/div";
-        }
+        private Dictionary<string, List<string>> xpaths = null;
+        public const string XPathKeyPrefix = ">";
+        public const string XPathKey_Login_IDInputBox = "Login_IDInputBox";
+        public const string XPathKey_Login_PWInputBox = "Login_PWInputBox";
+        public const string XPathKey_Login_LoginButton = "Login_LoginButton";
+        public const string XPathKey_InputBox = "InputBox";
+        public const string XPathKey_AIPopupCloseButton = "AIPopupCloseButton";
 
         private const string LogType_Performance = "performance";
         private const string StartUpURL = "https://play.aidungeon.io/main/loginRegister";
@@ -69,12 +52,74 @@ namespace AIDungeon_Extension.Core
 
         public void Run()
         {
-            this.Ready = false;
-            crawlingThread = new Thread(CrawlingScripts);
-            crawlingThread.Start();
+            this.xpaths = new Dictionary<string, List<string>>();
+            this.LoadXPaths();
 
             SetInputLoading(false);
             this.OnInputLoadingChanged?.Invoke(this.InputLoading);
+
+            this.Ready = false;
+            crawlingThread = new Thread(CrawlingScripts);
+            crawlingThread.Start();
+        }
+        private void LoadDefaultXPaths()
+        {
+            this.xpaths.Add(XPathKey_Login_IDInputBox, new List<string>() { "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[3]/input" });
+            this.xpaths.Add(XPathKey_Login_PWInputBox, new List<string>() { "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[4]/input" });
+            this.xpaths.Add(XPathKey_Login_LoginButton, new List<string>() { "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[5]/div/div" });
+            this.xpaths.Add(XPathKey_InputBox, new List<string>() { "//*[@class=\"css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox\"]/textarea[@placeholder]" });
+            this.xpaths.Add(XPathKey_AIPopupCloseButton, new List<string>() { "//*[@class=\"css-18t94o4 css-1dbjc4n r-1loqt21 r-u8s1d r-zchlnj r-ipm5af r-1otgn73 r-1i6wzkk r-lrvibr\" and @aria-label=\"close\"]" });
+        }
+        private void LoadXPaths()
+        {
+            lock (this.xpaths)
+            {
+                this.xpaths.Clear();
+
+                LoadDefaultXPaths();
+
+                var filePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "XPaths.txt");
+                if (System.IO.File.Exists(filePath))
+                {
+                    var currentKey = string.Empty;
+                    var lines = System.IO.File.ReadAllLines(filePath);
+                    foreach (var line in lines)
+                    {
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+
+                        if (line.StartsWith(XPathKeyPrefix))
+                        {
+                            currentKey = line.Remove(0, XPathKeyPrefix.Length);
+                            continue;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(currentKey))
+                            continue;
+
+                        if (!this.xpaths.ContainsKey(currentKey))
+                            this.xpaths.Add(currentKey, new List<string>());
+
+                        if (!this.xpaths[currentKey].Contains(line))
+                            this.xpaths[currentKey].Add(line);
+                    }
+                }
+                SaveXPaths();
+                return;
+            }
+        }
+        private void SaveXPaths()
+        {
+            var text = string.Empty;
+            foreach (var key in this.xpaths.Keys)
+            {
+                text += string.Format("{0}{1}", XPathKeyPrefix, key) + System.Environment.NewLine;
+                text += string.Join(System.Environment.NewLine, this.xpaths[key]);
+                text += System.Environment.NewLine + System.Environment.NewLine;
+            }
+
+            var filePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "XPaths.txt");
+            System.IO.File.WriteAllText(filePath, text);
         }
 
         private void CrawlingScripts()
@@ -107,10 +152,17 @@ namespace AIDungeon_Extension.Core
                 Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
                 foreach (var chromeDriverProcess in chromeDriverProcesses)
                 {
-                    if (chromeDriverProcess.MainModule.FileName.StartsWith(
-                        System.AppDomain.CurrentDomain.BaseDirectory))
+                    try
                     {
-                        chromeDriverProcess.Kill();
+                        if (chromeDriverProcess.MainModule.FileName.StartsWith(
+                            System.AppDomain.CurrentDomain.BaseDirectory))
+                        {
+                            chromeDriverProcess.Kill();
+                        }
+                    }
+                    catch (Exception _e)
+                    {
+                        Console.WriteLine("[Exception] Hooker-CrawlingScripts-Kill: " + _e.Message);
                     }
                 }
                 System.Environment.Exit(-1);
@@ -281,28 +333,24 @@ namespace AIDungeon_Extension.Core
             }
         }
 
-        private IWebElement GetInputTextArea()
+        private IWebElement FindElementWithXPathDict(string xPathKey)
         {
-            try { return driver.FindElementByXPath(XPaths.InputTextArea); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Survival_InputTextArea); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_Option_InputTextArea); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_Answer_InputTextArea); }
-            catch (Exception e) { }
-            return null;
-        }
-        private IWebElement GetSubmitButton()
-        {
-            try { return driver.FindElementByXPath(XPaths.SubmitButton); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Survival_SubmitButton); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_Option_SubmitButton); }
-            catch (Exception e) { }
-            try { return driver.FindElementByXPath(XPaths.Scenario_Answer_SubmitButton); }
-            catch (Exception e) { }
+            try
+            {
+                lock (xpaths)
+                {
+                    foreach (var xpath in this.xpaths[xPathKey])
+                    {
+                        var element = driver.FindElementByXPathOrNull(xpath);
+                        if (element != null)
+                            return element;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[Exception] Hooker-FindElement FindElementWithXPathDict: Key {0} XPath {1}", xPathKey, e.Message);
+            }
             return null;
         }
 
@@ -310,14 +358,19 @@ namespace AIDungeon_Extension.Core
         {
             if (!this.Ready)
                 return false;
+            if (this.InputLoading)
+                return false;
 
             try
             {
-                var inputTextArea = GetInputTextArea();
-                if (inputTextArea == null) return false;
-                if (!inputTextArea.Displayed) return false;
+                var popupCloseButton = FindElementWithXPathDict(XPathKey_AIPopupCloseButton);
+                if (popupCloseButton != null) popupCloseButton.Click();
 
-                inputTextArea.Clear();
+                var inputBox = FindElementWithXPathDict(XPathKey_InputBox);
+                if (inputBox == null) return false;
+                if (!inputBox.Displayed) return false;
+
+                inputBox.Clear();
                 if (!string.IsNullOrEmpty(text))
                 {
                     text = text.Replace("\r\n", "\r");
@@ -326,13 +379,13 @@ namespace AIDungeon_Extension.Core
 
                     for (int i = 0; i < lineCount; i++)
                     {
-                        inputTextArea.SendKeys(lines[i]);
+                        inputBox.SendKeys(lines[i]);
                         if (i < lineCount - 1)
-                            inputTextArea.SendKeys(Keys.Shift + Keys.Enter);
+                            inputBox.SendKeys(Keys.Shift + Keys.Enter);
                     }
                 }
 
-                inputTextArea.SendKeys(Keys.Enter);
+                inputBox.SendKeys(Keys.Enter);
                 SetInputLoading(true);
             }
             catch (Exception e)

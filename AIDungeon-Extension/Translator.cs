@@ -215,7 +215,7 @@ namespace AIDungeon_Extension
             }
         }
 
-        public static void OpenDictionary()
+        public static void OpenDictionaryFile()
         {
             var dictionaryPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Dictionary.txt");
             if (!System.IO.File.Exists(dictionaryPath)) System.IO.File.Create(dictionaryPath);

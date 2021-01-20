@@ -10,6 +10,8 @@ Todo
 			Button - Redo
 			Button - Undo
 			Button - Retry
+			Refactor XPaths (managed to file)
+			Use ender instead sendbutton when send text
 		*Translation:
 			Translation dictionary
 			Cancel input translation
@@ -22,12 +24,8 @@ Todo
 
 	Next feature:
 		*Main:
-			Refactor XPaths
-			inputText: //*[@class="css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox"]/textarea[@placeholder]
-			sendButton: //*[@class="css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox"]/*[@role="button" and @aria-label="Submit"]
-			***use ender instead sendbutton!***
 			***make user-written text to bold.***
-			alt+enter to reverse translate.
+			alt+enter to reverse translate (with balloon)
 			adventure option, input.
 			auto-login
 		*Translation:
