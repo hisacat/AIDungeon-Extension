@@ -61,6 +61,24 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Translating...과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string InputBoxLoading_Translating {
+            get {
+                return ResourceManager.GetString("InputBoxLoading/Translating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Waiting...과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string InputBoxLoading_Waiting {
+            get {
+                return ResourceManager.GetString("InputBoxLoading/Waiting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Initializing...과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string LoadingText_Initializing {

@@ -29,6 +29,7 @@ Todo
 			***make user-written text to bold.***
 			alt+enter to reverse translate.
 			adventure option, input.
+			auto-login
 		*Translation:
 			Refactor cancel input translation
 		*Design:

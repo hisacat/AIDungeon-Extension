@@ -16,6 +16,12 @@ namespace AIDungeon_Extension.Core
 {
     public class AIDungeonHooker : IDisposable
     {
+        public const bool LoggingDataType = true;
+        public const bool LoggingDataJson = true;
+        public bool InputLoading { get; private set; }
+        public delegate void OnInputLoadingChangedDelegate(bool isOn);
+        public event OnInputLoadingChangedDelegate OnInputLoadingChanged = null;
+
         public static class XPaths
         {
             public const string Login_IdInput = "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[3]/input";
@@ -66,6 +72,9 @@ namespace AIDungeon_Extension.Core
             this.Ready = false;
             crawlingThread = new Thread(CrawlingScripts);
             crawlingThread.Start();
+
+            SetInputLoading(false);
+            this.OnInputLoadingChanged?.Invoke(this.InputLoading);
         }
 
         private void CrawlingScripts()
@@ -174,7 +183,14 @@ namespace AIDungeon_Extension.Core
                         }
                         if (skip) continue;
 
-                        Console.WriteLine("[Log] Hooker-detect: {0} : {1}", dataType, json);
+                        if (LoggingDataType)
+                        {
+                            if (LoggingDataJson)
+                                Console.WriteLine("[Log] Hooker-detect: {0}:\r\n{1}", dataType, json);
+                            else
+                                Console.WriteLine("[Log] Hooker-detect: {0}", dataType);
+
+                        }
                         switch (dataType)
                         {
                             #region Others
@@ -186,12 +202,14 @@ namespace AIDungeon_Extension.Core
                             case "price":
                                 break;
                             #endregion
-                            #region Control callbacks
-                            case "editAction": //when Edit.
+                            #region Action result callbacks
                             case "undoAction": //when Undo.
+                            case "restoreAction": //when Restore or redo(case)
                             case "retryAction": //when Retry.
-                            case "restoreAction": //when Restore.
-                            case "addAction": //AI Sent?
+                            case "addAction": //when action added or error(AI cant reply)
+                            case "editAction": //when Edit (Its not loading but just add for safety)
+                                //case "updateAdventureMemory" from bottom.
+                                SetInputLoading(false);
                                 break;
                             #endregion
                             #region Etc.
@@ -225,6 +243,7 @@ namespace AIDungeon_Extension.Core
                                 break;
                             case "updateAdventureMemory":
                                 OnUpdateAdventureMemoryCallback(data.ToObject<AIDungeonWrapper.Adventure>());
+                                SetInputLoading(false);
                                 break;
                             case "adventure":
                                 OnAdventureCallback(data.ToObject<AIDungeonWrapper.Adventure>());
@@ -249,7 +268,7 @@ namespace AIDungeon_Extension.Core
                             #endregion
                             default:
                                 {
-                                    Console.WriteLine("[TRACE] Unknown dataType : {0}", dataType);
+                                    Console.WriteLine("[TRACE] Unknown dataType: {0}", dataType);
                                 }
                                 break;
                         }
@@ -296,6 +315,7 @@ namespace AIDungeon_Extension.Core
             {
                 var inputTextArea = GetInputTextArea();
                 if (inputTextArea == null) return false;
+                if (!inputTextArea.Displayed) return false;
 
                 inputTextArea.Clear();
                 if (!string.IsNullOrEmpty(text))
@@ -313,12 +333,7 @@ namespace AIDungeon_Extension.Core
                 }
 
                 inputTextArea.SendKeys(Keys.Enter);
-                /*
-                var submitButton = GetSubmitButton();
-                if (submitButton == null) return false;
-
-                submitButton.Click();
-                */
+                SetInputLoading(true);
             }
             catch (Exception e)
             {
@@ -341,6 +356,18 @@ namespace AIDungeon_Extension.Core
             return SendText("/retry");
         }
 
+        private void SetInputLoading(bool isOn)
+        {
+            if (this.InputLoading != isOn)
+                this.InputLoading = isOn;
+
+            OnInputLoadingChanged?.Invoke(this.InputLoading);
+        }
+        public void ForceSetInputLoading(bool isOn)
+        {
+            SetInputLoading(isOn);
+        }
+
         public bool Refresh()
         {
             if (!this.Ready)
@@ -349,6 +376,7 @@ namespace AIDungeon_Extension.Core
             try
             {
                 this.driver.Navigate().Refresh();
+                this.SetInputLoading(false);
             }
             catch (Exception e)
             {

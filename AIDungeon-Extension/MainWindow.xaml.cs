@@ -169,6 +169,15 @@ namespace AIDungeon_Extension
             });
         }
 
+        private void AdventureChangedCallback(AIDungeonWrapper.Adventure adventure)
+        {
+            actionContainer.Clear();
+            this.currentAdventureId = adventure.id;
+
+            if (this.hooker != null)
+                this.hooker.ForceSetInputLoading(false);
+        }
+
         #region AIDungeonHooker callbacks
         private void OnScenario(AIDungeonWrapper.Scenario scenario)
         {
@@ -184,10 +193,8 @@ namespace AIDungeon_Extension
                 return;
 
             if (this.currentAdventureId != adventure.id)
-            {
-                actionContainer.Clear();
-                this.currentAdventureId = adventure.id;
-            }
+                AdventureChangedCallback(adventure);
+
             actionContainer.AddRange(adventure.actionWindow);
         }
         private void OnAdventureUpdated(AIDungeonWrapper.Adventure adventure)
@@ -196,10 +203,8 @@ namespace AIDungeon_Extension
                 return;
 
             if (this.currentAdventureId != adventure.id)
-            {
-                actionContainer.Clear();
-                this.currentAdventureId = adventure.id;
-            }
+                AdventureChangedCallback(adventure);
+
             actionContainer.AddRange(adventure.actionWindow);
         }
         private void OnActionsUndone(List<AIDungeonWrapper.Action> actions)
@@ -305,12 +310,19 @@ namespace AIDungeon_Extension
                                 }
                                 #endregion
 
-
                                 var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
-                                inputTextBox.Text = string.Empty;
 
                                 if (this.hooker != null)
-                                    this.hooker.SendText(sendText);
+                                {
+                                    if (this.hooker.SendText(sendText))
+                                    {
+                                        inputTextBox.Text = string.Empty;
+                                    }
+                                    else
+                                    {
+                                        this.SetStatusText("Cannot send text. hooker is busy");
+                                    }
+                                }
                             }
                             return;
                         }
@@ -435,6 +447,7 @@ namespace AIDungeon_Extension
             hooker.OnActionAdded += OnActionAdded;
             hooker.OnActionUpdated += OnActionUpdated;
             hooker.OnActionRestored += OnActionRestored;
+            hooker.OnInputLoadingChanged += OnInputLoadingChanged;
             hooker.Run();
 
             this.Topmost = true;
@@ -459,6 +472,12 @@ namespace AIDungeon_Extension
                 });
             });
         }
+
+        private void OnInputLoadingChanged(bool isOn)
+        {
+            this.vm.ShowInputLoading = isOn;
+        }
+
         private void RestartHooker()
         {
             if (this.hooker != null)
