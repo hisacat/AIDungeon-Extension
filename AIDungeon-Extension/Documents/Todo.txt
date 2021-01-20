@@ -28,6 +28,7 @@ Todo
 			alt+enter to reverse translate (with balloon)
 			adventure option, input.
 			auto-login
+			select translate language.
 		*Translation:
 			Refactor cancel input translation
 		*Design:

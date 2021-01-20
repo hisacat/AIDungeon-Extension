@@ -141,6 +141,15 @@ Open download webpage?
 
 Current chrome version: {0}</value>
   </data>
+  <data name="SaveAccount/Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="SaveAccount/Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SaveAccount/Title" xml:space="preserve">
+    <value>Save Account</value>
+  </data>
   <data name="SideMenu/BGColor" xml:space="preserve">
     <value>Background</value>
   </data>
@@ -206,6 +215,15 @@ Current chrome version: {0}</value>
   </data>
   <data name="SideMenu_ControlPanel" xml:space="preserve">
     <value>Control Panel</value>
+  </data>
+  <data name="WindowMenu/Account" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="WindowMenu/Account/ClearAccount" xml:space="preserve">
+    <value>Clear Account</value>
+  </data>
+  <data name="WindowMenu/Account/SaveAccount" xml:space="preserve">
+    <value>Save Account</value>
   </data>
   <data name="WindowMenu/Developer" xml:space="preserve">
     <value>Developer</value>

@@ -135,6 +135,7 @@ namespace AIDungeon_Extension
             Dispatcher.Invoke(() =>
             {
                 this.actionsTextBox.Text = string.Empty;
+                //게임 시작하고 난 뒤에 윈도우끄면 끄면 여기서 무한루프됨. 이유 알아보자.
                 foreach (var action in actions.ToArray())
                 {
                     if (this.vm.ShowOriginTexts)
@@ -752,6 +753,17 @@ namespace AIDungeon_Extension
         {
             OpenURL(@"https://twitter.com/ahisacat");
         }
+        private void SaveAccountMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new SaveAccountWindow();
+            window.Left = this.Left;
+            window.Top = this.Top;
+            window.Show();
+        }
+        private void ClearAccountMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SaveAccountWindow.RemoveSavedAccount();
+        }
         #endregion
         private void OpenSideMenuButton_Click(object sender, RoutedEventArgs e)
         {
@@ -819,5 +831,6 @@ namespace AIDungeon_Extension
             }
         }
         #endregion
+
     }
 }

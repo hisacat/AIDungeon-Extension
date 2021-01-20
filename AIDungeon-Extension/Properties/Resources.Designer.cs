@@ -127,6 +127,33 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   Cancel과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SaveAccount_Cancel {
+            get {
+                return ResourceManager.GetString("SaveAccount/Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Save과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SaveAccount_Save {
+            get {
+                return ResourceManager.GetString("SaveAccount/Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Save Account과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SaveAccount_Title {
+            get {
+                return ResourceManager.GetString("SaveAccount/Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Background과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_BGColor {
@@ -321,6 +348,33 @@ namespace AIDungeon_Extension.Properties {
         public static string SideMenu_UpdateTranslateDictionary {
             get {
                 return ResourceManager.GetString("SideMenu/UpdateTranslateDictionary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Account과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Account {
+            get {
+                return ResourceManager.GetString("WindowMenu/Account", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Clear Account과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Account_ClearAccount {
+            get {
+                return ResourceManager.GetString("WindowMenu/Account/ClearAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Save Account과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Account_SaveAccount {
+            get {
+                return ResourceManager.GetString("WindowMenu/Account/SaveAccount", resourceCulture);
             }
         }
         

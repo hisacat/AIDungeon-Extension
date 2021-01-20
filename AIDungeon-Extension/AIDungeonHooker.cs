@@ -18,6 +18,8 @@ namespace AIDungeon_Extension.Core
     {
         public const bool LoggingDataType = true;
         public const bool LoggingDataJson = true;
+        public const double LoginFormWaitTimeout = 10;
+
         public bool InputLoading { get; private set; }
         public delegate void OnInputLoadingChangedDelegate(bool isOn);
         public event OnInputLoadingChangedDelegate OnInputLoadingChanged = null;
@@ -59,14 +61,14 @@ namespace AIDungeon_Extension.Core
             this.OnInputLoadingChanged?.Invoke(this.InputLoading);
 
             this.Ready = false;
-            crawlingThread = new Thread(CrawlingScripts);
+            crawlingThread = new Thread(Work);
             crawlingThread.Start();
         }
         private void LoadDefaultXPaths()
         {
-            this.xpaths.Add(XPathKey_Login_IDInputBox, new List<string>() { "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[3]/input" });
-            this.xpaths.Add(XPathKey_Login_PWInputBox, new List<string>() { "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[4]/input" });
-            this.xpaths.Add(XPathKey_Login_LoginButton, new List<string>() { "//*[@id=\"root\"]/div/div[1]/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div[5]/div/div" });
+            this.xpaths.Add(XPathKey_Login_IDInputBox, new List<string>() { "//*[@class=\"css-11aywtz r-snp9zz\" and @type=\"email\"]" });
+            this.xpaths.Add(XPathKey_Login_PWInputBox, new List<string>() { "//*[@class=\"css-11aywtz r-snp9zz\" and @type=\"password\"]" });
+            this.xpaths.Add(XPathKey_Login_LoginButton, new List<string>() { "//*[@aria-label=\"Login\"]/div" });
             this.xpaths.Add(XPathKey_InputBox, new List<string>() { "//*[@class=\"css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox\"]/textarea[@placeholder]" });
             this.xpaths.Add(XPathKey_AIPopupCloseButton, new List<string>() { "//*[@class=\"css-18t94o4 css-1dbjc4n r-1loqt21 r-u8s1d r-zchlnj r-ipm5af r-1otgn73 r-1i6wzkk r-lrvibr\" and @aria-label=\"close\"]" });
         }
@@ -122,7 +124,7 @@ namespace AIDungeon_Extension.Core
             System.IO.File.WriteAllText(filePath, text);
         }
 
-        private void CrawlingScripts()
+        private void Work()
         {
             if (driver != null)
             {
@@ -167,6 +169,48 @@ namespace AIDungeon_Extension.Core
                 }
                 System.Environment.Exit(-1);
             }
+            //Do login
+            try
+            {
+                string account_id;
+                if (SaveAccountWindow.GetSavedAccount_ID(out account_id))
+                {
+                    //Loading..?
+                    IWebElement loginFormElement = null;
+                    IWebElement idInput = null;
+                    IWebElement pwInput = null;
+                    var started = System.DateTime.Now;
+                    do
+                    {
+                        loginFormElement = driver.FindElementByXPathOrNull("/html/body/div[2]");
+                        idInput = FindElementWithXPathDict(XPathKey_Login_IDInputBox);
+                        pwInput = FindElementWithXPathDict(XPathKey_Login_PWInputBox);
+                        if ((System.DateTime.Now - started).TotalSeconds > LoginFormWaitTimeout)
+                            throw new Exception("Timeout");
+
+                    } while (loginFormElement == null || idInput == null || pwInput == null);
+                    Console.WriteLine("[Log] Loginform wait completed: {0}", (System.DateTime.Now - started).TotalSeconds);
+
+                    idInput.SendKeys(account_id);
+                    account_id = null;
+
+                    string account_pw;
+                    if (SaveAccountWindow.GetSavedAccount_Password(out account_pw))
+                    {
+                        pwInput.SendKeys(account_pw);
+                        account_pw = null;
+
+                        var loginButton = FindElementWithXPathDict(XPathKey_Login_LoginButton);
+                        if (loginButton != null)
+                            loginButton.Click();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[Exception] Hooker-AutoLogin: " + e.Message);
+            }
+
             while (true)
             {
                 try

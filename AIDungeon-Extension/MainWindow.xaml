@@ -97,6 +97,10 @@
                     <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help_CheckUpdate}" Click="Help_CheckForUpdateButton_Click"/>
                     <MenuItem Header="{x:Static prop:Resources.WindowMenu_Developer}" Click="Help_DeveloperButton_Click"/>
                 </MenuItem>
+                <MenuItem Header="{x:Static prop:Resources.WindowMenu_Account}">
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Account_SaveAccount}" Click="SaveAccountMenuItem_Click"/>
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Account_ClearAccount}" Click="ClearAccountMenuItem_Click"/>
+                </MenuItem>
             </Menu>
 
             <!--Bottom statusbar-->
