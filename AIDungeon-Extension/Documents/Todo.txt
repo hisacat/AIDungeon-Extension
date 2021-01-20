@@ -1,3 +1,5 @@
+Trello: https://trello.com/b/Y8P6VzhT
+
 Todo
 	Done:
 		*Main:
@@ -13,6 +15,7 @@ Todo
 			Refactor XPaths (managed to file)
 			Use ender instead sendbutton when send text
 			Auto-login
+			Wait AI input (loading)
 		*Translation:
 			Translation dictionary
 			Cancel input translation
@@ -37,7 +40,6 @@ Todo
 		
 	Planned:
 		*Main:
-			Wait AI input (loading)
 			Command - /Alter (edit)
 			Command - /Remember (pin)
 			Button - Edit (alter)
