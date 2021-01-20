@@ -51,3 +51,4 @@ Todo
 		*Etc:
 			Export/Load theme
 			Input text enter key binding
+			Auto-update

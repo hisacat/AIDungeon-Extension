@@ -135,6 +135,11 @@ namespace AIDungeon_Extension.Core
             var options = new ChromeOptions();
             options.SetLoggingPreference(LogType_Performance, LogLevel.All);
             options.AddArgument("disable-gpu");
+            options.AddArgument("disable-infobars");
+            options.AddArgument("--disable-extensions");
+            //options.AddUserProfilePreference("profile.default_content_settings", 2);
+            //options.AddUserProfilePreference("profile.default_content_setting_values", 2);
+
             //options.AddArgument("-homepage \"" + StartUpURL + "\"");
             options.AddArgument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6)" +
                 "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"); //Not bot
