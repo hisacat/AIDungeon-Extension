@@ -94,6 +94,7 @@
     <Compile Include="BackButtonControl.xaml.cs">
       <DependentUpon>BackButtonControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ChromeDriverExtension.cs" />
     <Compile Include="DisplayAIDActionContainer.cs" />
     <Compile Include="AIDungeonHooker.Wrapper.cs" />
     <Compile Include="Ini.cs" />

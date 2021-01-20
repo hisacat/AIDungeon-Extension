@@ -119,6 +119,7 @@ namespace AIDungeon_Extension
             }
             catch (Exception e)
             {
+                Console.WriteLine("[Exception] Hooker-CrawlingScripts-LoadChromeDriver: " + e.Message);
                 Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
                 foreach (var chromeDriverProcess in chromeDriverProcesses)
                 {
@@ -193,15 +194,19 @@ namespace AIDungeon_Extension
 
                             try
                             {
-                                translatedElement = driver.FindElementByXPath(TranslateResultXPath);
+                                translatedElement = driver.FindElementByXPathOrNull(TranslateResultXPath);
                             }
-                            catch (Exception e) { } //Needs timeout
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("[Exception] Translator-Update(TranslateWork)-FindElement: " + e.Message);
+                            } //Needs timeout
                         } while (translatedElement == null);
 
                         currentWork.TranslatedCallback(translatedElement.GetAttribute("data-text"));
                     }
                     catch (Exception e)
                     {
+                        Console.WriteLine("[Exception] Translator-Update(TranslateWork): " + e.Message);
                         currentWork.FailedCallback(e.Message);
                     }
                 }
@@ -209,6 +214,7 @@ namespace AIDungeon_Extension
                 System.Threading.Thread.Sleep(1);
             }
         }
+
         public static void OpenDictionary()
         {
             var dictionaryPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Dictionary.txt");

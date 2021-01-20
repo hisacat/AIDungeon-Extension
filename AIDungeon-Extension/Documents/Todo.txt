@@ -26,6 +26,9 @@ Todo
 			inputText: //*[@class="css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox"]/textarea[@placeholder]
 			sendButton: //*[@class="css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox"]/*[@role="button" and @aria-label="Submit"]
 			***use ender instead sendbutton!***
+			***make user-written text to bold.***
+			alt+enter to reverse translate.
+			adventure option, input.
 		*Translation:
 			Refactor cancel input translation
 		*Design:

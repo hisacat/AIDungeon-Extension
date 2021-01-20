@@ -94,6 +94,7 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
+                Console.WriteLine("[Exception] Hooker-CrawlingScripts-LoadChromeDriver: " + e.Message);
                 Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
                 foreach (var chromeDriverProcess in chromeDriverProcesses)
                 {
@@ -131,116 +132,132 @@ namespace AIDungeon_Extension.Core
                 }
                 catch (Exception e)
                 {
-
+                    Console.WriteLine("[Exception] Hooker-CrawlingScripts: " + e.Message);
                 }
             }
         }
 
         private void ParsePayloadData(JToken payloadData)
         {
-            var payloadDataType = payloadData["type"].Value<string>();
-            var payloadDataId = payloadData["id"].Value<string>();
-            var payload = payloadData["payload"];
-
-            if (payload.HasValues)
+            try
             {
-                var datas = payload["data"].ToObject<JObject>();
-                foreach (var dataPair in datas)
+
+                JToken tempToken = null;
+                tempToken = payloadData["type"]; if (tempToken == null) return;
+                var payloadDataType = tempToken.Value<string>();
+
+                tempToken = payloadData["id"]; if (tempToken == null) return;
+                var payloadDataId = tempToken.Value<string>();
+
+                tempToken = payloadData["data"]; if (tempToken == null) return;
+                var payload = tempToken;
+
+                if (payload.HasValues)
                 {
-                    var dataType = dataPair.Key;
-                    var data = dataPair.Value;
-
-                    var json = data.ToString();
-
-                    //Ignore list - for debug.
-                    bool skip = false;
-                    var ignoreList = new string[] { "sendEvent", "sendExperimentEvent" };
-                    foreach (var ignore in ignoreList)
+                    var datas = payload["data"].ToObject<JObject>();
+                    foreach (var dataPair in datas)
                     {
-                        if (dataType.Equals(ignore))
+                        var dataType = dataPair.Key;
+                        var data = dataPair.Value;
+
+                        var json = data.ToString();
+
+                        //Ignore list - for debug.
+                        bool skip = false;
+                        var ignoreList = new string[] { "sendEvent", "sendExperimentEvent" };
+                        foreach (var ignore in ignoreList)
                         {
-                            skip = true;
-                            break;
+                            if (dataType.Equals(ignore))
+                            {
+                                skip = true;
+                                break;
+                            }
+                        }
+                        if (skip) continue;
+
+                        switch (dataType)
+                        {
+                            #region Others
+                            case "search":
+                            case "refreshSearchIndex":
+                            case "saveContent":
+                            case "updateAdventureWorldInfo":
+                            case "scenarioLeaderboard":
+                            case "price":
+                                break;
+                            #endregion
+                            #region Bottom control button callbacks
+                            case "editAction": //when Edit.
+                            case "undoAction": //when Undo.
+                            case "retryAction": //when Retry.
+                            case "restoreAction": //when Restore.
+                                break;
+                            #endregion
+                            #region Etc.
+                            case "addDeviceToken":
+                                OnAddDeviceTokenCallback(data.Value<bool>());
+                                break;
+                            case "markAsTyping":
+                                OnMarkAsTypingCallback(data.Value<bool>());
+                                break;
+                            case "featureFlags":
+                                OnFeatureFlagsCallback(data.ToObject<List<AIDungeonWrapper.FeatureFlag>>());
+                                break;
+                            #endregion
+                            #region Users
+                            case "createAnonymousAccount":
+                                OnCreateAnonymousAccountCallback(data.ToObject<AIDungeonWrapper.User>());
+                                break;
+                            case "login":
+                                OnLoginCallback(data.ToObject<AIDungeonWrapper.User>());
+                                break;
+                            case "updateUser":
+                                OnUpdateUserCallback(data.ToObject<AIDungeonWrapper.User>());
+                                break;
+                            case "user":
+                                OnUserCallback(data.ToObject<AIDungeonWrapper.User>());
+                                break;
+                            #endregion
+                            #region Game
+                            case "scenario":
+                                OnScenarioCallback(data.ToObject<AIDungeonWrapper.Scenario>());
+                                break;
+                            case "updateAdventureMemory":
+                                OnUpdateAdventureMemoryCallback(data.ToObject<AIDungeonWrapper.Adventure>());
+                                break;
+                            case "adventure":
+                                OnAdventureCallback(data.ToObject<AIDungeonWrapper.Adventure>());
+                                break;
+                            case "adventureUpdated":
+                                var testobj = data.ToObject<AIDungeonWrapper.Adventure>();
+                                OnAdventureUpdatedCallback(data.ToObject<AIDungeonWrapper.Adventure>());
+                                Console.WriteLine(testobj.allPlayers[0].isTyping);
+                                break;
+                            case "actionsUndone":
+                                OnActionsUndoneCallback(data.ToObject<List<AIDungeonWrapper.Action>>());
+                                break;
+                            case "actionAdded":
+                                OnActionAddedCallback(data.ToObject<AIDungeonWrapper.Action>());
+                                break;
+                            case "actionUpdated":
+                                OnActionUpdatedCallback(data.ToObject<AIDungeonWrapper.Action>());
+                                break;
+                            case "actionRestored":
+                                OnActionRestoredCallback(data.ToObject<AIDungeonWrapper.Action>());
+                                break;
+                            #endregion
+                            default:
+                                {
+                                    Console.WriteLine("[TRACE] Unknown dataType : {0}", dataType);
+                                }
+                                break;
                         }
                     }
-                    if (skip) continue;
-
-                    switch (dataType)
-                    {
-                        #region Others
-                        case "search":
-                        case "refreshSearchIndex":
-                        case "saveContent":
-                        case "updateAdventureWorldInfo":
-                        case "scenarioLeaderboard":
-                        case "price":
-                            break;
-                        #endregion
-                        #region Bottom control button callbacks
-                        case "editAction": //when Edit.
-                        case "undoAction": //when Undo.
-                        case "retryAction": //when Retry.
-                        case "restoreAction": //when Restore.
-                            break;
-                        #endregion
-                        #region Etc.
-                        case "addDeviceToken":
-                            OnAddDeviceTokenCallback(data.Value<bool>());
-                            break;
-                        case "markAsTyping":
-                            OnMarkAsTypingCallback(data.Value<bool>());
-                            break;
-                        case "featureFlags":
-                            OnFeatureFlagsCallback(data.ToObject<List<AIDungeonWrapper.FeatureFlag>>());
-                            break;
-                        #endregion
-                        #region Users
-                        case "createAnonymousAccount":
-                            OnCreateAnonymousAccountCallback(data.ToObject<AIDungeonWrapper.User>());
-                            break;
-                        case "login":
-                            OnLoginCallback(data.ToObject<AIDungeonWrapper.User>());
-                            break;
-                        case "updateUser":
-                            OnUpdateUserCallback(data.ToObject<AIDungeonWrapper.User>());
-                            break;
-                        case "user":
-                            OnUserCallback(data.ToObject<AIDungeonWrapper.User>());
-                            break;
-                        #endregion
-                        #region Game
-                        case "scenario":
-                            OnScenarioCallback(data.ToObject<AIDungeonWrapper.Scenario>());
-                            break;
-                        case "updateAdventureMemory":
-                            OnUpdateAdventureMemoryCallback(data.ToObject<AIDungeonWrapper.Adventure>());
-                            break;
-                        case "adventure":
-                            OnAdventureCallback(data.ToObject<AIDungeonWrapper.Adventure>());
-                            break;
-                        case "adventureUpdated":
-                            OnAdventureUpdatedCallback(data.ToObject<AIDungeonWrapper.Adventure>());
-                            break;
-                        case "actionsUndone":
-                            OnActionsUndoneCallback(data.ToObject<List<AIDungeonWrapper.Action>>());
-                            break;
-                        case "actionAdded":
-                            OnActionAddedCallback(data.ToObject<AIDungeonWrapper.Action>());
-                            break;
-                        case "actionUpdated":
-                            OnActionUpdatedCallback(data.ToObject<AIDungeonWrapper.Action>());
-                            break;
-                        case "actionRestored":
-                            OnActionRestoredCallback(data.ToObject<AIDungeonWrapper.Action>());
-                            break;
-                        #endregion
-                        default:
-                            {
-                                Console.WriteLine("[TRACE] Unknown dataType : {0}", dataType);
-                            }
-                            break;
-                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[Exception] Hooker-ParsePayloadData: " + e.Message);
             }
         }
 
@@ -304,7 +321,7 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("[Exception] Hooker-SendText: " + e.Message);
                 return false;
             }
 
@@ -334,7 +351,7 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("[Exception] Hooker-Refresh: " + e.Message);
                 return false;
             }
 
