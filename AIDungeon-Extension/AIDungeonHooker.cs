@@ -174,6 +174,7 @@ namespace AIDungeon_Extension.Core
                         }
                         if (skip) continue;
 
+                        Console.WriteLine("[Log] Hooker-detect: {0} : {1}", dataType, json);
                         switch (dataType)
                         {
                             #region Others
@@ -191,7 +192,6 @@ namespace AIDungeon_Extension.Core
                             case "retryAction": //when Retry.
                             case "restoreAction": //when Restore.
                             case "addAction": //AI Sent?
-                                Console.WriteLine("[Log] Hooker-Controlcallbacks {0} : {1}", dataType, json);
                                 break;
                             #endregion
                             #region Etc.
