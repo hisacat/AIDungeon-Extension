@@ -141,7 +141,6 @@ namespace AIDungeon_Extension.Core
         {
             try
             {
-
                 JToken tempToken = null;
                 tempToken = payloadData["type"]; if (tempToken == null) return;
                 var payloadDataType = tempToken.Value<string>();

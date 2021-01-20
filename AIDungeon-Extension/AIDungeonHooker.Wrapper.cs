@@ -29,7 +29,7 @@ namespace AIDungeon_Extension.Core
             public string shouldPromptReview;
             public string onFirstAdventure;
             public string avatar;
-            public bool isDeveloper;
+            public object isDeveloper;
             public bool enforceEnergy;
             public int newNotificationCount;
             public string accessToken;
