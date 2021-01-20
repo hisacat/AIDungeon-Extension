@@ -12,6 +12,7 @@ Todo
 			Button - Retry
 			Refactor XPaths (managed to file)
 			Use ender instead sendbutton when send text
+			Auto-login
 		*Translation:
 			Translation dictionary
 			Cancel input translation
@@ -24,10 +25,10 @@ Todo
 
 	Next feature:
 		*Main:
+			Better action viewmodel
 			***make user-written text to bold.***
 			alt+enter to reverse translate (with balloon)
 			adventure option, input.
-			auto-login
 			select translate language.
 		*Translation:
 			Refactor cancel input translation
