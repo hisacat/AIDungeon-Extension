@@ -441,8 +441,15 @@ namespace AIDungeon_Extension
             this.vm.ShowLoading = true;
             Task.Run(() =>
             {
-                while (!hooker.Ready)
+                while (hooker != null && !hooker.Ready)
                     Thread.Sleep(1);
+
+                if (hooker == null)
+                {
+                    Console.WriteLine("[ERROR] Hooker missing at StartHooker");
+                    System.Environment.Exit(-1);
+                    return;
+                }
 
                 this.Dispatcher.Invoke(() =>
                 {

@@ -185,11 +185,13 @@ namespace AIDungeon_Extension.Core
                             case "price":
                                 break;
                             #endregion
-                            #region Bottom control button callbacks
+                            #region Control callbacks
                             case "editAction": //when Edit.
                             case "undoAction": //when Undo.
                             case "retryAction": //when Retry.
                             case "restoreAction": //when Restore.
+                            case "addAction": //AI Sent?
+                                Console.WriteLine("[Log] Hooker-Controlcallbacks {0} : {1}", dataType, json);
                                 break;
                             #endregion
                             #region Etc.
