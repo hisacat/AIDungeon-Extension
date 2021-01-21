@@ -1,0 +1,19 @@
+﻿<Window x:Class="AIDungeon_Extension.TextEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AIDungeon_Extension"
+        mc:Ignorable="d"
+        Title="TextEditorWindow" Height="450" Width="800" WindowStyle="ToolWindow">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" Margin="0,0,0,5" VerticalScrollBarVisibility="Auto"/>
+        <Button Grid.Row="1" Width="100" HorizontalAlignment="Right">
+            <TextBlock Text="Save"/>
+        </Button>
+    </Grid>
+</Window>

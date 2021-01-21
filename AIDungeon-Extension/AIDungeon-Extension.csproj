@@ -107,9 +107,15 @@
     <Compile Include="SaveAccountWindow.xaml.cs">
       <DependentUpon>SaveAccountWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ScenarioOptionControl.xaml.cs">
+      <DependentUpon>ScenarioOptionControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="SideMenuButtonControl.xaml.cs">
       <DependentUpon>SideMenuButtonControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TextEditorWindow.xaml.cs">
+      <DependentUpon>TextEditorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Translator.cs" />
     <Compile Include="WebBrowserTranslator.cs" />
@@ -142,7 +148,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ScenarioOptionControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="SideMenuButtonControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TextEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

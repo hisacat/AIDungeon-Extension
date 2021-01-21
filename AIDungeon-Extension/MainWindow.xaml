@@ -263,10 +263,38 @@
                             </StackPanel>
                         </Grid>
                         <Grid DockPanel.Dock="Top">
-                            <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Margin="5,5,5,0"  Background="Transparent" Foreground="{Binding TextColor}"
-                             FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
-                             HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
-
+                            <!--Actions-->
+                            <Grid Visibility="Collapsed">
+                                <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Margin="5,5,5,0"  Background="Transparent" Foreground="{Binding TextColor}"
+                                         FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
+                                         HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
+                            </Grid>
+                            <!--Scenario Options-->
+                            <Grid Visibility="Visible">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBox Grid.Row="0" Text="Prompts here" 
+                                         Foreground="{Binding TextColor}"
+                                         FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
+                                <ItemsControl Grid.Row="1">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <local:ScenarioOptionControl OrderText="1" Text="option" Margin="5" 
+                                                                 Foreground="{Binding TextColor}"
+                                                                 FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
+                                </ItemsControl>
+                            </Grid>
+                            <!--Prompt-->
+                            <Grid Visibility="Visible">
+                                <TextBox Text="Prompts here" VerticalAlignment="Bottom"
+                                         Foreground="{Binding TextColor}"
+                                         FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
+                            </Grid>
                             <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
                                                  Opacity="0.9"
                                                  Click="OpenSideMenuButton_Click" Visibility="{Binding ShowSideMenuButton, Converter={StaticResource BoolToVis}}"/>
