@@ -274,11 +274,11 @@
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                                          HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
                                     -->
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <ScrollViewer x:Name="actionsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <ItemsControl x:Name="actionsControl"  Grid.Row="1" ItemsSource="{Binding}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <TextBox IsReadOnly="True" TextWrapping="Wrap" Background="Transparent" Text="{Binding Text}"
+                                                    <TextBox IsReadOnly="True" TextWrapping="Wrap" Height="auto" Text="{Binding Text}"
                                                     Foreground="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextColor}"
                                                     FontFamily="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontFamily}"
                                                     FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontSize}"
@@ -377,7 +377,7 @@
                         </Grid>
                     </Grid>
                 </Grid>
-                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="5" ShowsPreview="False"  Background="Black" Opacity="0.5"/>
+                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="5" ShowsPreview="True"  Background="Black" Opacity="0.5"/>
 
                 <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
             </Grid>

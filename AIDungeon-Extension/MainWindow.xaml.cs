@@ -117,7 +117,7 @@ namespace AIDungeon_Extension
             this.model.ShowInputTranslateLoading = false;
             this.model.ShowInputLoading = false;
 
-            //this.actionsTextBox.Text = string.Empty;
+            this.actionModel.Actions.Clear();
 
             UpdateWriteMode(WriteMode.Say);
 
@@ -141,8 +141,6 @@ namespace AIDungeon_Extension
         }
         private void UpdateActionText(List<DisplayAIDActionContainer.DisplayAIDAction> actions, bool forceUpdatee = false)
         {
-            //여러 윈도우가 뎁스로 쌓여있어서 뒤 윈도우에 값을 전달할때가 있음. 이경우 꼬여버림.
-            //해결책이 필요
             Dispatcher.Invoke(() =>
             {
                 var actionsClone = actions.ToArray();
@@ -196,47 +194,8 @@ namespace AIDungeon_Extension
                         this.actionModel.Actions.Remove(actionModelNode);
                 }
 
-                //this.actionModel.Actions.
-
+                actionsScrollViewer.ScrollToBottom();
             });
-            /*
-            Dispatcher.Invoke(() =>
-            {
-                this.actionsTextBox.Text = string.Empty;
-                //게임 시작하고 난 뒤에 윈도우끄면 끄면 여기서 무한루프됨. 이유 알아보자.
-                foreach (var action in actions.ToArray())
-                {
-                    if (this.model.ShowOriginTexts)
-                        this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
-
-                    switch (action.TranslateStatus)
-                    {
-                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Abort:
-                            this.actionsTextBox.Text += "[번역 취소됨]" + System.Environment.NewLine;
-                            break;
-                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Failed:
-                            this.actionsTextBox.Text += "[번역 실패!]:" + action.TranslateFailedReason;
-                            break;
-                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Success:
-                            this.actionsTextBox.Text += action.Translated + System.Environment.NewLine;
-                            break;
-                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Working:
-                            if (this.model.ShowOriginTexts)
-                                this.actionsTextBox.Text += "[번역중...]" + System.Environment.NewLine;
-                            else
-                                this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
-                            break;
-                        case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.None:
-                            this.actionsTextBox.Text += "[번역 준비중]" + System.Environment.NewLine;
-                            break;
-                    }
-
-                    if (!this.model.ShowOriginTexts)
-                        this.actionsTextBox.Text += System.Environment.NewLine;
-                }
-                this.actionsTextBox.ScrollToEnd();
-            });
-            */
         }
 
         private void AdventureChangedCallback(AIDungeonWrapper.Adventure adventure)
@@ -508,19 +467,23 @@ namespace AIDungeon_Extension
 
         private void SaveGameTexts()
         {
-            //var text = this.actionsTextBox.Text;
+            var text = string.Empty;
+            foreach (var t in this.actionModel.Actions)
+                text += t.Text + System.Environment.NewLine;
 
             var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             saveFileDialog.Title = "Save text";
             saveFileDialog.FileName = "AIDungeon.txt";
             saveFileDialog.Filter = "Text|*.txt";
-            //if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            //    File.WriteAllText(saveFileDialog.FileName, text);
+            
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                File.WriteAllText(saveFileDialog.FileName, text);
         }
         private void ResetHooker()
         {
             this.actionContainer.Clear();
-            //this.actionsTextBox.Text = string.Empty;
+
+            this.actionModel.Actions.Clear();
             this.hooker.Refresh();
         }
         private void StartHooker()
