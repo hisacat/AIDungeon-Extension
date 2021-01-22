@@ -165,23 +165,27 @@ namespace AIDungeon_Extension
                     try
                     {
                         var targetText = currentWork.Text;
+
+                        var replaceFormat = "\"{{{0}}}\"";
+                        int currentReplaceIndex = 0;
+                        Dictionary<string, string> replaceStrings = new Dictionary<string, string>();
+
                         lock (this.translateDictionary)
                         {
                             using (var enumerator = this.translateDictionary.Keys.GetEnumerator())
                             {
-                                var maches = Regex.Matches(targetText, @"(\w+)");
                                 while (enumerator.MoveNext())
                                 {
                                     var key = enumerator.Current;
                                     var value = this.translateDictionary[key];
+                                    var regex = string.Format("\\b({0})", key);
 
-                                    foreach (Match match in maches)
+                                    if (Regex.IsMatch(targetText, regex))
                                     {
-                                        if (match.Value == key)
-                                        {
-                                            targetText = targetText.Remove(match.Index, key.Length);
-                                            targetText = targetText.Insert(match.Index, value);
-                                        }
+                                        var replaced = string.Format(replaceFormat, currentReplaceIndex);
+                                        targetText = Regex.Replace(targetText, regex, replaced);
+                                        replaceStrings.Add(replaced, value);
+                                        currentReplaceIndex++;
                                     }
                                 }
                             }
@@ -207,7 +211,11 @@ namespace AIDungeon_Extension
                             } //Needs timeout
                         } while (translatedElement == null);
 
-                        currentWork.TranslatedCallback(translatedElement.GetAttribute("data-text"));
+                        var translated = translatedElement.GetAttribute("data-text");
+                        foreach (var key in replaceStrings.Keys)
+                            translated = translated.Replace(key, replaceStrings[key]);
+
+                        currentWork.TranslatedCallback(translated);
                     }
                     catch (Exception e)
                     {

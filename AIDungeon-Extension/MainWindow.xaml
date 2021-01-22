@@ -252,9 +252,10 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="50" MinHeight="0"/>
                 </Grid.RowDefinitions>
-                <!--Contents Actionss-->
+                <!--Contents Actions-->
                 <Grid Grid.Row="0">
                     <DockPanel LastChildFill="True">
+                        <!--Contents Command buttons-->
                         <Grid DockPanel.Dock="Bottom" >
                             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="8" Visibility="{Binding ShowControlMenus, Converter={StaticResource BoolToVis}}">
                                 <local:AIDMenuButtonControl Tag="undo"  IconText="󰕌" Text="UNDO" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
@@ -262,38 +263,42 @@
                                 <local:AIDMenuButtonControl Tag="retry"  IconText="󰜉" Text="RETRY" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
                             </StackPanel>
                         </Grid>
+                        
+                        <!--Contents Action-->
                         <Grid DockPanel.Dock="Top">
-                            <!--Actions-->
-                            <Grid Visibility="Collapsed">
-                                <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Margin="5,5,5,0"  Background="Transparent" Foreground="{Binding TextColor}"
+                            <Grid Margin="5,5,45,0">
+                                <!--Actions-->
+                                <Grid Visibility="Visible">
+                                    <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Background="Transparent" Foreground="{Binding TextColor}"
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                                          HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
-                            </Grid>
-                            <!--Scenario Options-->
-                            <Grid Visibility="Visible">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBox Grid.Row="0" Text="Prompts here" 
-                                         Foreground="{Binding TextColor}"
+                                </Grid>
+                                <!--Scenario Options-->
+                                <Grid Visibility="Visible">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBox Grid.Row="0" Text="Prompts here" Background="Transparent" TextWrapping="Wrap"
+                                         Foreground="{Binding TextColor}" 
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
-                                <ItemsControl Grid.Row="1">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Vertical"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <local:ScenarioOptionControl OrderText="1" Text="option" Margin="5" 
+                                    <ItemsControl Grid.Row="1">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Vertical"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <local:ScenarioOptionControl OrderText="1" Text="option" Margin="5" 
                                                                  Foreground="{Binding TextColor}"
                                                                  FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
-                                </ItemsControl>
-                            </Grid>
-                            <!--Prompt-->
-                            <Grid Visibility="Visible">
-                                <TextBox Text="Prompts here" VerticalAlignment="Bottom"
+                                    </ItemsControl>
+                                </Grid>
+                                <!--Prompt-->
+                                <Grid Visibility="Visible">
+                                    <TextBox Text="Prompts here" VerticalAlignment="Bottom" Background="Transparent" TextWrapping="Wrap"
                                          Foreground="{Binding TextColor}"
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
+                                </Grid>
                             </Grid>
                             <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
                                                  Opacity="0.9"
