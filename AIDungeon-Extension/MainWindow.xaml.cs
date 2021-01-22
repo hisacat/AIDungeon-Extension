@@ -54,6 +54,23 @@ namespace AIDungeon_Extension
             Story = 2,
         }
         private WriteMode writeMode = default;
+        
+        public class MockModel
+        {
+            public ObservableCollection<MockNode> Nodes;
+
+            public MockModel()
+            {
+                Nodes = new ObservableCollection<MockNode>();
+            }
+        }
+        public class MockNode
+        {
+            public MockNode() { }
+
+            public string OrderText { get; set; }
+            public string Text { get; set; }
+        }
 
         public MainWindow()
         {
@@ -102,7 +119,19 @@ namespace AIDungeon_Extension
 
             CloseSideMenu();
 
-            //return;
+            MockModel myModel = new MockModel();
+            for (int i = 0; i < 4; i++)
+            {
+                MockNode mn = new MockNode();
+                mn.Text = String.Format("Node {0}", i);
+                myModel.Nodes.Add(mn);
+            }
+            // Set DataContext for StackPanel
+            this.TESTSS.ItemsSource = myModel.Nodes;
+            myModel.Nodes[0].Text = "TEST";
+            myModel.Nodes.Add(new MockNode());
+
+            return;
 
             this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
             this.vm.ShowInputTranslateLoading = false;
@@ -632,21 +661,21 @@ namespace AIDungeon_Extension
 
         private void ControlMenuButton_Click(object sender, RoutedEventArgs e)
         {
+            if (this.hooker == null || !this.hooker.Ready || this.hooker.InputLoading)
+                return;
+
             var button = sender as AIDMenuButtonControl;
             if (button == null) return;
             switch (button.Tag)
             {
                 case "redo":
-                    if (this.hooker != null && this.hooker.Ready)
-                        this.hooker.Command_Redo();
+                    this.hooker.Command_Redo();
                     break;
                 case "undo":
-                    if (this.hooker != null && this.hooker.Ready)
-                        this.hooker.Command_Undo();
+                    this.hooker.Command_Undo();
                     break;
                 case "retry":
-                    if (this.hooker != null && this.hooker.Ready)
-                        this.hooker.Command_Retry();
+                    this.hooker.Command_Retry();
                     break;
             }
         }

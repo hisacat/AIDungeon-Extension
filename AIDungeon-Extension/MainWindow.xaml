@@ -263,7 +263,7 @@
                                 <local:AIDMenuButtonControl Tag="retry"  IconText="󰜉" Text="RETRY" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
                             </StackPanel>
                         </Grid>
-                        
+
                         <!--Contents Action-->
                         <Grid DockPanel.Dock="Top">
                             <Grid Margin="5,5,45,0">
@@ -282,15 +282,25 @@
                                     <TextBox Grid.Row="0" Text="Prompts here" Background="Transparent" TextWrapping="Wrap"
                                          Foreground="{Binding TextColor}" 
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
-                                    <ItemsControl Grid.Row="1">
+
+                                    <ItemsControl x:Name="TESTSS"  Grid.Row="1" ItemsSource="{Binding }">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <local:ScenarioOptionControl Margin="5" 
+                                                                             OrderText="{Binding OrderText}" Text="{Binding Text}"
+                                                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextColor}"
+                                                                             FontFamily="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontFamily}"
+                                                                             FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontSize}"
+                                                                             FontWeight="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontWeight}"
+                                                                             FontStyle="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontStyle}"
+                                                                             TextDecorations="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextDecorations}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <StackPanel Orientation="Vertical"/>
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
-                                        <local:ScenarioOptionControl OrderText="1" Text="option" Margin="5" 
-                                                                 Foreground="{Binding TextColor}"
-                                                                 FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
                                     </ItemsControl>
                                 </Grid>
                                 <!--Prompt-->
