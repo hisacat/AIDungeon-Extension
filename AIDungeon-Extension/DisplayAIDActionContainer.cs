@@ -33,6 +33,7 @@ namespace AIDungeon_Extension
             }
             public TranslateStatusType TranslateStatus { get; private set; }
             public string TranslateFailedReason { get; private set; }
+            public bool IsModified { get; set; }
 
             public DisplayAIDAction(DisplayAIDActionContainer container, AIDungeonWrapper.Action action)
             {
@@ -81,9 +82,12 @@ namespace AIDungeon_Extension
                     },
                     finished: () =>
                     {
+                        this.IsModified = true;
                         container.TranslatedCallback(this);
                     });
                 }
+
+                this.IsModified = true;
             }
             public void Dispose()
             {

@@ -17,7 +17,7 @@ namespace AIDungeon_Extension.Core
     public class AIDungeonHooker : IDisposable
     {
         public const bool LoggingDataType = true;
-        public const bool LoggingDataJson = true;
+        public const bool LoggingDataJson = false;
         public const double LoginFormWaitTimeout = 10;
 
         public bool InputLoading { get; private set; }
@@ -69,7 +69,10 @@ namespace AIDungeon_Extension.Core
             this.xpaths.Add(XPathKey_Login_IDInputBox, new List<string>() { "//*[@class=\"css-11aywtz r-snp9zz\" and @type=\"email\"]" });
             this.xpaths.Add(XPathKey_Login_PWInputBox, new List<string>() { "//*[@class=\"css-11aywtz r-snp9zz\" and @type=\"password\"]" });
             this.xpaths.Add(XPathKey_Login_LoginButton, new List<string>() { "//*[@aria-label=\"Login\"]/div" });
-            this.xpaths.Add(XPathKey_InputBox, new List<string>() { "//*[@class=\"css-1dbjc4n r-1awozwy r-18u37iz r-16y2uox\"]/textarea[@placeholder]" });
+            this.xpaths.Add(XPathKey_InputBox, new List<string>() 
+            {
+                "//*[@class=\"css-1dbjc4n r-13awgt0\"]/*[@class=\"css-1dbjc4n r-1p0dtai r-1d2f490 r-12vffkv r-u8s1d r-zchlnj r-ipm5af\"]/*[@class=\"css-1dbjc4n r-1p0dtai r-1d2f490 r-12vffkv r-u8s1d r-zchlnj r-ipm5af\" and not(@aria-hidden)]//*/textarea[@placeholder]"
+            });
             this.xpaths.Add(XPathKey_AIPopupCloseButton, new List<string>() { "//*[@class=\"css-18t94o4 css-1dbjc4n r-1loqt21 r-u8s1d r-zchlnj r-ipm5af r-1otgn73 r-1i6wzkk r-lrvibr\" and @aria-label=\"close\"]" });
         }
         private void LoadXPaths()
@@ -77,8 +80,6 @@ namespace AIDungeon_Extension.Core
             lock (this.xpaths)
             {
                 this.xpaths.Clear();
-
-                LoadDefaultXPaths();
 
                 var filePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "XPaths.txt");
                 if (System.IO.File.Exists(filePath))
@@ -105,6 +106,19 @@ namespace AIDungeon_Extension.Core
                         if (!this.xpaths[currentKey].Contains(line))
                             this.xpaths[currentKey].Add(line);
                     }
+                    
+                    if(!this.xpaths.ContainsKey(XPathKey_Login_IDInputBox) ||
+                        this.xpaths.ContainsKey(XPathKey_Login_PWInputBox) ||
+                        this.xpaths.ContainsKey(XPathKey_Login_LoginButton) ||
+                        this.xpaths.ContainsKey(XPathKey_InputBox) ||
+                        this.xpaths.ContainsKey(XPathKey_AIPopupCloseButton))
+                    {
+                        this.xpaths.Clear();
+                        LoadDefaultXPaths();
+                    }
+                }else
+                {
+                    LoadDefaultXPaths();
                 }
                 SaveXPaths();
                 return;

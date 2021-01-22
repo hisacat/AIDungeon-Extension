@@ -103,7 +103,9 @@
       <DependentUpon>LoadingIndicatorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="MachineKeyProtect.cs" />
-    <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="Models\ActionModel.cs" />
+    <Compile Include="Models\MainWindowViewModel.cs" />
+    <Compile Include="Models\ScenarioOptionModel.cs" />
     <Compile Include="SaveAccountWindow.xaml.cs">
       <DependentUpon>SaveAccountWindow.xaml</DependentUpon>
     </Compile>
@@ -199,6 +201,9 @@
     <Content Include="chromedriver.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="XPaths.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Documents\Todo.txt" />
   </ItemGroup>
   <ItemGroup />

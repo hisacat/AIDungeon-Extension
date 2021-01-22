@@ -226,7 +226,16 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("showControlMenus");
             }
         }
-
+        private string promptText = "prompts here";
+        public string PromptText
+        {
+            get { return this.promptText; }
+            set
+            {
+                this.promptText = value;
+                OnPropertyChanged("promptText");
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)

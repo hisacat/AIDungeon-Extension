@@ -32,7 +32,9 @@ namespace AIDungeon_Extension
     public partial class MainWindow : Window
     {
         public const string VersionStr = "0.1b";
-        private MainWindowViewModel vm = null;
+        private MainWindowViewModel model = null;
+        private ScenarioOptionModel scenarioOptionModel = null;
+        private ActionModel actionModel = null;
         public static readonly RoutedUICommand Reset = new RoutedUICommand("Reset", "Reset", typeof(MainWindow));
         public static readonly RoutedUICommand Save = new RoutedUICommand("Save", "Save", typeof(MainWindow));
         public static readonly RoutedUICommand Exit = new RoutedUICommand("Exit", "Exit", typeof(MainWindow));
@@ -54,23 +56,6 @@ namespace AIDungeon_Extension
             Story = 2,
         }
         private WriteMode writeMode = default;
-        
-        public class MockModel
-        {
-            public ObservableCollection<MockNode> Nodes;
-
-            public MockModel()
-            {
-                Nodes = new ObservableCollection<MockNode>();
-            }
-        }
-        public class MockNode
-        {
-            public MockNode() { }
-
-            public string OrderText { get; set; }
-            public string Text { get; set; }
-        }
 
         public MainWindow()
         {
@@ -112,32 +97,27 @@ namespace AIDungeon_Extension
                 System.Environment.Exit(-1);
             }
 
-            this.vm = new MainWindowViewModel();
-            this.DataContext = this.vm;
+            this.model = new MainWindowViewModel();
+            this.DataContext = this.model;
 
             UpdateColorPickerColorsFromViewModel();
 
             CloseSideMenu();
 
-            MockModel myModel = new MockModel();
-            for (int i = 0; i < 4; i++)
-            {
-                MockNode mn = new MockNode();
-                mn.Text = String.Format("Node {0}", i);
-                myModel.Nodes.Add(mn);
-            }
-            // Set DataContext for StackPanel
-            this.TESTSS.ItemsSource = myModel.Nodes;
-            myModel.Nodes[0].Text = "TEST";
-            myModel.Nodes.Add(new MockNode());
+            this.actionModel = new ActionModel();
+            this.actionsControl.ItemsSource = this.actionModel.Actions;
 
-            return;
+            this.scenarioOptionModel = new ScenarioOptionModel();
+            this.scenarioOptionsControl.ItemsSource = this.scenarioOptionModel.Options;
 
-            this.vm.LoadingText = Properties.Resources.LoadingText_Initializing;
-            this.vm.ShowInputTranslateLoading = false;
-            this.vm.ShowInputLoading = false;
 
-            this.actionsTextBox.Text = string.Empty;
+            //return;
+
+            this.model.LoadingText = Properties.Resources.LoadingText_Initializing;
+            this.model.ShowInputTranslateLoading = false;
+            this.model.ShowInputLoading = false;
+
+            //this.actionsTextBox.Text = string.Empty;
 
             UpdateWriteMode(WriteMode.Say);
 
@@ -159,15 +139,74 @@ namespace AIDungeon_Extension
         {
             UpdateActionText(actions);
         }
-        private void UpdateActionText(List<DisplayAIDActionContainer.DisplayAIDAction> actions)
+        private void UpdateActionText(List<DisplayAIDActionContainer.DisplayAIDAction> actions, bool forceUpdatee = false)
         {
+            //여러 윈도우가 뎁스로 쌓여있어서 뒤 윈도우에 값을 전달할때가 있음. 이경우 꼬여버림.
+            //해결책이 필요
+            Dispatcher.Invoke(() =>
+            {
+                var actionsClone = actions.ToArray();
+
+                foreach (var action in actionsClone)
+                {
+                    if (!this.actionModel.Actions.Any(x => x.AIDAction == action))
+                        this.actionModel.Actions.Add(new ActionModel.Action(action));
+
+                    var actionModelNode = this.actionModel.Actions.First(x => x.AIDAction == action);
+
+                    if(action.IsModified || forceUpdatee)
+                    {
+                        actionModelNode.Text = string.Empty;
+
+                        if (this.model.ShowOriginTexts)
+                            actionModelNode.Text = action.Text + System.Environment.NewLine;
+
+                        switch (action.TranslateStatus)
+                        {
+                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Abort:
+                                actionModelNode.Text += "[번역 취소됨]" + System.Environment.NewLine;
+                                break;
+                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Failed:
+                                actionModelNode.Text += "[번역 실패!]:" + action.TranslateFailedReason;
+                                break;
+                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Success:
+                                actionModelNode.Text += action.Translated + System.Environment.NewLine;
+                                break;
+                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Working:
+                                if (this.model.ShowOriginTexts)
+                                    actionModelNode.Text += "[번역중...]" + System.Environment.NewLine;
+                                else
+                                    actionModelNode.Text += action.Text + System.Environment.NewLine;
+                                break;
+                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.None:
+                                actionModelNode.Text += "[번역 준비중]" + System.Environment.NewLine;
+                                break;
+                        }
+
+                        if (!this.model.ShowOriginTexts)
+                            actionModelNode.Text += System.Environment.NewLine;
+                        action.IsModified = false;
+                    }
+                }
+                this.actionModel.Sort();
+
+                foreach (var actionModelNode in this.actionModel.Actions.ToArray())
+                {
+                    if (!actionsClone.Contains(actionModelNode.AIDAction))
+                        this.actionModel.Actions.Remove(actionModelNode);
+                }
+
+                //this.actionModel.Actions.
+
+            });
+            /*
             Dispatcher.Invoke(() =>
             {
                 this.actionsTextBox.Text = string.Empty;
                 //게임 시작하고 난 뒤에 윈도우끄면 끄면 여기서 무한루프됨. 이유 알아보자.
                 foreach (var action in actions.ToArray())
                 {
-                    if (this.vm.ShowOriginTexts)
+                    if (this.model.ShowOriginTexts)
                         this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
 
                     switch (action.TranslateStatus)
@@ -182,7 +221,7 @@ namespace AIDungeon_Extension
                             this.actionsTextBox.Text += action.Translated + System.Environment.NewLine;
                             break;
                         case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Working:
-                            if (this.vm.ShowOriginTexts)
+                            if (this.model.ShowOriginTexts)
                                 this.actionsTextBox.Text += "[번역중...]" + System.Environment.NewLine;
                             else
                                 this.actionsTextBox.Text += action.Text + System.Environment.NewLine;
@@ -192,11 +231,12 @@ namespace AIDungeon_Extension
                             break;
                     }
 
-                    if (!this.vm.ShowOriginTexts)
+                    if (!this.model.ShowOriginTexts)
                         this.actionsTextBox.Text += System.Environment.NewLine;
                 }
                 this.actionsTextBox.ScrollToEnd();
             });
+            */
         }
 
         private void AdventureChangedCallback(AIDungeonWrapper.Adventure adventure)
@@ -211,6 +251,23 @@ namespace AIDungeon_Extension
         #region AIDungeonHooker callbacks
         private void OnScenario(AIDungeonWrapper.Scenario scenario)
         {
+            /*
+            this.Dispatcher.Invoke(() =>
+            {
+                this.model.PromptText = scenario.prompt;
+                this.scenarioOptionModel.Options.Clear();
+                if (scenario.options != null && scenario.options.Count >= 0)
+                {
+                    int optionCount = scenario.options.Count;
+                    for (int i = 0; i < optionCount; i++)
+                    {
+                        //Order is index+1 in normal case.
+                        this.scenarioOptionModel.Options.Add(
+                            new ScenarioOptionModel.Option() { OrderText = (i + 1).ToString(), Text = scenario.options[i].title });
+                    }
+                }
+            });
+            */
         }
         private void OnUpdateAdventureMemory(AIDungeonWrapper.Adventure adventure)
         {
@@ -361,7 +418,7 @@ namespace AIDungeon_Extension
                             e.Handled = true;
 
                             inputTextBox.IsReadOnly = true;
-                            this.vm.ShowInputTranslateLoading = true;
+                            this.model.ShowInputTranslateLoading = true;
                             SetStatusText("Translating...");
                             if (translator != null)
                             {
@@ -388,7 +445,7 @@ namespace AIDungeon_Extension
                                 {
                                     Dispatcher.Invoke(() =>
                                     {
-                                        this.vm.ShowInputTranslateLoading = false;
+                                        this.model.ShowInputTranslateLoading = false;
                                         inputTextBox.IsReadOnly = false;
                                     });
                                     this.inputTranslateWork = null;
@@ -446,24 +503,24 @@ namespace AIDungeon_Extension
         }
         public void SetStatusText(string text)
         {
-            this.vm.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
+            this.model.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
         }
 
         private void SaveGameTexts()
         {
-            var text = this.actionsTextBox.Text;
+            //var text = this.actionsTextBox.Text;
 
             var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             saveFileDialog.Title = "Save text";
             saveFileDialog.FileName = "AIDungeon.txt";
             saveFileDialog.Filter = "Text|*.txt";
-            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                File.WriteAllText(saveFileDialog.FileName, text);
+            //if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            //    File.WriteAllText(saveFileDialog.FileName, text);
         }
         private void ResetHooker()
         {
             this.actionContainer.Clear();
-            this.actionsTextBox.Text = string.Empty;
+            //this.actionsTextBox.Text = string.Empty;
             this.hooker.Refresh();
         }
         private void StartHooker()
@@ -481,7 +538,7 @@ namespace AIDungeon_Extension
             hooker.Run();
 
             this.Topmost = true;
-            this.vm.ShowLoading = true;
+            this.model.ShowLoading = true;
             Task.Run(() =>
             {
                 while (hooker != null && !hooker.Ready)
@@ -496,7 +553,7 @@ namespace AIDungeon_Extension
 
                 this.Dispatcher.Invoke(() =>
                 {
-                    this.vm.ShowLoading = false;
+                    this.model.ShowLoading = false;
                     this.Topmost = false;
                     this.Activate();
                 });
@@ -505,7 +562,7 @@ namespace AIDungeon_Extension
 
         private void OnInputLoadingChanged(bool isOn)
         {
-            this.vm.ShowInputLoading = isOn;
+            this.model.ShowInputLoading = isOn;
         }
 
         private void RestartHooker()
@@ -526,8 +583,8 @@ namespace AIDungeon_Extension
         {
             if (this.translator != null)
             {
-                this.vm.ShowLoading = true;
-                this.vm.LoadingText = Properties.Resources.LoadingText_UpdateDictionary;
+                this.model.ShowLoading = true;
+                this.model.LoadingText = Properties.Resources.LoadingText_UpdateDictionary;
 
                 Task.Run(() =>
                 {
@@ -535,31 +592,31 @@ namespace AIDungeon_Extension
 
                     this.Dispatcher.Invoke(() =>
                     {
-                        this.vm.ShowLoading = false;
+                        this.model.ShowLoading = false;
                     });
                 });
             }
         }
         private void OpenSideMenu()
         {
-            this.vm.ShowSideMenu = true;
-            this.vm.ShowSideMenuButton = !this.vm.ShowSideMenu;
+            this.model.ShowSideMenu = true;
+            this.model.ShowSideMenuButton = !this.model.ShowSideMenu;
         }
         private void CloseSideMenu()
         {
-            this.vm.ShowSideMenu = false;
-            this.vm.ShowSideMenuButton = !this.vm.ShowSideMenu;
+            this.model.ShowSideMenu = false;
+            this.model.ShowSideMenuButton = !this.model.ShowSideMenu;
         }
         private void OpenChangeFontDialog()
         {
             var fd = new System.Windows.Forms.FontDialog();
 
             //Select current font
-            if (this.vm.FontFamily != null)
+            if (this.model.FontFamily != null)
             {
-                var isBold = this.vm.FontWeight == FontWeights.Bold ? true : false;
-                var isItalic = this.vm.FontStyle == FontStyles.Italic ? true : false;
-                var fdFontSize = (float)((this.vm.FontSize * 72.0) / 96.0);
+                var isBold = this.model.FontWeight == FontWeights.Bold ? true : false;
+                var isItalic = this.model.FontStyle == FontStyles.Italic ? true : false;
+                var fdFontSize = (float)((this.model.FontSize * 72.0) / 96.0);
                 var fdFontStyle = System.Drawing.FontStyle.Regular;
                 if (isBold) fdFontStyle = fdFontStyle | System.Drawing.FontStyle.Bold;
                 if (isItalic) fdFontStyle = fdFontStyle | System.Drawing.FontStyle.Italic;
@@ -567,7 +624,7 @@ namespace AIDungeon_Extension
                 if (fdFontSize <= 0)
                     fdFontSize = 9;
 
-                string fdFontName = this.vm.FontFamily == null ? null : this.vm.FontFamily.Source;
+                string fdFontName = this.model.FontFamily == null ? null : this.model.FontFamily.Source;
 
                 var fdFont = new System.Drawing.Font(fdFontName, fdFontSize, fdFontStyle);
 
@@ -587,11 +644,11 @@ namespace AIDungeon_Extension
                 if (fd.Font.Strikeout) tdc.Add(TextDecorations.Strikethrough);
                 var textDecorations = tdc;
 
-                this.vm.FontFamily = fontFamily;
-                this.vm.FontSize = fontSize;
-                this.vm.FontWeight = fontWeight;
-                this.vm.FontStyle = fontStyle;
-                this.vm.TextDecorations = textDecorations;
+                this.model.FontFamily = fontFamily;
+                this.model.FontSize = fontSize;
+                this.model.FontWeight = fontWeight;
+                this.model.FontStyle = fontStyle;
+                this.model.TextDecorations = textDecorations;
             }
         }
         private void OpenSelectBGImageDialog()
@@ -602,28 +659,28 @@ namespace AIDungeon_Extension
             openFileDialog.Filter = "Images Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png)|*.jpg;*.jpeg;*.gif;*.bmp;*.png";
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                this.vm.BGImage = openFileDialog.FileName;
+                this.model.BGImage = openFileDialog.FileName;
             }
         }
         private void ClearBGImage()
         {
-            this.vm.BGImage = null;
+            this.model.BGImage = null;
         }
         private void ResetColorToDefault()
         {
-            this.vm.TextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
-            this.vm.BGColor = (SolidColorBrush)Application.Current.Resources["AID_Black"];
-            this.vm.InputBoxColor = (SolidColorBrush)Application.Current.Resources["AID_Gray"];
-            this.vm.InputTextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+            this.model.TextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
+            this.model.BGColor = (SolidColorBrush)Application.Current.Resources["AID_Black"];
+            this.model.InputBoxColor = (SolidColorBrush)Application.Current.Resources["AID_Gray"];
+            this.model.InputTextColor = (SolidColorBrush)Application.Current.Resources["AID_White"];
 
             UpdateColorPickerColorsFromViewModel();
         }
         private void UpdateColorPickerColorsFromViewModel()
         {
-            this.bgColorPicker.SelectedColor = this.vm.BGColor.Color;
-            this.textColorPicker.SelectedColor = this.vm.TextColor.Color;
-            this.inputBoxColorPicker.SelectedColor = this.vm.InputBoxColor.Color;
-            this.inputTextColorPicker.SelectedColor = this.vm.InputTextColor.Color;
+            this.bgColorPicker.SelectedColor = this.model.BGColor.Color;
+            this.textColorPicker.SelectedColor = this.model.TextColor.Color;
+            this.inputBoxColorPicker.SelectedColor = this.model.InputBoxColor.Color;
+            this.inputTextColorPicker.SelectedColor = this.model.InputTextColor.Color;
         }
         private void CancelInputTranslate()
         {
@@ -631,7 +688,7 @@ namespace AIDungeon_Extension
             {
                 Dispatcher.Invoke(() =>
                 {
-                    this.vm.ShowInputTranslateLoading = false;
+                    this.model.ShowInputTranslateLoading = false;
                     inputTextBox.IsReadOnly = false;
                 });
                 this.inputTranslateWork.Abort();
@@ -650,12 +707,12 @@ namespace AIDungeon_Extension
         private void OnShownOriginTextsChanged()
         {
             if (this.actionContainer != null)
-                UpdateActionText(this.actionContainer.Actions);
+                UpdateActionText(this.actionContainer.Actions, true);
         }
         private void OnDetachNewLineTextsChanged()
         {
             if (this.actionContainer != null)
-                this.actionContainer.SetForceNewLine(this.vm.DetachNewlineTexts);
+                this.actionContainer.SetForceNewLine(this.model.DetachNewlineTexts);
         }
         #endregion
 
@@ -754,22 +811,22 @@ namespace AIDungeon_Extension
         private void textColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             if (e.NewValue.HasValue)
-                this.vm.TextColor = new SolidColorBrush(e.NewValue.Value);
+                this.model.TextColor = new SolidColorBrush(e.NewValue.Value);
         }
         private void bgColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             if (e.NewValue.HasValue)
-                this.vm.BGColor = new SolidColorBrush(e.NewValue.Value);
+                this.model.BGColor = new SolidColorBrush(e.NewValue.Value);
         }
         private void inputBoxColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             if (e.NewValue.HasValue)
-                this.vm.InputBoxColor = new SolidColorBrush(e.NewValue.Value);
+                this.model.InputBoxColor = new SolidColorBrush(e.NewValue.Value);
         }
         private void inputTextColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             if (e.NewValue.HasValue)
-                this.vm.InputTextColor = new SolidColorBrush(e.NewValue.Value);
+                this.model.InputTextColor = new SolidColorBrush(e.NewValue.Value);
         }
         #endregion
         #region Button callbacks

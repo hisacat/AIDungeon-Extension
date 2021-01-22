@@ -269,21 +269,43 @@
                             <Grid Margin="5,5,45,0">
                                 <!--Actions-->
                                 <Grid Visibility="Visible">
+                                    <!--
                                     <TextBox x:Name="actionsTextBox"  IsReadOnly="True" TextWrapping="Wrap"  Height="auto" Background="Transparent" Foreground="{Binding TextColor}"
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                                          HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
+                                    -->
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsControl x:Name="actionsControl"  Grid.Row="1" ItemsSource="{Binding}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBox IsReadOnly="True" TextWrapping="Wrap" Background="Transparent" Text="{Binding Text}"
+                                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextColor}"
+                                                    FontFamily="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontFamily}"
+                                                    FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontSize}"
+                                                    FontWeight="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontWeight}"
+                                                    FontStyle="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontStyle}"
+                                                    TextDecorations="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextDecorations}"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Vertical"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </ScrollViewer>
                                 </Grid>
                                 <!--Scenario Options-->
-                                <Grid Visibility="Visible">
+                                <Grid Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="auto"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <TextBox Grid.Row="0" Text="Prompts here" Background="Transparent" TextWrapping="Wrap"
+                                    <TextBox Grid.Row="0" Text="{Binding PromptText}" Background="Transparent" TextWrapping="Wrap"
                                          Foreground="{Binding TextColor}" 
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
 
-                                    <ItemsControl x:Name="TESTSS"  Grid.Row="1" ItemsSource="{Binding }">
+                                    <ItemsControl x:Name="scenarioOptionsControl"  Grid.Row="1" ItemsSource="{Binding }">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <local:ScenarioOptionControl Margin="5" 
@@ -304,8 +326,8 @@
                                     </ItemsControl>
                                 </Grid>
                                 <!--Prompt-->
-                                <Grid Visibility="Visible">
-                                    <TextBox Text="Prompts here" VerticalAlignment="Bottom" Background="Transparent" TextWrapping="Wrap"
+                                <Grid Visibility="Collapsed">
+                                    <TextBox Text="{Binding PromptText}" VerticalAlignment="Bottom" Background="Transparent" TextWrapping="Wrap"
                                          Foreground="{Binding TextColor}"
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
                                 </Grid>
