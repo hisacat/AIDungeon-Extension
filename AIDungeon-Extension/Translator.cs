@@ -178,7 +178,7 @@ namespace AIDungeon_Extension
                                 {
                                     var key = enumerator.Current;
                                     var value = this.translateDictionary[key];
-                                    var regex = string.Format("\\b({0})", key);
+                                    var regex = string.Format("\\b({0})\\b", key);
 
                                     if (Regex.IsMatch(targetText, regex))
                                     {
