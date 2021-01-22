@@ -166,9 +166,9 @@ namespace AIDungeon_Extension
                     {
                         var targetText = currentWork.Text;
 
-                        var replaceFormat = "\"{{{0}}}\"";
-                        int currentReplaceIndex = 0;
-                        Dictionary<string, string> replaceStrings = new Dictionary<string, string>();
+                        //var replaceFormat = "\"{{{0}}}\"";
+                        //int currentReplaceIndex = 0;
+                        //Dictionary<string, string> replaceStrings = new Dictionary<string, string>();
 
                         lock (this.translateDictionary)
                         {
@@ -182,10 +182,11 @@ namespace AIDungeon_Extension
 
                                     if (Regex.IsMatch(targetText, regex))
                                     {
-                                        var replaced = string.Format(replaceFormat, currentReplaceIndex);
-                                        targetText = Regex.Replace(targetText, regex, replaced);
-                                        replaceStrings.Add(replaced, value);
-                                        currentReplaceIndex++;
+                                        targetText = Regex.Replace(targetText, regex, value);
+                                        //var replaced = string.Format(replaceFormat, currentReplaceIndex);
+                                        //targetText = Regex.Replace(targetText, regex, replaced);
+                                        //replaceStrings.Add(replaced, value);
+                                        //currentReplaceIndex++;
                                     }
                                 }
                             }
@@ -212,8 +213,8 @@ namespace AIDungeon_Extension
                         } while (translatedElement == null);
 
                         var translated = translatedElement.GetAttribute("data-text");
-                        foreach (var key in replaceStrings.Keys)
-                            translated = translated.Replace(key, replaceStrings[key]);
+                        //foreach (var key in replaceStrings.Keys)
+                        //    translated = translated.Replace(key, replaceStrings[key]);
 
                         currentWork.TranslatedCallback(translated);
                     }
