@@ -216,6 +216,19 @@ namespace AIDungeon_Extension
                         //foreach (var key in replaceStrings.Keys)
                         //    translated = translated.Replace(key, replaceStrings[key]);
 
+                        //Add empty lines.
+                        string[] lines = targetText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            if (string.IsNullOrWhiteSpace(lines[i])) translated = System.Environment.NewLine + translated;
+                            else break;
+                        }
+                        for (int i = lines.Length - 1; i >= 0; i--)
+                        {
+                            if (string.IsNullOrWhiteSpace(lines[i])) translated = translated + System.Environment.NewLine;
+                            else break;
+                        }
+
                         currentWork.TranslatedCallback(translated);
                     }
                     catch (Exception e)
