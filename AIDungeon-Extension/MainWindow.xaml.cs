@@ -138,6 +138,8 @@ namespace AIDungeon_Extension
                         this.actionsModels.Add(publicId, new ActionsModel());
 
                     var actionsModel = this.actionsModels[publicId];
+
+                    actions.Sort();
                     foreach (var action in actions)
                     {
                         if (!actionsModel.Actions.Any(x => x.AIDAction == action))
@@ -163,12 +165,18 @@ namespace AIDungeon_Extension
 
                             actionModel.OriginText = actionText;
 
+                            if (actionModel.TranslateWork != null)
+                            {
+                                actionModel.TranslateWork.Abort();
+                                actionModel.TranslateWork = null;
+                            }
+
                             actionModel.OnTranslating = true;
                             actionModel.TranslatedText = "[번역중...]";
-                            translator.Translate(actionModel.OriginText, "en", "ko",
+                            actionModel.TranslateWork = translator.Translate(actionModel.OriginText, "en", "ko",
                                 (translated) =>
                                 {
-                                    Dispatcher.Invoke(() => { actionModel.TranslatedText = translated + System.Environment.NewLine; });
+                                    Dispatcher.Invoke(() => { actionModel.TranslatedText = translated; });
 
                                 }, failed: (reason) =>
                                 {
@@ -186,9 +194,16 @@ namespace AIDungeon_Extension
                     foreach (var head in actionsModel.Actions.ToArray())
                     {
                         if (!actions.Contains(head.AIDAction))
+                        {
+                            if (head.TranslateWork != null)
+                            {
+                                head.TranslateWork.Abort();
+                                head.TranslateWork = null;
+                            }
                             actionsModel.Actions.Remove(head);
+                        }
                     }
-                    actionsScrollViewer.ScrollToBottom();
+                    //actionsScrollViewer.ScrollToBottom();
                 }
 
                 UpdateDisplayAction();

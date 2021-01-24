@@ -69,6 +69,17 @@ namespace AIDungeon_Extension
                     OnPropertyChanged("onTranslating");
                 }
             }
+            private Translator.TranslateWorker translateWork;
+            public Translator.TranslateWorker TranslateWork
+            {
+                get { return this.translateWork; }
+                set
+                {
+                    this.translateWork = value;
+                    OnPropertyChanged("translateWork");
+                }
+            }
+
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged(string propertyName)

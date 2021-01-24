@@ -71,6 +71,11 @@ namespace AIDungeon_Extension
 
                 this.isAborted = false;
             }
+
+            public override string ToString()
+            {
+                return string.Format("{0}", Text);
+            }
         }
         public string BlockTranslate(string text, string from, string to, Action<string> failed = null)
         {
@@ -79,7 +84,10 @@ namespace AIDungeon_Extension
             Action finished = () => { complited = true; };
             Action<string> translated = (r) => { result = r; };
             var work = new TranslateWorker(text, from, to, translated, failed, finished);
-            this.works.Add(work);
+            lock (this.works)
+            {
+                this.works.Add(work);
+            }
 
             while (!complited)
                 System.Threading.Thread.Sleep(1);
@@ -90,7 +98,10 @@ namespace AIDungeon_Extension
         public TranslateWorker Translate(string text, string from, string to, Action<string> translated, Action<string> failed = null, Action finished = null)
         {
             var work = new TranslateWorker(text, from, to, translated, failed, finished);
-            this.works.Add(work);
+            lock (this.works)
+            {
+                this.works.Insert(0, work);
+            }
             return work;
         }
 
@@ -146,8 +157,8 @@ namespace AIDungeon_Extension
                 {
                     if (works.Count > 0)
                     {
-                        currentWork = works[works.Count - 1];
-                        works.RemoveAt(works.Count - 1);
+                        currentWork = works[0];
+                        works.RemoveAt(0);
 
                         if (currentWork.isAborted)
                             continue;
