@@ -39,14 +39,34 @@ namespace AIDungeon_Extension
                 this.AIDAction = _AIDAction;
             }
 
-            private string text;
-            public string Text
+            private string originText;
+            public string OriginText
             {
-                get { return this.text; }
+                get { return this.originText; }
                 set
                 {
-                    this.text = value;
-                    OnPropertyChanged("text");
+                    this.originText = value;
+                    OnPropertyChanged("originText");
+                }
+            }
+            private string translatedText;
+            public string TranslatedText
+            {
+                get { return this.translatedText; }
+                set
+                {
+                    this.translatedText = value;
+                    OnPropertyChanged("translatedText");
+                }
+            }
+            private bool onTranslating;
+            public bool OnTranslating
+            {
+                get { return this.onTranslating; }
+                set
+                {
+                    this.onTranslating = value;
+                    OnPropertyChanged("onTranslating");
                 }
             }
 

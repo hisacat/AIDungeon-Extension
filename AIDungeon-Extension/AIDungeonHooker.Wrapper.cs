@@ -119,6 +119,11 @@ namespace AIDungeon_Extension.Core
 
             public string __typename; //Adventure
 
+            public override string ToString()
+            {
+                return string.Format("({0}/{1}/{2})", id, publicId, type);
+            }
+
             public class Quest
             {
                 public string id;
@@ -182,6 +187,11 @@ namespace AIDungeon_Extension.Core
             public int Compare(Action x, Action y)
             {
                 return x.CompareTo(y);
+            }
+
+            public override string ToString()
+            {
+                return string.Format("({0}/{1}/{2})", id, type, text);
             }
         }
     }

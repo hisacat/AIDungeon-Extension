@@ -146,7 +146,38 @@ namespace AIDungeon_Extension
                         var actionModel = actionsModel.Actions.First(x => x.AIDAction == action);
                         if (action.IsModified)
                         {
-                            actionModel.Text = action.Text;
+                            var actionText = action.Text;
+
+                            actionModel.OriginText = action.Text;
+
+                            if (actionModel.AIDAction.Action.type == "continue")
+                            {
+                                if (AIDAdventuresContainer.StartsWithNewLine(actionText))
+                                    actionText = actionText.Remove(0, 1);
+                            }
+                            else
+                            {
+                                if (AIDAdventuresContainer.EndsWithNewLine(actionText))
+                                    actionText = actionText.Remove(actionText.Length - 1, 1);
+                            }
+
+                            actionModel.OriginText = actionText;
+
+                            actionModel.OnTranslating = true;
+                            actionModel.TranslatedText = "[번역중...]";
+                            translator.Translate(actionModel.OriginText, "en", "ko",
+                                (translated) =>
+                                {
+                                    Dispatcher.Invoke(() => { actionModel.TranslatedText = translated + System.Environment.NewLine; });
+
+                                }, failed: (reason) =>
+                                {
+                                    Dispatcher.Invoke(() => { actionModel.TranslatedText = "[번역 실패] " + reason; });
+                                }, finished: () =>
+                                {
+                                    Dispatcher.Invoke(() => { actionModel.OnTranslating = false; });
+                                });
+
                             action.IsModified = false;
                         }
                     }
@@ -661,8 +692,10 @@ namespace AIDungeon_Extension
         }
         private void OnDetachNewLineTextsChanged()
         {
+            /*
             if (this.actionContainer != null)
                 this.actionContainer.SetForceNewLine(this.model.DetachNewlineTexts);
+            */
         }
         #endregion
 
