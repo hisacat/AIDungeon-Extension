@@ -34,7 +34,8 @@ namespace AIDungeon_Extension
         public const string VersionStr = "0.1b";
         private MainWindowViewModel model = null;
         private ScenarioOptionModel scenarioOptionModel = null;
-        private ActionModel actionModel = null;
+        //Key is publicId
+        private Dictionary<string, ActionsModel> actionsModels = null;
         public static readonly RoutedUICommand Reset = new RoutedUICommand("Reset", "Reset", typeof(MainWindow));
         public static readonly RoutedUICommand Save = new RoutedUICommand("Save", "Save", typeof(MainWindow));
         public static readonly RoutedUICommand Exit = new RoutedUICommand("Exit", "Exit", typeof(MainWindow));
@@ -44,11 +45,11 @@ namespace AIDungeon_Extension
         public FontFamily actionFont { get; set; }
 
         private AIDungeonHooker hooker = null;
-        private DisplayAIDActionContainer actionContainer = null;
+        private AIDAdventuresContainer actionContainer = null;
 
         private Translator translator = null;
 
-        private string currentAdventureId = string.Empty;
+        private string currentAdventurePublicId = string.Empty;
         public enum WriteMode : int
         {
             Say = 0,
@@ -104,12 +105,10 @@ namespace AIDungeon_Extension
 
             CloseSideMenu();
 
-            this.actionModel = new ActionModel();
-            this.actionsControl.ItemsSource = this.actionModel.Actions;
+            this.actionsModels = new Dictionary<string, ActionsModel>();
 
             this.scenarioOptionModel = new ScenarioOptionModel();
             this.scenarioOptionsControl.ItemsSource = this.scenarioOptionModel.Options;
-
 
             //return;
 
@@ -117,97 +116,83 @@ namespace AIDungeon_Extension
             this.model.ShowInputTranslateLoading = false;
             this.model.ShowInputLoading = false;
 
-            this.actionModel.Actions.Clear();
-
             UpdateWriteMode(WriteMode.Say);
 
             translator = new Translator();
             translator.Run();
 
-            actionContainer = new DisplayAIDActionContainer(translator);
+            actionContainer = new AIDAdventuresContainer(translator);
             actionContainer.OnActionsChanged += ActionContainer_OnActionsChanged;
-            actionContainer.OnTranslated += ActionContainer_OnTranslated;
 
             StartHooker();
         }
 
-        private void ActionContainer_OnActionsChanged(List<DisplayAIDActionContainer.DisplayAIDAction> actions)
+        private void ActionContainer_OnActionsChanged(string publicId, List<AIDAdventuresContainer.AIDAction> actions)
         {
-            UpdateActionText(actions);
-        }
-        private void ActionContainer_OnTranslated(List<DisplayAIDActionContainer.DisplayAIDAction> actions, DisplayAIDActionContainer.DisplayAIDAction translated)
-        {
-            UpdateActionText(actions);
-        }
-        private void UpdateActionText(List<DisplayAIDActionContainer.DisplayAIDAction> actions, bool forceUpdatee = false)
-        {
+            //Update action model
             Dispatcher.Invoke(() =>
             {
-                var actionsClone = actions.ToArray();
-
-                foreach (var action in actionsClone)
+                lock (this.actionsModels)
                 {
-                    if (!this.actionModel.Actions.Any(x => x.AIDAction == action))
-                        this.actionModel.Actions.Add(new ActionModel.Action(action));
+                    if (!this.actionsModels.ContainsKey(publicId))
+                        this.actionsModels.Add(publicId, new ActionsModel());
 
-                    var actionModelNode = this.actionModel.Actions.First(x => x.AIDAction == action);
-
-                    if(action.IsModified || forceUpdatee)
+                    var actionsModel = this.actionsModels[publicId];
+                    foreach (var action in actions)
                     {
-                        actionModelNode.Text = string.Empty;
+                        if (!actionsModel.Actions.Any(x => x.AIDAction == action))
+                            actionsModel.Actions.Add(new ActionsModel.Action(action));
 
-                        if (this.model.ShowOriginTexts)
-                            actionModelNode.Text = action.Text + System.Environment.NewLine;
-
-                        switch (action.TranslateStatus)
+                        var actionModel = actionsModel.Actions.First(x => x.AIDAction == action);
+                        if (action.IsModified)
                         {
-                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Abort:
-                                actionModelNode.Text += "[번역 취소됨]" + System.Environment.NewLine;
-                                break;
-                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Failed:
-                                actionModelNode.Text += "[번역 실패!]:" + action.TranslateFailedReason;
-                                break;
-                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Success:
-                                actionModelNode.Text += action.Translated + System.Environment.NewLine;
-                                break;
-                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.Working:
-                                if (this.model.ShowOriginTexts)
-                                    actionModelNode.Text += "[번역중...]" + System.Environment.NewLine;
-                                else
-                                    actionModelNode.Text += action.Text + System.Environment.NewLine;
-                                break;
-                            case DisplayAIDActionContainer.DisplayAIDAction.TranslateStatusType.None:
-                                actionModelNode.Text += "[번역 준비중]" + System.Environment.NewLine;
-                                break;
+                            actionModel.Text = action.Text;
+                            action.IsModified = false;
                         }
-
-                        if (!this.model.ShowOriginTexts)
-                            actionModelNode.Text += System.Environment.NewLine;
-                        action.IsModified = false;
                     }
-                }
-                this.actionModel.Sort();
+                    actionsModel.Sort();
 
-                foreach (var actionModelNode in this.actionModel.Actions.ToArray())
-                {
-                    if (!actionsClone.Contains(actionModelNode.AIDAction))
-                        this.actionModel.Actions.Remove(actionModelNode);
+                    foreach (var head in actionsModel.Actions.ToArray())
+                    {
+                        if (!actions.Contains(head.AIDAction))
+                            actionsModel.Actions.Remove(head);
+                    }
+                    actionsScrollViewer.ScrollToBottom();
                 }
 
-                actionsScrollViewer.ScrollToBottom();
+                UpdateDisplayAction();
             });
         }
 
-        private void AdventureChangedCallback(AIDungeonWrapper.Adventure adventure)
+        /// <summary>
+        /// Update displayed game texts
+        /// /// </summary>
+        private void UpdateDisplayAction()
         {
-            actionContainer.Clear();
-            this.currentAdventureId = adventure.id;
+            Dispatcher.Invoke(() =>
+            {
+                lock (this.actionsModels)
+                {
+                    if (!this.actionsModels.ContainsKey(this.currentAdventurePublicId))
+                        this.actionsModels.Add(this.currentAdventurePublicId, new ActionsModel());
 
-            if (this.hooker != null)
-                this.hooker.ForceSetInputLoading(false);
+                    this.actionsControl.ItemsSource = this.actionsModels[this.currentAdventurePublicId].Actions;
+                }
+            });
         }
 
         #region AIDungeonHooker callbacks
+        private void OnAdventurePublicIdChagned(string publicId)
+        {
+            this.currentAdventurePublicId = publicId;
+            this.hooker.ForceSetInputLoading(false);
+
+            UpdateDisplayAction();
+        }
+        private void Hooker_OnURLChanged(string url)
+        {
+            this.hooker.ForceSetInputLoading(false);
+        }
         private void OnScenario(AIDungeonWrapper.Scenario scenario)
         {
             /*
@@ -238,20 +223,14 @@ namespace AIDungeon_Extension
             if (adventure == null)
                 return;
 
-            if (this.currentAdventureId != adventure.id)
-                AdventureChangedCallback(adventure);
-
-            actionContainer.AddRange(adventure.actionWindow);
+            actionContainer.UpdateFromAdventure(adventure);
         }
         private void OnAdventureUpdated(AIDungeonWrapper.Adventure adventure)
         {
             if (adventure == null)
                 return;
 
-            if (this.currentAdventureId != adventure.id)
-                AdventureChangedCallback(adventure);
-
-            actionContainer.AddRange(adventure.actionWindow);
+            actionContainer.UpdateFromAdventure(adventure);
         }
         private void OnActionsUndone(List<AIDungeonWrapper.Action> actions)
         {
@@ -467,28 +446,43 @@ namespace AIDungeon_Extension
 
         private void SaveGameTexts()
         {
+            /*
             var text = string.Empty;
-            foreach (var t in this.actionModel.Actions)
+
+            foreach (var t in this.actionsModels.Actions)
                 text += t.Text + System.Environment.NewLine;
 
             var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             saveFileDialog.Title = "Save text";
             saveFileDialog.FileName = "AIDungeon.txt";
             saveFileDialog.Filter = "Text|*.txt";
-            
+
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 File.WriteAllText(saveFileDialog.FileName, text);
+            */
         }
         private void ResetHooker()
         {
             this.actionContainer.Clear();
 
-            this.actionModel.Actions.Clear();
+            this.actionsModels.Clear();
             this.hooker.Refresh();
+        }
+        private void RestartHooker()
+        {
+            if (this.hooker != null)
+            {
+                this.hooker.Dispose();
+                this.hooker = null;
+            }
+
+            StartHooker();
         }
         private void StartHooker()
         {
             hooker = new AIDungeonHooker();
+            hooker.OnAdventurePublicIdChagned += OnAdventurePublicIdChagned;
+            hooker.OnURLChanged += Hooker_OnURLChanged;
             hooker.OnScenario += OnScenario;
             hooker.OnUpdateAdventureMemory += OnUpdateAdventureMemory;
             hooker.OnAdventure += OnAdventure;
@@ -523,21 +517,12 @@ namespace AIDungeon_Extension
             });
         }
 
+
         private void OnInputLoadingChanged(bool isOn)
         {
             this.model.ShowInputLoading = isOn;
         }
 
-        private void RestartHooker()
-        {
-            if (this.hooker != null)
-            {
-                this.hooker.Dispose();
-                this.hooker = null;
-            }
-
-            StartHooker();
-        }
         private void OpenTranslateDictionary()
         {
             Translator.OpenDictionaryFile();
@@ -669,8 +654,10 @@ namespace AIDungeon_Extension
 
         private void OnShownOriginTextsChanged()
         {
+            /*
             if (this.actionContainer != null)
-                UpdateActionText(this.actionContainer.Actions, true);
+                UpdateActionText(this.actionContainer.Adventures, true);
+            */
         }
         private void OnDetachNewLineTextsChanged()
         {

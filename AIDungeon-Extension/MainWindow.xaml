@@ -261,6 +261,7 @@
                                 <local:AIDMenuButtonControl Tag="undo"  IconText="󰕌" Text="UNDO" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
                                 <local:AIDMenuButtonControl Tag="redo"  IconText="󰑎" Text="REDO" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
                                 <local:AIDMenuButtonControl Tag="retry"  IconText="󰜉" Text="RETRY" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
+                                <!--<TextBlock Text="222" Foreground="Wheat"/>-->
                             </StackPanel>
                         </Grid>
 

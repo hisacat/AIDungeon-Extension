@@ -95,7 +95,7 @@
       <DependentUpon>BackButtonControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="ChromeDriverExtension.cs" />
-    <Compile Include="DisplayAIDActionContainer.cs" />
+    <Compile Include="AIDAdventuresContainer.cs" />
     <Compile Include="AIDungeonHooker.Wrapper.cs" />
     <Compile Include="Ini.cs" />
     <Compile Include="LiveTranslator.cs" />
@@ -103,7 +103,7 @@
       <DependentUpon>LoadingIndicatorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="MachineKeyProtect.cs" />
-    <Compile Include="Models\ActionModel.cs" />
+    <Compile Include="Models\ActionsModel.cs" />
     <Compile Include="Models\MainWindowViewModel.cs" />
     <Compile Include="Models\ScenarioOptionModel.cs" />
     <Compile Include="SaveAccountWindow.xaml.cs">

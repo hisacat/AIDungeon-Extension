@@ -5,15 +5,15 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static AIDungeon_Extension.DisplayAIDActionContainer;
+using static AIDungeon_Extension.AIDAdventuresContainer;
 
 namespace AIDungeon_Extension
 {
-    class ActionModel
+    class ActionsModel
     {
         public ObservableCollection<Action> Actions;
 
-        public ActionModel()
+        public ActionsModel()
         {
             Actions = new ObservableCollection<Action>();
         }
@@ -33,8 +33,8 @@ namespace AIDungeon_Extension
         {
             public Action() { }
 
-            public DisplayAIDAction AIDAction { get; private set; }
-            public Action(DisplayAIDAction _AIDAction)
+            public AIDAction AIDAction { get; private set; }
+            public Action(AIDAction _AIDAction)
             {
                 this.AIDAction = _AIDAction;
             }

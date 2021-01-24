@@ -39,6 +39,11 @@ namespace AIDungeon_Extension.Core
         private Thread crawlingThread = null;
         public bool Ready { get; private set; }
 
+        public delegate void OnAdventurePublicIdChagnedDelegate(string publicId);
+        public event OnAdventurePublicIdChagnedDelegate OnAdventurePublicIdChagned = null;
+        public delegate void OnURLChangedDelegate(string url);
+        public event OnURLChangedDelegate OnURLChanged = null;
+
         public delegate void AdventureDelegate(AIDungeonWrapper.Adventure adventure);
         public delegate void ScenarioDelegate(AIDungeonWrapper.Scenario scenario);
         public delegate void ActionsDelegate(List<AIDungeonWrapper.Action> actions);
@@ -69,7 +74,7 @@ namespace AIDungeon_Extension.Core
             this.xpaths.Add(XPathKey_Login_IDInputBox, new List<string>() { "//*[@class=\"css-11aywtz r-snp9zz\" and @type=\"email\"]" });
             this.xpaths.Add(XPathKey_Login_PWInputBox, new List<string>() { "//*[@class=\"css-11aywtz r-snp9zz\" and @type=\"password\"]" });
             this.xpaths.Add(XPathKey_Login_LoginButton, new List<string>() { "//*[@aria-label=\"Login\"]/div" });
-            this.xpaths.Add(XPathKey_InputBox, new List<string>() 
+            this.xpaths.Add(XPathKey_InputBox, new List<string>()
             {
                 "//*[@class=\"css-1dbjc4n r-13awgt0\"]/*[@class=\"css-1dbjc4n r-1p0dtai r-1d2f490 r-12vffkv r-u8s1d r-zchlnj r-ipm5af\"]/*[@class=\"css-1dbjc4n r-1p0dtai r-1d2f490 r-12vffkv r-u8s1d r-zchlnj r-ipm5af\" and not(@aria-hidden)]//*/textarea[@placeholder]"
             });
@@ -106,8 +111,8 @@ namespace AIDungeon_Extension.Core
                         if (!this.xpaths[currentKey].Contains(line))
                             this.xpaths[currentKey].Add(line);
                     }
-                    
-                    if(!this.xpaths.ContainsKey(XPathKey_Login_IDInputBox) ||
+
+                    if (!this.xpaths.ContainsKey(XPathKey_Login_IDInputBox) ||
                         this.xpaths.ContainsKey(XPathKey_Login_PWInputBox) ||
                         this.xpaths.ContainsKey(XPathKey_Login_LoginButton) ||
                         this.xpaths.ContainsKey(XPathKey_InputBox) ||
@@ -116,7 +121,8 @@ namespace AIDungeon_Extension.Core
                         this.xpaths.Clear();
                         LoadDefaultXPaths();
                     }
-                }else
+                }
+                else
                 {
                     LoadDefaultXPaths();
                 }
@@ -230,10 +236,17 @@ namespace AIDungeon_Extension.Core
                 Console.WriteLine("[Exception] Hooker-AutoLogin: " + e.Message);
             }
 
+            string currentURL = driver.Url;
             while (true)
             {
                 try
                 {
+                    if (!currentURL.Equals(driver.Url))
+                    {
+                        currentURL = driver.Url;
+                        OnURLChangedCallback(currentURL);
+                    }
+
                     var logs = driver.Manage().Logs.GetLog(LogType_Performance);
                     foreach (var log in logs)
                     {
@@ -258,6 +271,21 @@ namespace AIDungeon_Extension.Core
                 {
                     Console.WriteLine("[Exception] Hooker-CrawlingScripts: " + e.Message);
                 }
+            }
+        }
+
+
+        private void OnURLChangedCallback(string url)
+        {
+            Console.WriteLine("[Hooker] URL Changed: " + url);
+            this.OnURLChanged?.Invoke(url);
+
+            Uri uri = new Uri(url);
+            string publicId = HttpUtility.ParseQueryString(uri.Query).Get("publicId");
+            if (!string.IsNullOrWhiteSpace(publicId))
+            {
+                Console.WriteLine("[Hooker] Adventure Id detected " + publicId);
+                this.OnAdventurePublicIdChagned?.Invoke(publicId);
             }
         }
 
