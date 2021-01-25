@@ -110,7 +110,15 @@ namespace AIDungeon_Extension
             this.scenarioOptionModel = new ScenarioOptionModel();
             this.scenarioOptionsControl.ItemsSource = this.scenarioOptionModel.Options;
 
-            //return;
+            var test = new ObservableCollection<ActionsModel.Action>();
+            this.actionsControl.ItemsSource = test;
+
+            var tt = "A\r\nA\r\nA\r\nA\r\nA\r\nA\r\nA\r\nA\r\nA\r\nA\r\n";
+
+            test.Add(new ActionsModel.Action() { OriginText = tt, TranslatedText = tt });
+            //test.Add(new ActionsModel.Action() { OriginText = tt, TranslatedText = tt });
+            
+            return;
 
             this.model.LoadingText = Properties.Resources.LoadingText_Initializing;
             this.model.ShowInputTranslateLoading = false;

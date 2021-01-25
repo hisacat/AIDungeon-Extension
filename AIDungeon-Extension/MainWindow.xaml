@@ -275,11 +275,11 @@
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                                          HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
                                     -->
-                                    <ScrollViewer x:Name="actionsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" VerticalContentAlignment="Bottom">
-                                        <ItemsControl x:Name="actionsControl"  Grid.Row="1" ItemsSource="{Binding}" VerticalAlignment="Bottom">
+                                    <ScrollViewer x:Name="actionsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" VerticalContentAlignment="Top">
+                                        <ItemsControl x:Name="actionsControl"  Grid.Row="1" ItemsSource="{Binding}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
+                                                    <StackPanel Orientation="Vertical">
                                                         <TextBox IsReadOnly="True" TextWrapping="Wrap" Height="auto" Text="{Binding OriginText}" 
                                                                  Visibility="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowOriginTexts, Converter={StaticResource BoolToVis}}"
                                                                  Foreground="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextColor}"
@@ -304,13 +304,6 @@
                                                 </ItemsPanelTemplate>
                                             </ItemsControl.ItemsPanel>
                                         </ItemsControl>
-                                    </ScrollViewer>
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" VerticalContentAlignment="Bottom">
-                                        <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
-                                            <TextBlock Foreground="White"><Run Text="sadfasdfasdfdsfsdf"/><Run Text="sdfsdaf"/><LineBreak/><Run Text="asdfsdafasdf"/><LineBreak/><Run Text="sadfasdfas"/><LineBreak/><Run Text="fasdf"/><LineBreak/><Run Text="asd"/><LineBreak/><Run Text="fasdf"/><LineBreak/><Run Text="asd"/><LineBreak/><Run Text="fsd"/><LineBreak/><Run Text="fasd"/><LineBreak/><Run Text="fs"/><LineBreak/><Run Text="dfas"/><LineBreak/><Run Text="dfas"/><LineBreak/><Run Text="dfsd"/><LineBreak/><Run Text="fasd"/><LineBreak/><Run Text="fd"/><LineBreak/><Run/></TextBlock>
-                                            <TextBlock Foreground="White"><Run Text="sadfasdfasdfdsfsdf"/><Run Text="sdfsdaf"/><LineBreak/><Run Text="asdfsdafasdf"/><LineBreak/><Run Text="sadfasdfas"/><LineBreak/><Run Text="fasdf"/><LineBreak/><Run Text="asd"/><LineBreak/><Run Text="fasdf"/><LineBreak/><Run Text="asd"/><LineBreak/><Run Text="fsd"/><LineBreak/><Run Text="fasd"/><LineBreak/><Run Text="fs"/><LineBreak/><Run Text="dfas"/><LineBreak/><Run Text="dfas"/><LineBreak/><Run Text="dfsd"/><LineBreak/><Run Text="fasd"/><LineBreak/><Run Text="fd"/><LineBreak/><Run/></TextBlock>
-                                            <TextBlock Text="last" Foreground="White"/>
-                                        </StackPanel>
                                     </ScrollViewer>
                                 </Grid>
                                 <!--Scenario Options-->
