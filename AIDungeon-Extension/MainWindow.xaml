@@ -341,9 +341,6 @@
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"/>
                                         </Grid>
                                     </Grid>
-                                    <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
-                                                 Opacity="0.9"
-                                                 Click="OpenSideMenuButton_Click" Visibility="{Binding ShowSideMenuButton, Converter={StaticResource BoolToVis}}"/>
                                 </Grid>
                             </DockPanel>
                         </Grid>
@@ -398,7 +395,10 @@
                         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="5" ShowsPreview="True"  Background="Black" Opacity="0.5"/>
                     </Grid>
 
-                    <!--Ingame wait-->
+                    <!--Menu button-->
+                    <local:SideMenuButtonControl VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="20" Margin="10"
+                                                 Opacity="0.9"
+                                                 Click="OpenSideMenuButton_Click" Visibility="{Binding ShowSideMenuButton, Converter={StaticResource BoolToVis}}"/>
                 </Grid>
 
                 <Grid x:Name="translateWebBrowserGrid" Visibility="Hidden" Margin="50,50,50.333,141.667"/>
