@@ -319,7 +319,7 @@ namespace AIDungeon_Extension
         private void OnActionAdded(AIDungeonWrapper.Action action)
         {
             this.actionContainer.Add(action);
-            this.actionsScrollViewer.ScrollToBottom();
+            Dispatcher.Invoke(() => this.actionsScrollViewer.ScrollToBottom());
         }
         private void OnActionUpdated(AIDungeonWrapper.Action action)
         {

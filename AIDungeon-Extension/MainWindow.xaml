@@ -250,7 +250,7 @@
             <Grid>
                 <Grid>
                     <!--Inagme contents-->
-                    <Grid x:Name="ingameContentGrid" IsEnabled="{Binding IsInGame}">
+                    <Grid x:Name="ingameContentGrid">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="50" MinHeight="0"/>
@@ -259,7 +259,7 @@
                         <Grid Grid.Row="0">
                             <DockPanel LastChildFill="True">
                                 <!--Contents Command buttons-->
-                                <Grid DockPanel.Dock="Bottom" >
+                                <Grid DockPanel.Dock="Bottom" IsEnabled="{Binding IsInGame}">
                                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="8" Visibility="{Binding ShowControlMenus, Converter={StaticResource BoolToVis}}">
                                         <local:AIDMenuButtonControl Tag="undo"  IconText="󰕌" Text="UNDO" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
                                         <local:AIDMenuButtonControl Tag="redo"  IconText="󰑎" Text="REDO" Margin="4,0,4,0" Click="ControlMenuButton_Click"/>
@@ -348,13 +348,13 @@
                         </Grid>
 
                         <!--Contents Input-->
-                        <Grid Grid.Row="1">
+                        <Grid Grid.Row="1" IsEnabled="{Binding IsInGame}">
                             <Grid Background="{Binding InputBoxColor}">
                                 <Grid.Style>
                                     <Style TargetType="Grid">
                                         <Setter Property="Opacity" Value="1"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsEnabled, ElementName=ingameContentGrid}" Value="False">
+                                            <DataTrigger Binding="{Binding IsInGame}" Value="False">
                                                 <Setter Property="Opacity" Value="0.5"/>
                                             </DataTrigger>
                                         </Style.Triggers>
