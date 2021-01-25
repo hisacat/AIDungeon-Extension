@@ -91,6 +91,7 @@
     <Compile Include="AIDMenuButtonControl.xaml.cs">
       <DependentUpon>AIDMenuButtonControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AniScrollViewer.cs" />
     <Compile Include="BackButtonControl.xaml.cs">
       <DependentUpon>BackButtonControl.xaml</DependentUpon>
     </Compile>

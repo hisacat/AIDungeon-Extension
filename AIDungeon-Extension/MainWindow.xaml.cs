@@ -15,6 +15,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -182,7 +183,10 @@ namespace AIDungeon_Extension
                                         actionModel.TranslatedText = translated;
                                         this.actionsScrollViewer.UpdateLayout();
                                         Console.WriteLine("Diff " + (prevScrollableHeight - actionsScrollViewer.ScrollableHeight));
-                                        actionsScrollViewer.ScrollToVerticalOffset(actionsScrollViewer.VerticalOffset - (prevScrollableHeight - actionsScrollViewer.ScrollableHeight));
+
+                                        var newScrollOffset = actionsScrollViewer.VerticalOffset - (prevScrollableHeight - actionsScrollViewer.ScrollableHeight);
+                                        //DoSmoothScroll(this.actionsScrollViewer, newScrollOffset, new TimeSpan(0, 0, 1));
+                                        this.actionsScrollViewer.ScrollToVerticalOffset(newScrollOffset);
                                     });
 
                                 }, failed: (reason) =>
@@ -214,6 +218,22 @@ namespace AIDungeon_Extension
                 }
                 UpdateDisplayAction();
             });
+        }
+
+        private void DoSmoothScroll(ScrollViewer scrollViewer, double to, TimeSpan duration)
+        {
+            DoubleAnimation verticalAnimation = new DoubleAnimation();
+
+            verticalAnimation.From = scrollViewer.VerticalOffset;
+            verticalAnimation.To = to;
+            verticalAnimation.Duration = new Duration(duration);
+
+            Storyboard storyboard = new Storyboard();
+
+            storyboard.Children.Add(verticalAnimation);
+            Storyboard.SetTarget(verticalAnimation, scrollViewer);
+            Storyboard.SetTargetProperty(verticalAnimation, new PropertyPath(AniScrollViewer.CurrentVerticalOffsetProperty)); // Attached dependency property
+            storyboard.Begin();
         }
 
         /// <summary>

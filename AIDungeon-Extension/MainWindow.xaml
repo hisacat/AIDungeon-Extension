@@ -275,7 +275,8 @@
                                          FontFamily="{Binding FontFamily}" FontSize="{Binding FontSize}"  FontWeight="{Binding FontWeight}" FontStyle="{Binding FontStyle}" TextDecorations="{Binding TextDecorations}"
                                          HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Text="Actions here"/>
                                     -->
-                                    <ScrollViewer x:Name="actionsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" VerticalContentAlignment="Top">
+
+                                    <local:AniScrollViewer x:Name="actionsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" VerticalContentAlignment="Top">
                                         <ItemsControl x:Name="actionsControl"  Grid.Row="1" ItemsSource="{Binding}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -304,7 +305,7 @@
                                                 </ItemsPanelTemplate>
                                             </ItemsControl.ItemsPanel>
                                         </ItemsControl>
-                                    </ScrollViewer>
+                                    </local:AniScrollViewer>
                                 </Grid>
                                 <!--Scenario Options-->
                                 <Grid Visibility="Collapsed">
