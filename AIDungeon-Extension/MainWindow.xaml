@@ -279,20 +279,22 @@
                                                         <DataTemplate>
                                                             <StackPanel Orientation="Vertical">
                                                                 <TextBox IsReadOnly="True" TextWrapping="Wrap" Height="auto" Text="{Binding OriginText}" 
-                                                                 Visibility="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowOriginTexts, Converter={StaticResource BoolToVis}}"
-                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextColor}"
-                                                                 FontFamily="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontFamily}"
-                                                                 FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontSize}"
-                                                                 FontWeight="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontWeight}"
-                                                                 FontStyle="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontStyle}"
-                                                                 TextDecorations="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextDecorations}"/>
+                                                                         Background="Transparent"
+                                                                         Visibility="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowOriginTexts, Converter={StaticResource BoolToVis}}"
+                                                                         Foreground="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextColor}"
+                                                                         FontFamily="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontFamily}"
+                                                                         FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontSize}"
+                                                                         FontWeight="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontWeight}"
+                                                                         FontStyle="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontStyle}"
+                                                                         TextDecorations="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextDecorations}"/>
                                                                 <TextBox IsReadOnly="True" TextWrapping="Wrap" Height="auto" Text="{Binding TranslatedText}"
-                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextColor}"
-                                                                 FontFamily="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontFamily}"
-                                                                 FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontSize}"
-                                                                 FontWeight="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontWeight}"
-                                                                 FontStyle="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontStyle}"
-                                                                 TextDecorations="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextDecorations}"/>
+                                                                         Background="Transparent"
+                                                                         Foreground="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextColor}"
+                                                                         FontFamily="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontFamily}"
+                                                                         FontSize="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontSize}"
+                                                                         FontWeight="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontWeight}"
+                                                                         FontStyle="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.FontStyle}"
+                                                                         TextDecorations="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextDecorations}"/>
                                                             </StackPanel>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>

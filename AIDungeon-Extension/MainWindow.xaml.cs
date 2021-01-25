@@ -263,9 +263,6 @@ namespace AIDungeon_Extension
         }
         private void Hooker_OnURLChanged(string url, AIDungeonHooker.URLType type)
         {
-            //New game: https://play.aidungeon.io/main/play
-            //Continue: https://play.aidungeon.io/main/adventurePlay
-            //Prompt: https://play.aidungeon.io/main/scenarioPlay
             this.hooker.ForceSetInputLoading(false);
 
             switch (type)
@@ -306,19 +303,13 @@ namespace AIDungeon_Extension
         }
         private void OnAdventure(AIDungeonWrapper.Adventure adventure)
         {
-            if (adventure == null)
-                return;
-
             actionContainer.UpdateFromAdventure(adventure);
-            this.actionsScrollViewer.ScrollToBottom();
+            Dispatcher.Invoke(() => this.actionsScrollViewer.ScrollToBottom());
         }
         private void OnAdventureUpdated(AIDungeonWrapper.Adventure adventure)
         {
-            if (adventure == null)
-                return;
-
             actionContainer.UpdateFromAdventure(adventure);
-            this.actionsScrollViewer.ScrollToBottom();
+            Dispatcher.Invoke(() => this.actionsScrollViewer.ScrollToBottom());
         }
         private void OnActionsUndone(List<AIDungeonWrapper.Action> actions)
         {
@@ -533,14 +524,20 @@ namespace AIDungeon_Extension
             this.model.StatusText = string.IsNullOrEmpty(text) ? DefaultStatusText : text;
         }
 
-        private void SaveGameTexts()
+        private bool SaveGameTexts()
         {
-            /*
             var text = string.Empty;
 
-            foreach (var t in this.actionsModels.Actions)
-                text += t.Text + System.Environment.NewLine;
+            if (!actionsModels.ContainsKey(currentAdventurePublicId))
+                return false;
 
+            foreach (var t in this.actionsModels[currentAdventurePublicId].Actions)
+            {
+                if (this.model.ShowOriginTexts)
+                    text += t.OriginText + t.TranslatedText;
+                else
+                    text += t.TranslatedText;
+            }
             var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             saveFileDialog.Title = "Save text";
             saveFileDialog.FileName = "AIDungeon.txt";
@@ -548,7 +545,8 @@ namespace AIDungeon_Extension
 
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 File.WriteAllText(saveFileDialog.FileName, text);
-            */
+
+            return true;
         }
         private void ResetHooker()
         {

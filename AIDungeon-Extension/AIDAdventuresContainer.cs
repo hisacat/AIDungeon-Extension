@@ -124,6 +124,8 @@ namespace AIDungeon_Extension
 
             var adventure = this.Adventures[adventureData.id];
 
+            if (adventureData.actionWindow == null) return;
+
             var actions = adventureData.actionWindow.ToList();
             adventure.MetaActions.Clear();
             if (actions == null) return;

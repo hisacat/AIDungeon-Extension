@@ -297,11 +297,11 @@ namespace AIDungeon_Extension.Core
         {
             Console.WriteLine("[Hooker] URL Changed: " + url);
             var urlType = URLType.Unknown;
-            if (url.StartsWith("https://play.aidungeon.io/main/play", StringComparison.OrdinalIgnoreCase))
+            if (url.StartsWith("https://play.aidungeon.io/main/play", StringComparison.OrdinalIgnoreCase)) //New game
                 urlType = URLType.Play;
-            else if (url.StartsWith("https://play.aidungeon.io/main/adventurePlay", StringComparison.OrdinalIgnoreCase))
+            else if (url.StartsWith("https://play.aidungeon.io/main/adventurePlay", StringComparison.OrdinalIgnoreCase)) //Continue
                 urlType = URLType.AdventurePlay;
-            else if (url.StartsWith("https://play.aidungeon.io/main/scenarioPlay", StringComparison.OrdinalIgnoreCase))
+            else if (url.StartsWith("https://play.aidungeon.io/main/scenarioPlay", StringComparison.OrdinalIgnoreCase)) //Prompt
                 urlType = URLType.ScenarioPlay;
 
             this.OnURLChanged?.Invoke(url, urlType);
