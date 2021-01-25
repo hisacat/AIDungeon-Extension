@@ -110,15 +110,7 @@ namespace AIDungeon_Extension
             this.scenarioOptionModel = new ScenarioOptionModel();
             this.scenarioOptionsControl.ItemsSource = this.scenarioOptionModel.Options;
 
-            var test = new ObservableCollection<ActionsModel.Action>();
-            this.actionsControl.ItemsSource = test;
-
-            var tt = "A\r\nA\r\nA\r\nA\r\nA\r\nA\r\nA\r\nA\r\nA\r\nA\r\n";
-
-            test.Add(new ActionsModel.Action() { OriginText = tt, TranslatedText = tt });
-            //test.Add(new ActionsModel.Action() { OriginText = tt, TranslatedText = tt });
-            
-            return;
+            //return;
 
             this.model.LoadingText = Properties.Resources.LoadingText_Initializing;
             this.model.ShowInputTranslateLoading = false;
@@ -184,7 +176,14 @@ namespace AIDungeon_Extension
                             actionModel.TranslateWork = translator.Translate(actionModel.OriginText, "en", "ko",
                                 (translated) =>
                                 {
-                                    Dispatcher.Invoke(() => { actionModel.TranslatedText = translated; });
+                                    Dispatcher.Invoke(() =>
+                                    {
+                                        var prevScrollableHeight = actionsScrollViewer.ScrollableHeight;
+                                        actionModel.TranslatedText = translated;
+                                        this.actionsScrollViewer.UpdateLayout();
+                                        Console.WriteLine("Diff " + (prevScrollableHeight - actionsScrollViewer.ScrollableHeight));
+                                        actionsScrollViewer.ScrollToVerticalOffset(actionsScrollViewer.VerticalOffset - (prevScrollableHeight - actionsScrollViewer.ScrollableHeight));
+                                    });
 
                                 }, failed: (reason) =>
                                 {
@@ -211,9 +210,8 @@ namespace AIDungeon_Extension
                             actionsModel.Actions.Remove(head);
                         }
                     }
-                    //actionsScrollViewer.ScrollToBottom();
-                }
 
+                }
                 UpdateDisplayAction();
             });
         }
@@ -278,6 +276,7 @@ namespace AIDungeon_Extension
                 return;
 
             actionContainer.UpdateFromAdventure(adventure);
+            this.actionsScrollViewer.ScrollToBottom();
         }
         private void OnAdventureUpdated(AIDungeonWrapper.Adventure adventure)
         {
@@ -285,6 +284,7 @@ namespace AIDungeon_Extension
                 return;
 
             actionContainer.UpdateFromAdventure(adventure);
+            this.actionsScrollViewer.ScrollToBottom();
         }
         private void OnActionsUndone(List<AIDungeonWrapper.Action> actions)
         {
@@ -294,6 +294,7 @@ namespace AIDungeon_Extension
         private void OnActionAdded(AIDungeonWrapper.Action action)
         {
             this.actionContainer.Add(action);
+            this.actionsScrollViewer.ScrollToBottom();
         }
         private void OnActionUpdated(AIDungeonWrapper.Action action)
         {
