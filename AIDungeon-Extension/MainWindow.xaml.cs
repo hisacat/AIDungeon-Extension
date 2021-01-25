@@ -261,9 +261,23 @@ namespace AIDungeon_Extension
 
             UpdateDisplayAction();
         }
-        private void Hooker_OnURLChanged(string url)
+        private void Hooker_OnURLChanged(string url, AIDungeonHooker.URLType type)
         {
+            //New game: https://play.aidungeon.io/main/play
+            //Continue: https://play.aidungeon.io/main/adventurePlay
+            //Prompt: https://play.aidungeon.io/main/scenarioPlay
             this.hooker.ForceSetInputLoading(false);
+
+            switch (type)
+            {
+                case AIDungeonHooker.URLType.Play:
+                case AIDungeonHooker.URLType.AdventurePlay:
+                    this.model.IsInGame = true;
+                    break;
+                default:
+                    this.model.IsInGame = false;
+                    break;
+            }
         }
         private void OnScenario(AIDungeonWrapper.Scenario scenario)
         {

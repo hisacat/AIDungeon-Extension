@@ -30,7 +30,7 @@ namespace AIDungeon_Extension.Core
         public const string XPathKey_Login_PWInputBox = "Login_PWInputBox";
         public const string XPathKey_Login_LoginButton = "Login_LoginButton";
         public const string XPathKey_InputBox = "InputBox";
-        public const string XPathKey_AIPopupCloseButton = "AIPopupCloseButton";
+        public const string XPathKey_PopupCloseButton = "PopupCloseButton";
 
         private const string LogType_Performance = "performance";
         private const string StartUpURL = "https://play.aidungeon.io/main/loginRegister";
@@ -41,7 +41,24 @@ namespace AIDungeon_Extension.Core
 
         public delegate void OnAdventurePublicIdChagnedDelegate(string publicId);
         public event OnAdventurePublicIdChagnedDelegate OnAdventurePublicIdChagned = null;
-        public delegate void OnURLChangedDelegate(string url);
+
+        public enum URLType : int
+        {
+            Unknown = -1,
+            /// <summary>
+            /// New game
+            /// </summary>
+            Play = 0,
+            /// <summary>
+            /// Continue
+            /// </summary>
+            AdventurePlay = 1,
+            /// <summary>
+            /// Prompt
+            /// </summary>
+            ScenarioPlay = 2,
+        }
+        public delegate void OnURLChangedDelegate(string url, URLType type);
         public event OnURLChangedDelegate OnURLChanged = null;
 
         public delegate void AdventureDelegate(AIDungeonWrapper.Adventure adventure);
@@ -78,7 +95,7 @@ namespace AIDungeon_Extension.Core
             {
                 "//*[@class=\"css-1dbjc4n r-13awgt0\"]/*[@class=\"css-1dbjc4n r-1p0dtai r-1d2f490 r-12vffkv r-u8s1d r-zchlnj r-ipm5af\"]/*[@class=\"css-1dbjc4n r-1p0dtai r-1d2f490 r-12vffkv r-u8s1d r-zchlnj r-ipm5af\" and not(@aria-hidden)]//*/textarea[@placeholder]"
             });
-            this.xpaths.Add(XPathKey_AIPopupCloseButton, new List<string>() { "//*[@class=\"css-18t94o4 css-1dbjc4n r-1loqt21 r-u8s1d r-zchlnj r-ipm5af r-1otgn73 r-1i6wzkk r-lrvibr\" and @aria-label=\"close\"]" });
+            this.xpaths.Add(XPathKey_PopupCloseButton, new List<string>() { "//*[@class=\"css-18t94o4 css-1dbjc4n r-1loqt21 r-u8s1d r-zchlnj r-ipm5af r-1otgn73 r-1i6wzkk r-lrvibr\" and @aria-label=\"close\"]" });
         }
         private void LoadXPaths()
         {
@@ -116,7 +133,7 @@ namespace AIDungeon_Extension.Core
                         this.xpaths.ContainsKey(XPathKey_Login_PWInputBox) ||
                         this.xpaths.ContainsKey(XPathKey_Login_LoginButton) ||
                         this.xpaths.ContainsKey(XPathKey_InputBox) ||
-                        this.xpaths.ContainsKey(XPathKey_AIPopupCloseButton))
+                        this.xpaths.ContainsKey(XPathKey_PopupCloseButton))
                     {
                         this.xpaths.Clear();
                         LoadDefaultXPaths();
@@ -275,10 +292,19 @@ namespace AIDungeon_Extension.Core
         }
 
 
+
         private void OnURLChangedCallback(string url)
         {
             Console.WriteLine("[Hooker] URL Changed: " + url);
-            this.OnURLChanged?.Invoke(url);
+            var urlType = URLType.Unknown;
+            if (url.StartsWith("https://play.aidungeon.io/main/play", StringComparison.OrdinalIgnoreCase))
+                urlType = URLType.Play;
+            else if (url.StartsWith("https://play.aidungeon.io/main/adventurePlay", StringComparison.OrdinalIgnoreCase))
+                urlType = URLType.AdventurePlay;
+            else if (url.StartsWith("https://play.aidungeon.io/main/scenarioPlay", StringComparison.OrdinalIgnoreCase))
+                urlType = URLType.ScenarioPlay;
+
+            this.OnURLChanged?.Invoke(url, urlType);
 
             Uri uri = new Uri(url);
             string publicId = HttpUtility.ParseQueryString(uri.Query).Get("publicId");
@@ -454,7 +480,7 @@ namespace AIDungeon_Extension.Core
 
             try
             {
-                var popupCloseButton = FindElementWithXPathDict(XPathKey_AIPopupCloseButton);
+                var popupCloseButton = FindElementWithXPathDict(XPathKey_PopupCloseButton);
                 if (popupCloseButton != null) popupCloseButton.Click();
 
                 var inputBox = FindElementWithXPathDict(XPathKey_InputBox);

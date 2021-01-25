@@ -216,6 +216,9 @@ Current chrome version: {0}</value>
   <data name="SideMenu_ControlPanel" xml:space="preserve">
     <value>Control Panel</value>
   </data>
+  <data name="WaitStartPlayText" xml:space="preserve">
+    <value>Waiting for start playing</value>
+  </data>
   <data name="WindowMenu/Account" xml:space="preserve">
     <value>Account</value>
   </data>

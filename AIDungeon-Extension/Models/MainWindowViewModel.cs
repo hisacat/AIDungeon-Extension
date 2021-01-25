@@ -236,13 +236,23 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("promptText");
             }
         }
+        private bool isInGame;
+        public bool IsInGame
+        {
+            get { return this.isInGame; }
+            set
+            {
+                this.isInGame = value;
+                OnPropertyChanged("isInGame");
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
             if (PropertyChanged != null) { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); }
 
-            switch(propertyName)
+            switch (propertyName)
             {
                 case "fontFamily":
                     ini["Font"]["fontFamily"] = this.fontFamily == null ? null : this.fontFamily.Source;
@@ -299,7 +309,7 @@ namespace AIDungeon_Extension
                 string font;
                 font = this.ini["Font"]["fontFamily"].ToString();
                 if (!string.IsNullOrEmpty(font)) this.fontFamily = new FontFamily(font);
-                
+
                 int weight;
                 if (this.ini["Font"]["fontWeight"].TryConvertInt(out weight))
                     this.fontWeight = System.Windows.FontWeight.FromOpenTypeWeight(weight);
