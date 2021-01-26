@@ -67,7 +67,7 @@
                    </Hyperlink.Inlines>
                </Hyperlink>
             </TextBlock>
-            <TextBlock Text="This is a extended GUI tool for play.aidungeon.io" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="70,70,0,0"/>
+            <TextBlock Text="Extended GUI tool for play.aidungeon.io" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,70,0,0"/>
             <StackPanel VerticalAlignment="Top" Margin="10,100,10,0">
                 <TextBlock Text="Author: HisaCat"/>
                 <TextBlock Text="Email: ahisacat@gmail.com"/>
