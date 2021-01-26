@@ -211,12 +211,18 @@
                                 <Control Height="10"/>
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_Options}" FontWeight="Bold"/>
                                 <Control Height="5"/>
-                                <CheckBox Tag="ShowOriginTexts" IsChecked="{Binding ShowOriginTexts}" Content="{x:Static prop:Resources.SideMenu_ShowOriginalTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
-                                <Control Height="5"/>
-                                <CheckBox Tag="DetachNewlineTexts" IsChecked="{Binding DetachNewlineTexts}" Content="{x:Static prop:Resources.SideMenu_DetachNewlineTexts}" Checked="SideMenu_CheckBox_Checked" Unchecked="SideMenu_CheckBox_Unchecked"/>
+                                <CheckBox Tag="ShowOriginTexts" IsChecked="{Binding ShowOriginTexts}" Content="{x:Static prop:Resources.SideMenu_ShowOriginalTexts}" />
 
                                 <Control Height="10"/>
                                 <TextBlock Text="{x:Static prop:Resources.SideMenu_Translate}" FontWeight="Bold"/>
+                                <Grid Height="22">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{x:Static prop:Resources.SideMenu_Translate_Language}" VerticalAlignment="Center" Grid.Column="0"/>
+                                    <TextBox Text="{Binding TranslateLanguage}" Grid.Column="1" Background="{StaticResource AID_Gray}" Foreground="{StaticResource AID_White}"/>
+                                </Grid>
                                 <Control Height="5"/>
                                 <Button Click="SideMenu_OpenDictionaryButton_Click" Style="{StaticResource RoundCorner}">
                                     <TextBlock Text="{x:Static prop:Resources.SideMenu_OpenTranslateDictionary}" Margin="3"/>

@@ -164,16 +164,6 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("showOriginTexts");
             }
         }
-        private bool detachNewlineTexts = true;
-        public bool DetachNewlineTexts
-        {
-            get { return this.detachNewlineTexts; }
-            set
-            {
-                this.detachNewlineTexts = value;
-                OnPropertyChanged("detachNewlineTexts");
-            }
-        }
 
         private string statusText = MainWindow.DefaultStatusText;
         public string StatusText
@@ -246,6 +236,17 @@ namespace AIDungeon_Extension
                 OnPropertyChanged("isInGame");
             }
         }
+        private string translateLanguage;
+        public string TranslateLanguage
+        {
+            get { return this.translateLanguage; }
+            set
+            {
+                this.translateLanguage = value;
+                OnPropertyChanged("translateLanguage");
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
@@ -286,9 +287,6 @@ namespace AIDungeon_Extension
 
                 case "showOriginTexts":
                     ini["Option"]["showOriginTexts"] = this.showOriginTexts;
-                    break;
-                case "detachNewlineTexts":
-                    ini["Option"]["detachNewlineTexts"] = this.detachNewlineTexts;
                     break;
             }
 
@@ -335,8 +333,6 @@ namespace AIDungeon_Extension
                 {
                     if (this.ini["Option"]["showOriginTexts"].TryConvertBool(out isOn))
                         this.showOriginTexts = isOn;
-                    if (this.ini["Option"]["detachNewlineTexts"].TryConvertBool(out isOn))
-                        this.detachNewlineTexts = isOn;
                 }
             }
         }

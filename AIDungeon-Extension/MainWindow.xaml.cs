@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -102,6 +103,8 @@ namespace AIDungeon_Extension
             this.model = new MainWindowViewModel();
             this.DataContext = this.model;
 
+            this.model.TranslateLanguage = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+
             UpdateColorPickerColorsFromViewModel();
 
             CloseSideMenu();
@@ -174,7 +177,7 @@ namespace AIDungeon_Extension
 
                             actionModel.OnTranslating = true;
                             actionModel.TranslatedText = "[번역중...]";
-                            actionModel.TranslateWork = translator.Translate(actionModel.OriginText, "en", "ko",
+                            actionModel.TranslateWork = translator.Translate(actionModel.OriginText, "en", model.TranslateLanguage,
                                 (translated) =>
                                 {
                                     Dispatcher.Invoke(() =>
@@ -440,7 +443,7 @@ namespace AIDungeon_Extension
                             SetStatusText("Translating...");
                             if (translator != null)
                             {
-                                this.inputTranslateWork = translator.Translate(inputTextBox.Text, "ko", "en", (translated) =>
+                                this.inputTranslateWork = translator.Translate(inputTextBox.Text, model.TranslateLanguage, "en", (translated) =>
                                 {
                                     Dispatcher.Invoke(() =>
                                    {
@@ -551,8 +554,8 @@ namespace AIDungeon_Extension
         private void ResetHooker()
         {
             this.actionContainer.Clear();
-
             this.actionsModels.Clear();
+
             this.hooker.Refresh();
         }
         private void RestartHooker()
@@ -562,6 +565,9 @@ namespace AIDungeon_Extension
                 this.hooker.Dispose();
                 this.hooker = null;
             }
+
+            this.actionContainer.Clear();
+            this.actionsModels.Clear();
 
             StartHooker();
         }
@@ -739,20 +745,6 @@ namespace AIDungeon_Extension
             Process.Start(psi);
         }
 
-        private void OnShownOriginTextsChanged()
-        {
-            /*
-            if (this.actionContainer != null)
-                UpdateActionText(this.actionContainer.Adventures, true);
-            */
-        }
-        private void OnDetachNewLineTextsChanged()
-        {
-            /*
-            if (this.actionContainer != null)
-                this.actionContainer.SetForceNewLine(this.model.DetachNewlineTexts);
-            */
-        }
         #endregion
 
         private void ControlMenuButton_Click(object sender, RoutedEventArgs e)
@@ -933,29 +925,5 @@ namespace AIDungeon_Extension
         }
         #endregion
         #endregion
-        #region Checkbox callbacks
-        private void SideMenu_CheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            SideMenu_CheckBox_IsCheckedChanged(sender, e);
-        }
-        private void SideMenu_CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            SideMenu_CheckBox_IsCheckedChanged(sender, e);
-        }
-        private void SideMenu_CheckBox_IsCheckedChanged(object sender, RoutedEventArgs e)
-        {
-            var cb = sender as CheckBox;
-            switch (cb.Tag)
-            {
-                case "ShowOriginTexts":
-                    OnShownOriginTextsChanged();
-                    break;
-                case "DetachNewlineTexts":
-                    OnDetachNewLineTextsChanged();
-                    break;
-            }
-        }
-        #endregion
-
     }
 }

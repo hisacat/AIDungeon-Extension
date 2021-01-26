@@ -208,15 +208,6 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
-        ///   Detach newline texts과(와) 유사한 지역화된 문자열을 찾습니다.
-        /// </summary>
-        public static string SideMenu_DetachNewlineTexts {
-            get {
-                return ResourceManager.GetString("SideMenu/DetachNewlineTexts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Display과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string SideMenu_Display {
@@ -339,6 +330,15 @@ namespace AIDungeon_Extension.Properties {
         public static string SideMenu_Translate {
             get {
                 return ResourceManager.GetString("SideMenu/Translate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Language과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string SideMenu_Translate_Language {
+            get {
+                return ResourceManager.GetString("SideMenu/Translate/Language", resourceCulture);
             }
         }
         

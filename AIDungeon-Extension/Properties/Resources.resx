@@ -165,9 +165,6 @@ Current chrome version: {0}</value>
   <data name="SideMenu/Design" xml:space="preserve">
     <value>Design</value>
   </data>
-  <data name="SideMenu/DetachNewlineTexts" xml:space="preserve">
-    <value>Detach newline texts</value>
-  </data>
   <data name="SideMenu/Display" xml:space="preserve">
     <value>Display</value>
   </data>
@@ -209,6 +206,9 @@ Current chrome version: {0}</value>
   </data>
   <data name="SideMenu/Translate" xml:space="preserve">
     <value>Translate</value>
+  </data>
+  <data name="SideMenu/Translate/Language" xml:space="preserve">
+    <value>Language</value>
   </data>
   <data name="SideMenu/UpdateTranslateDictionary" xml:space="preserve">
     <value>Update Dictionary</value>
