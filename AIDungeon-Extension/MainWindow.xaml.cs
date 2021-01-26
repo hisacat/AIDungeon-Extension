@@ -534,9 +534,9 @@ namespace AIDungeon_Extension
             foreach (var t in this.actionsModels[currentAdventurePublicId].Actions)
             {
                 if (this.model.ShowOriginTexts)
-                    text += t.OriginText + t.TranslatedText;
+                    text += t.OriginText + System.Environment.NewLine + t.TranslatedText + System.Environment.NewLine;
                 else
-                    text += t.TranslatedText;
+                    text += t.TranslatedText + System.Environment.NewLine;
             }
             var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             saveFileDialog.Title = "Save text";

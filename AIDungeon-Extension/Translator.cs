@@ -17,15 +17,18 @@ namespace AIDungeon_Extension
         public const int TimeOut = 10;
         public const string TranslateResultXPath = "//*[@id=\"yDmH0d\"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/c-wiz[2]/div[5]/div/div[3]";
 
+
         ChromeDriver driver = null;
         Thread workThread = null;
         List<TranslateWorker> works = null;
         Dictionary<string, string> translateDictionary = null;
 
         public bool Ready { get; private set; }
+        public bool IsAborted { get; private set; }
         public void Run()
         {
             this.Ready = false;
+            this.IsAborted = false;
 
             this.translateDictionary = new Dictionary<string, string>();
             works = new List<TranslateWorker>();
@@ -152,6 +155,8 @@ namespace AIDungeon_Extension
 
             while (true)
             {
+                if (this.IsAborted) break;
+
                 TranslateWorker currentWork = null;
                 lock (works)
                 {
@@ -251,6 +256,25 @@ namespace AIDungeon_Extension
 
                 System.Threading.Thread.Sleep(1);
             }
+
+            //Dispose
+            if (works != null)
+            {
+                lock (works)
+                {
+                    foreach (var work in works)
+                        work.FailedCallback("Abort");
+
+                    works.Clear();
+                }
+                works = null;
+            }
+            if (driver != null)
+            {
+                driver.Quit();
+                driver = null;
+            }
+            workThread = null;
         }
 
         public static void OpenDictionaryFile()
@@ -290,29 +314,13 @@ namespace AIDungeon_Extension
 
         public void Dispose()
         {
-            this.Ready = false;
-
-            if (works != null)
-            {
-                lock (works)
-                {
-                    foreach (var work in works)
-                        work.FailedCallback("Abort");
-
-                    works.Clear();
-                }
-                works = null;
-            }
-            if (workThread != null)
-            {
-                workThread.Abort();
-                workThread = null;
-            }
             if (driver != null)
             {
                 driver.Quit();
                 driver = null;
             }
+            this.Ready = false;
+            this.IsAborted = true;
         }
 
     }

@@ -38,6 +38,7 @@ namespace AIDungeon_Extension.Core
         private ChromeDriver driver = null;
         private Thread crawlingThread = null;
         public bool Ready { get; private set; }
+        public bool IsAborted { get; private set; }
 
         public delegate void OnAdventurePublicIdChagnedDelegate(string publicId);
         public event OnAdventurePublicIdChagnedDelegate OnAdventurePublicIdChagned = null;
@@ -76,13 +77,15 @@ namespace AIDungeon_Extension.Core
 
         public void Run()
         {
+            this.Ready = false;
+            this.IsAborted = false;
+
             this.xpaths = new Dictionary<string, List<string>>();
             this.LoadXPaths();
 
             SetInputLoading(false);
             this.OnInputLoadingChanged?.Invoke(this.InputLoading);
 
-            this.Ready = false;
             crawlingThread = new Thread(Work);
             crawlingThread.Start();
         }
@@ -229,6 +232,8 @@ namespace AIDungeon_Extension.Core
                         pwInput = FindElementWithXPathDict(XPathKey_Login_PWInputBox);
                         if ((System.DateTime.Now - started).TotalSeconds > LoginFormWaitTimeout)
                             throw new Exception("Timeout");
+                        if (this.IsAborted)
+                            throw new Exception("Aborted");
 
                     } while (loginFormElement == null || idInput == null || pwInput == null);
                     Console.WriteLine("[Log] Loginform wait completed: {0}", (System.DateTime.Now - started).TotalSeconds);
@@ -253,18 +258,22 @@ namespace AIDungeon_Extension.Core
                 Console.WriteLine("[Exception] Hooker-AutoLogin: " + e.Message);
             }
 
-            string currentURL = driver.Url;
+            string currentURL = string.Empty;
             while (true)
             {
+                if (this.IsAborted) break;
+
                 try
                 {
-                    if (!currentURL.Equals(driver.Url))
+                    if (driver == null) continue;
+
+                    if (!currentURL.Equals(driver == null ? null : driver.Url))
                     {
                         currentURL = driver.Url;
                         OnURLChangedCallback(currentURL);
                     }
 
-                    var logs = driver.Manage().Logs.GetLog(LogType_Performance);
+                    var logs = driver == null ? null : driver.Manage().Logs.GetLog(LogType_Performance);
                     foreach (var log in logs)
                     {
                         #region For hooking
@@ -289,9 +298,15 @@ namespace AIDungeon_Extension.Core
                     Console.WriteLine("[Exception] Hooker-CrawlingScripts: " + e.Message);
                 }
             }
+
+            //Dispose
+            if (driver != null)
+            {
+                driver.Quit();
+                driver = null;
+            }
+            crawlingThread = null;
         }
-
-
 
         private void OnURLChangedCallback(string url)
         {
@@ -640,18 +655,13 @@ namespace AIDungeon_Extension.Core
 
         public void Dispose()
         {
-            this.Ready = false;
-
-            if (crawlingThread != null)
-            {
-                crawlingThread.Abort();
-                crawlingThread = null;
-            }
             if (driver != null)
             {
                 driver.Quit();
                 driver = null;
             }
+            this.Ready = false;
+            this.IsAborted = true;
         }
     }
 }
