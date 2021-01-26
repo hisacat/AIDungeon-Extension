@@ -195,7 +195,8 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Exception] Hooker-CrawlingScripts-LoadChromeDriver: " + e.Message);
+                if (!this.IsAborted)
+                    Console.WriteLine("[Exception] Hooker-CrawlingScripts-LoadChromeDriver: " + e.Message);
                 Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
                 foreach (var chromeDriverProcess in chromeDriverProcesses)
                 {
@@ -209,7 +210,8 @@ namespace AIDungeon_Extension.Core
                     }
                     catch (Exception _e)
                     {
-                        Console.WriteLine("[Exception] Hooker-CrawlingScripts-Kill: " + _e.Message);
+                        if (!this.IsAborted)
+                            Console.WriteLine("[Exception] Hooker-CrawlingScripts-Kill: " + _e.Message);
                     }
                 }
                 System.Environment.Exit(-1);
@@ -255,7 +257,8 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Exception] Hooker-AutoLogin: " + e.Message);
+                if (!this.IsAborted)
+                    Console.WriteLine("[Exception] Hooker-AutoLogin: " + e.Message);
             }
 
             string currentURL = string.Empty;
@@ -295,7 +298,8 @@ namespace AIDungeon_Extension.Core
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("[Exception] Hooker-CrawlingScripts: " + e.Message);
+                    if (!this.IsAborted)
+                        Console.WriteLine("[Exception] Hooker-CrawlingScripts: " + e.Message);
                 }
             }
 
@@ -461,7 +465,8 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Exception] Hooker-ParsePayloadData: " + e.Message);
+                if (!this.IsAborted)
+                    Console.WriteLine("[Exception] Hooker-ParsePayloadData: " + e.Message);
             }
         }
 
@@ -481,7 +486,8 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Exception] Hooker-FindElement FindElementWithXPathDict: Key {0} XPath {1}", xPathKey, e.Message);
+                if (!this.IsAborted)
+                    Console.WriteLine("[Exception] Hooker-FindElement FindElementWithXPathDict: Key {0} XPath {1}", xPathKey, e.Message);
             }
             return null;
         }
@@ -522,7 +528,8 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Exception] Hooker-SendText: " + e.Message);
+                if (!this.IsAborted)
+                    Console.WriteLine("[Exception] Hooker-SendText: " + e.Message);
                 return false;
             }
 
@@ -565,7 +572,8 @@ namespace AIDungeon_Extension.Core
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Exception] Hooker-Refresh: " + e.Message);
+                if (!this.IsAborted)
+                    Console.WriteLine("[Exception] Hooker-Refresh: " + e.Message);
                 return false;
             }
 

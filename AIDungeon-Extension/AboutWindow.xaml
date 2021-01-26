@@ -68,7 +68,7 @@
                </Hyperlink>
             </TextBlock>
             <TextBlock Text="Extended GUI tool for play.aidungeon.io" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,70,0,0"/>
-            <StackPanel VerticalAlignment="Top" Margin="10,100,10,0">
+            <StackPanel VerticalAlignment="Top" Margin="20,100,10,0">
                 <TextBlock Text="Author: HisaCat"/>
                 <TextBlock Text="Email: ahisacat@gmail.com"/>
                 <TextBlock>

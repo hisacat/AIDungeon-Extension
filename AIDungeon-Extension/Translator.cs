@@ -138,7 +138,8 @@ namespace AIDungeon_Extension
             }
             catch (Exception e)
             {
-                Console.WriteLine("[Exception] Hooker-CrawlingScripts-LoadChromeDriver: " + e.Message);
+                if (!this.IsAborted)
+                    Console.WriteLine("[Exception] Hooker-CrawlingScripts-LoadChromeDriver: " + e.Message);
                 Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
                 foreach (var chromeDriverProcess in chromeDriverProcesses)
                 {
@@ -224,7 +225,8 @@ namespace AIDungeon_Extension
                             }
                             catch (Exception e)
                             {
-                                Console.WriteLine("[Exception] Translator-Update(TranslateWork)-FindElement: " + e.Message);
+                                if (!this.IsAborted)
+                                    Console.WriteLine("[Exception] Translator-Update(TranslateWork)-FindElement: " + e.Message);
                             } //Needs timeout
                         } while (translatedElement == null);
 
@@ -249,7 +251,8 @@ namespace AIDungeon_Extension
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("[Exception] Translator-Update(TranslateWork): " + e.Message);
+                        if (!this.IsAborted)
+                            Console.WriteLine("[Exception] Translator-Update(TranslateWork): " + e.Message);
                         currentWork.FailedCallback(e.Message);
                     }
                 }

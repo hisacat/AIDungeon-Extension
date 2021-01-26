@@ -65,6 +65,13 @@ namespace AIDungeon_Extension
         private SaveAccountWindow saveAccountWindow = null;
         public MainWindow()
         {
+            FileStream filestream = new FileStream("log.txt", FileMode.Create);
+            var streamwriter = new StreamWriter(filestream);
+            streamwriter.AutoFlush = true;
+            Console.SetOut(streamwriter);
+            Console.SetError(streamwriter);
+
+            Console.WriteLine(string.Format("[Log] Start: {0}", DateTime.Now));
             InitializeComponent();
             this.Title = string.Format("{0} {1}", this.Title, VersionStr);
 
@@ -191,7 +198,6 @@ namespace AIDungeon_Extension
                                         var prevScrollableHeight = actionsScrollViewer.ScrollableHeight;
                                         actionModel.TranslatedText = translated;
                                         this.actionsScrollViewer.UpdateLayout();
-                                        Console.WriteLine("Diff " + (prevScrollableHeight - actionsScrollViewer.ScrollableHeight));
 
                                         var newScrollOffset = actionsScrollViewer.VerticalOffset - (prevScrollableHeight - actionsScrollViewer.ScrollableHeight);
                                         //DoSmoothScroll(this.actionsScrollViewer, newScrollOffset, new TimeSpan(0, 0, 1));
@@ -845,6 +851,7 @@ namespace AIDungeon_Extension
         }
         protected override void OnClosed(EventArgs e)
         {
+            Console.WriteLine(string.Format("[Log] OnClosed: {0}", DateTime.Now));
             //Dispose...
 
             if (hooker != null)
@@ -873,6 +880,7 @@ namespace AIDungeon_Extension
                 }
             }
 
+            Console.WriteLine(string.Format("[Log] End: {0}", DateTime.Now));
             System.Environment.Exit(0);
         }
 
