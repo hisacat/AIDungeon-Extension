@@ -49,7 +49,8 @@ namespace AIDungeon_Extension
         private AIDungeonHooker hooker = null;
         private AIDAdventuresContainer actionContainer = null;
 
-        private Translator translator = null;
+        private Translator actionTranslator = null;
+        private Translator inputTranslator = null;
 
         private string currentAdventurePublicId = string.Empty;
         public enum WriteMode : int
@@ -122,10 +123,12 @@ namespace AIDungeon_Extension
 
             UpdateWriteMode(WriteMode.Say);
 
-            translator = new Translator();
-            translator.Run();
+            actionTranslator = new Translator();
+            actionTranslator.Run();
+            inputTranslator = new Translator();
+            inputTranslator.Run();
 
-            actionContainer = new AIDAdventuresContainer(translator);
+            actionContainer = new AIDAdventuresContainer(actionTranslator);
             actionContainer.OnActionsChanged += ActionContainer_OnActionsChanged;
 
             StartHooker();
@@ -177,7 +180,7 @@ namespace AIDungeon_Extension
 
                             actionModel.OnTranslating = true;
                             actionModel.TranslatedText = "[번역중...]";
-                            actionModel.TranslateWork = translator.Translate(actionModel.OriginText, "en", model.TranslateLanguage,
+                            actionModel.TranslateWork = actionTranslator.Translate(actionModel.OriginText, "en", model.TranslateLanguage,
                                 (translated) =>
                                 {
                                     Dispatcher.Invoke(() =>
@@ -441,9 +444,9 @@ namespace AIDungeon_Extension
                             inputTextBox.IsReadOnly = true;
                             this.model.ShowInputTranslateLoading = true;
                             SetStatusText("Translating...");
-                            if (translator != null)
+                            if (inputTranslator != null)
                             {
-                                this.inputTranslateWork = translator.Translate(inputTextBox.Text, model.TranslateLanguage, "en", (translated) =>
+                                this.inputTranslateWork = inputTranslator.Translate(inputTextBox.Text, model.TranslateLanguage, "en", (translated) =>
                                 {
                                     Dispatcher.Invoke(() =>
                                    {
@@ -622,14 +625,19 @@ namespace AIDungeon_Extension
         }
         private void UpdateTranslateDictionary()
         {
-            if (this.translator != null)
+            UpdateTranslateDictionary(this.actionTranslator);
+            UpdateTranslateDictionary(this.inputTranslator);
+        }
+        private void UpdateTranslateDictionary(Translator translator)
+        {
+            if (translator != null)
             {
                 this.model.ShowLoading = true;
                 this.model.LoadingText = Properties.Resources.LoadingText_UpdateDictionary;
 
                 Task.Run(() =>
                 {
-                    this.translator.LoadDictionary();
+                    translator.LoadDictionary();
 
                     this.Dispatcher.Invoke(() =>
                     {
@@ -819,10 +827,15 @@ namespace AIDungeon_Extension
                 hooker.Dispose();
                 hooker = null;
             }
-            if (translator != null)
+            if (actionTranslator != null)
             {
-                translator.Dispose();
-                translator = null;
+                actionTranslator.Dispose();
+                actionTranslator = null;
+            }
+            if(inputTranslator != null)
+            {
+                inputTranslator.Dispose();
+                inputTranslator = null;
             }
 
             Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
