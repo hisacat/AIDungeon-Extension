@@ -61,9 +61,12 @@ namespace AIDungeon_Extension
         }
         private WriteMode writeMode = default;
 
+        private AboutWindow aboutWindow = null;
+        private SaveAccountWindow saveAccountWindow = null;
         public MainWindow()
         {
             InitializeComponent();
+            this.Title = string.Format("{0} {1}", this.Title, VersionStr);
 
             var chromeDriverPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "chromedriver.exe");
             if (!System.IO.File.Exists(chromeDriverPath))
@@ -783,6 +786,28 @@ namespace AIDungeon_Extension
                 case Key.Escape:
                     CancelInputTranslate();
                     break;
+                case Key.F1:
+                    Help_AboutButton_Click(null, null);
+                    break;
+            }
+        }
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            switch (this.WindowState)
+            {
+                case WindowState.Maximized:
+                case WindowState.Normal:
+                    if (this.aboutWindow != null)
+                        this.aboutWindow.WindowState = WindowState.Normal;
+                    if (this.saveAccountWindow != null)
+                        this.saveAccountWindow.WindowState = WindowState.Normal;
+                    break;
+                case WindowState.Minimized:
+                    if (this.aboutWindow != null)
+                        this.aboutWindow.WindowState = WindowState.Minimized;
+                    if (this.saveAccountWindow != null)
+                        this.saveAccountWindow.WindowState = WindowState.Minimized;
+                    break;
             }
         }
 
@@ -832,7 +857,7 @@ namespace AIDungeon_Extension
                 actionTranslator.Dispose();
                 actionTranslator = null;
             }
-            if(inputTranslator != null)
+            if (inputTranslator != null)
             {
                 inputTranslator.Dispose();
                 inputTranslator = null;
@@ -879,16 +904,28 @@ namespace AIDungeon_Extension
         {
             OpenURL(@"https://github.com/hisacat/AIDungeon-Extension");
         }
-        private void Help_DeveloperButton_Click(object sender, RoutedEventArgs e)
+        private void Help_AboutButton_Click(object sender, RoutedEventArgs e)
         {
-            OpenURL(@"https://twitter.com/ahisacat");
+            if (aboutWindow == null)
+            {
+                aboutWindow = new AboutWindow();
+                aboutWindow.Closed += (_sender, _e) => { aboutWindow = null; };
+            }
+
+            aboutWindow.Left = this.Width / 2 + this.Left - aboutWindow.Width / 2;
+            aboutWindow.Top = this.Height / 2 + this.Top - aboutWindow.Height / 2;
+            aboutWindow.Show();
         }
         private void SaveAccountMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var window = new SaveAccountWindow();
-            window.Left = this.Left;
-            window.Top = this.Top;
-            window.Show();
+            if (saveAccountWindow == null)
+            {
+                saveAccountWindow = new SaveAccountWindow();
+                saveAccountWindow.Closed += (_sender, _e) => { saveAccountWindow = null; };
+            }
+            saveAccountWindow.Left = this.Width / 2 + this.Left - saveAccountWindow.Width / 2;
+            saveAccountWindow.Top = this.Height / 2 + this.Top - saveAccountWindow.Height / 2;
+            saveAccountWindow.Show();
         }
         private void ClearAccountMenuItem_Click(object sender, RoutedEventArgs e)
         {
@@ -937,6 +974,7 @@ namespace AIDungeon_Extension
             RestartHooker();
         }
         #endregion
+
         #endregion
     }
 }

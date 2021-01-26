@@ -1,0 +1,106 @@
+﻿<Window x:Class="AIDungeon_Extension.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AIDungeon_Extension"
+        mc:Ignorable="d"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Title="AboutWindow" Height="400" Width="420" ResizeMode="NoResize" WindowStyle="None">
+    <Window.DataContext>
+        <local:AboutWindowViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <Style x:Key="RoundCorner" TargetType="{x:Type Button}">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid x:Name="grid">
+                            <Border x:Name="border" CornerRadius="5" BorderThickness="0"
+                                    Background="{StaticResource AID_Gray}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          TextElement.FontWeight="Bold">
+                                </ContentPresenter>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource AID_DarkGray}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" TargetName="grid" Value="0.25"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AID_Gray}"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource AID_White}"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource AID_Black}"/>
+            <Setter Property="Foreground" Value="{StaticResource AID_White}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AID_Gray}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Window.Resources>
+    <Grid Background="{StaticResource AID_Black}">
+        <Grid Margin=" 5">
+            <Border  BorderBrush="{StaticResource AID_Gray}" BorderThickness="2" />
+            <Image Source="icon.ico" VerticalAlignment="Top" HorizontalAlignment="Left" Width="50" Margin="10,10,0,0"/>
+            <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Margin="70,22,0,0">
+                <Run Text="AIDungeon Extension"/>
+                <Run Text="{Binding Version}"/>
+            </TextBlock>
+            <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Margin="70,40,0,0">
+               <Hyperlink NavigateUri="https://github.com/hisacat/AIDungeon-Extension" RequestNavigate="Hyperlink_RequestNavigate">
+                   <Hyperlink.Inlines>
+                       <Run Text="Github repository"/>
+                   </Hyperlink.Inlines>
+               </Hyperlink>
+            </TextBlock>
+            <TextBlock Text="This is a extended GUI tool for play.aidungeon.io" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="70,70,0,0"/>
+            <StackPanel VerticalAlignment="Top" Margin="10,100,10,0">
+                <TextBlock Text="Author: HisaCat"/>
+                <TextBlock Text="Email: ahisacat@gmail.com"/>
+                <TextBlock>
+                    <Hyperlink NavigateUri="https://github.com/hisacat" RequestNavigate="Hyperlink_RequestNavigate">
+                        <Hyperlink.Inlines>
+                            <Run Text="Github"/>
+                        </Hyperlink.Inlines>
+                    </Hyperlink>
+                    <Hyperlink NavigateUri="https://twitter.com/ahisacat" RequestNavigate="Hyperlink_RequestNavigate">
+                        <Hyperlink.Inlines>
+                            <Run Text="Twitter"/>
+                        </Hyperlink.Inlines>
+                    </Hyperlink>
+                    <Hyperlink NavigateUri="https://hisacat.tistory.com/" RequestNavigate="Hyperlink_RequestNavigate">
+                        <Hyperlink.Inlines>
+                            <Run Text="Blog"/>
+                        </Hyperlink.Inlines>
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+
+            <Grid Margin="20,170,20,60">
+                <Border  BorderBrush="{StaticResource AID_Gray}" BorderThickness="2" />
+                <TextBlock Text=" MIT License " VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-10,0,0" Background="{StaticResource AID_Black}"/>
+                <ScrollViewer Margin="10">
+                    <TextBlock><Run Text="Copyright (c) 2021 HisaCat"/><LineBreak/><Run/><LineBreak/><Run Text="Permission is hereby granted, free of charge, to any person obtaining a copy"/><LineBreak/><Run Text="of this software and associated documentation files (the &quot;Software&quot;), to deal"/><LineBreak/><Run Text="in the Software without restriction, including without limitation the rights"/><LineBreak/><Run Text="to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"/><LineBreak/><Run Text="copies of the Software, and to permit persons to whom the Software is"/><LineBreak/><Run Text="furnished to do so, subject to the following conditions:"/><LineBreak/><Run/><LineBreak/><Run Text="The above copyright notice and this permission notice shall be included in all"/><LineBreak/><Run Text="copies or substantial portions of the Software."/><LineBreak/><Run/><LineBreak/><Run Text="THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"/><LineBreak/><Run Text="IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"/><LineBreak/><Run Text="FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE"/><LineBreak/><Run Text="AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"/><LineBreak/><Run Text="LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,"/><LineBreak/><Run Text="OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE"/><LineBreak/><Run Text="SOFTWARE."/></TextBlock>
+                </ScrollViewer>
+            </Grid>
+
+            <Button Style="{StaticResource RoundCorner}" HorizontalAlignment="Center" Width="100" Height="22" VerticalAlignment="Bottom" Margin="0,0,0,20" Click="Button_Click" >
+                <TextBlock Text="Ok" Margin="3"/>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

@@ -91,6 +91,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AboutWindow.xaml.cs">
+      <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AIDMenuButtonControl.xaml.cs">
       <DependentUpon>AIDMenuButtonControl.xaml</DependentUpon>
     </Compile>
@@ -125,6 +128,10 @@
     </Compile>
     <Compile Include="Translator.cs" />
     <Compile Include="WebBrowserTranslator.cs" />
+    <Page Include="AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AIDMenuButtonControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -433,6 +433,15 @@ namespace AIDungeon_Extension.Properties {
         }
         
         /// <summary>
+        ///   About AIDungeon Extension과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string WindowMenu_Help_About {
+            get {
+                return ResourceManager.GetString("WindowMenu/Help/About", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Check for update (Open Github)과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string WindowMenu_Help_CheckUpdate {

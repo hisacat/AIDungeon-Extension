@@ -243,6 +243,9 @@ Current chrome version: {0}</value>
   <data name="WindowMenu/Help" xml:space="preserve">
     <value>Help</value>
   </data>
+  <data name="WindowMenu/Help/About" xml:space="preserve">
+    <value>About AIDungeon Extension</value>
+  </data>
   <data name="WindowMenu/Help/CheckUpdate" xml:space="preserve">
     <value>Check for update (Open Github)</value>
   </data>

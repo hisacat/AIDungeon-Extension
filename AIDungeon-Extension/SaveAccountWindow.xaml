@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:AIDungeon_Extension"
         xmlns:prop="clr-namespace:AIDungeon_Extension.Properties"
         mc:Ignorable="d"
+        ShowInTaskbar="False"
         Title="{x:Static prop:Resources.SaveAccount_Title}" Height="180" Width="300" MinHeight="180" MinWidth="300"
         WindowStyle="ToolWindow" Topmost="True">
     <StackPanel Margin="10">

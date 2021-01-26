@@ -8,6 +8,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         KeyDown="Window_KeyDown"
+        ShowInTaskbar="True"
+        StateChanged="Window_StateChanged"
         Title="AIDungeon Extension" Height="700" Width="800" MinHeight="200" MinWidth="400">
 
     <Window.CommandBindings>
@@ -93,13 +95,13 @@
                     <!--<Separator/>-->
                     <MenuItem  Header="{x:Static prop:Resources.WindowMenu_RestartHooker}" Click="SideMenu_RestartHookerButton_Click" Visibility="Collapsed"/>
                 </MenuItem>
-                <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help}">
-                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help_CheckUpdate}" Click="Help_CheckForUpdateButton_Click"/>
-                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Developer}" Click="Help_DeveloperButton_Click"/>
-                </MenuItem>
                 <MenuItem Header="{x:Static prop:Resources.WindowMenu_Account}">
                     <MenuItem Header="{x:Static prop:Resources.WindowMenu_Account_SaveAccount}" Click="SaveAccountMenuItem_Click"/>
                     <MenuItem Header="{x:Static prop:Resources.WindowMenu_Account_ClearAccount}" Click="ClearAccountMenuItem_Click"/>
+                </MenuItem>
+                <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help}">
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help_CheckUpdate}" Click="Help_CheckForUpdateButton_Click"/>
+                    <MenuItem Header="{x:Static prop:Resources.WindowMenu_Help_About}" Click="Help_AboutButton_Click" InputGestureText="F1"/>
                 </MenuItem>
             </Menu>
 
