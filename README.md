@@ -3,7 +3,7 @@
 
 <img width="100" alt="Screenshot_685" src="https://user-images.githubusercontent.com/17191898/105829172-5d393580-6007-11eb-88b5-96dd598bbb0f.png">
 
-이것은 https://play.aidungeon.io 의 GUI 확장 런처로써, **번역 기능**을 포함한 추가 기능을 제공합니다.
+이것은 https://play.aidungeon.io 의 GUI 확장 프로그램으로써, **번역 기능**을 포함한 추가 기능을 제공합니다.
 현재 프로토타입 단계이며, 작업 현황은 [트렐로](https://trello.com/b/Y8P6VzhT)에서 확인 가능합니다.
 
 <img width="700" src="https://user-images.githubusercontent.com/17191898/105830386-c7060f00-6008-11eb-9d04-ebee6844255c.png">
