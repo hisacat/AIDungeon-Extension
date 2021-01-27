@@ -33,7 +33,7 @@ namespace AIDungeon_Extension
 {
     public partial class MainWindow : Window
     {
-        public const string VersionStr = "0.1b";
+        public const string VersionStr = "0.0.1a";
         private MainWindowViewModel model = null;
         private ScenarioOptionModel scenarioOptionModel = null;
         //Key is publicId
