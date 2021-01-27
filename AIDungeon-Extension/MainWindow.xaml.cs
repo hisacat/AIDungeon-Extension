@@ -78,7 +78,9 @@ namespace AIDungeon_Extension
             var chromeDriverPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "chromedriver.exe");
             if (!System.IO.File.Exists(chromeDriverPath))
             {
+                Console.WriteLine("[Log] Cannot find chromedriver");
                 var chromeVersion = string.Empty;
+                try
                 {
                     const string suffix = @"Google\Chrome\Application\chrome.exe";
                     var prefixes = new List<string> { Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) };
@@ -101,6 +103,9 @@ namespace AIDungeon_Extension
                     {
                         chromeVersion = FileVersionInfo.GetVersionInfo(path.ToString()).FileVersion;
                     }
+                }catch(Exception e)
+                {
+                    Console.WriteLine("[ERROR] Cannot detect chrome version");
                 }
 
                 if (MessageBox.Show(string.Format(Properties.Resources.MessageBox_ChromeDriverMissing_Text, chromeVersion),

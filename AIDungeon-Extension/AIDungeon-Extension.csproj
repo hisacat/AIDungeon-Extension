@@ -209,9 +209,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="chromedriver.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Resource Include="icon.ico" />
     <Resource Include="XPaths.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

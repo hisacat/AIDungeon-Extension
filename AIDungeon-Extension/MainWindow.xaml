@@ -80,7 +80,7 @@
         </Style>
     </Window.Resources>
     <Grid Background="{Binding BGColor}">
-        <Image Source="{Binding BGImage}" Stretch="UniformToFill"/>
+        <Image Source="{Binding BGImage}" Stretch="UniformToFill" VerticalAlignment="Bottom"/>
         <DockPanel Background="Transparent">
             <!--Main menus-->
             <Menu IsMainMenu="True" DockPanel.Dock="Top" VerticalContentAlignment="Center">
