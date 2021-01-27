@@ -17,8 +17,7 @@
 **버전은 앞의 숫자만 기억하면 됩니다.**
 
 ## chromedriver 다운로드 및 설치 방법
-1. chromedriver 다운로드 [페이지](https://chromedriver.chromium.org/downloads)로 이동하여,
-현재 사용중인 Chrome버전에 해당하는 다운로드 링크를 클릭합니다. (위 예시의 경우 88)
+1. chromedriver 다운로드 [페이지](https://chromedriver.chromium.org/downloads)로 이동하여, 현재 사용중인 Chrome버전에 해당하는 다운로드 링크를 클릭합니다. (위 예시의 경우 88)
 <img width="482" src="https://user-images.githubusercontent.com/17191898/105823759-e305b280-6000-11eb-954d-b8eaaf995743.png">
 2. win32.zip을 다운로드합니다.
 <img width="539" src="https://user-images.githubusercontent.com/17191898/105824348-91115c80-6001-11eb-9085-446a810240f9.png">
