@@ -156,10 +156,10 @@ namespace AIDungeon_Extension
                     }
                     else
                     {
+                        head.Action = actions[i];
                         head.UpdatedCallback();
                         removedHeads.Remove(head);
                     }
-                    head.Action.text = actions[i].text;
 
                     //merge action if they are one-line texts
                     var innerActions = new List<AIDungeonWrapper.Action>();
