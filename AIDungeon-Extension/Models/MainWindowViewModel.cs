@@ -264,6 +264,9 @@ namespace AIDungeon_Extension
                 case "fontStyle":
                     ini["Font"]["fontStyle"] = this.fontStyle.ToString();
                     break;
+                case "fontSize":
+                    ini["Font"]["fontSize"] = this.fontSize.ToString();
+                    break;
                 case "textDecorations":
                     ini["Font"]["textDecorations"] = this.textDecorations.ToString();
                     break;
@@ -308,9 +311,9 @@ namespace AIDungeon_Extension
                 font = this.ini["Font"]["fontFamily"].ToString();
                 if (!string.IsNullOrEmpty(font)) this.fontFamily = new FontFamily(font);
 
-                int weight;
-                if (this.ini["Font"]["fontWeight"].TryConvertInt(out weight))
-                    this.fontWeight = System.Windows.FontWeight.FromOpenTypeWeight(weight);
+                int fontSize;
+                if (this.ini["Font"]["fontSize"].TryConvertInt(out fontSize))
+                    this.fontSize = fontSize;
 
                 this.ini["Font"]["fontStyle"].ToString();
                 this.ini["Font"]["textDecorations"].ToString();
