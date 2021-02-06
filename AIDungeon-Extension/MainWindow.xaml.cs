@@ -33,7 +33,7 @@ namespace AIDungeon_Extension
 {
     public partial class MainWindow : Window
     {
-        public const string VersionStr = "0.0.1a";
+        public const string VersionStr = "0.0.2a";
         private MainWindowViewModel model = null;
         private ScenarioOptionModel scenarioOptionModel = null;
         //Key is publicId
@@ -194,7 +194,8 @@ namespace AIDungeon_Extension
                             }
 
                             actionModel.OnTranslating = true;
-                            actionModel.TranslatedText = "[번역중...]";
+                            var oldTranslatedText = actionModel.TranslatedText;
+                            actionModel.TranslatedText = oldTranslatedText + System.Environment.NewLine + "[번역중...]";
                             actionModel.TranslateWork = actionTranslator.Translate(actionModel.OriginText, "en", model.TranslateLanguage,
                                 (translated) =>
                                 {
@@ -211,7 +212,7 @@ namespace AIDungeon_Extension
 
                                 }, failed: (reason) =>
                                 {
-                                    Dispatcher.Invoke(() => { actionModel.TranslatedText = "[번역 실패] " + reason; });
+                                    Dispatcher.Invoke(() => { actionModel.TranslatedText = oldTranslatedText + System.Environment.NewLine + "[번역 실패] " + reason; });
                                 }, finished: () =>
                                 {
                                     Dispatcher.Invoke(() => { actionModel.OnTranslating = false; });
@@ -398,101 +399,96 @@ namespace AIDungeon_Extension
 
             if (e.Key == Key.Enter)
             {
-                switch (Keyboard.Modifiers)
+                if(Keyboard.Modifiers == ModifierKeys.Shift) // New line
                 {
-                    case ModifierKeys.Shift: //New line
-                        {
-                            e.Handled = false;
-                            return;
-                        }
-                    case ModifierKeys.Control: //Send
-                        {
-                            e.Handled = true;
+                    e.Handled = false;
+                    return;
+                }
+                if(string.IsNullOrEmpty(inputTextBox.Text) || Keyboard.Modifiers == ModifierKeys.Control) //Send
+                {
+                    e.Handled = true;
 
-                            if (this.hooker != null && this.hooker.Ready)
+                    if (this.hooker != null && this.hooker.Ready)
+                    {
+                        #region Check it command
+                        if (inputTextBox.Text.StartsWith("/"))
+                        {
+                            if (CheckItCommandText(inputTextBox.Text, "/redo"))
                             {
-                                #region Check it command
-                                if (inputTextBox.Text.StartsWith("/"))
-                                {
-                                    if (CheckItCommandText(inputTextBox.Text, "/redo"))
-                                    {
-                                        inputTextBox.Text = string.Empty;
-                                        this.hooker.Command_Redo();
-                                        return;
-                                    }
-                                    if (CheckItCommandText(inputTextBox.Text, "/undo"))
-                                    {
-                                        inputTextBox.Text = string.Empty;
-                                        this.hooker.Command_Undo();
-                                        return;
-                                    }
-                                    if (CheckItCommandText(inputTextBox.Text, "/retry"))
-                                    {
-                                        inputTextBox.Text = string.Empty;
-                                        this.hooker.Command_Retry();
-                                        return;
-                                    }
-                                }
-                                #endregion
-
-                                var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
-
-                                if (this.hooker != null)
-                                {
-                                    if (this.hooker.SendText(sendText))
-                                    {
-                                        inputTextBox.Text = string.Empty;
-                                    }
-                                    else
-                                    {
-                                        this.SetStatusText("Cannot send text. hooker is busy");
-                                    }
-                                }
+                                inputTextBox.Text = string.Empty;
+                                this.hooker.Command_Redo();
+                                return;
                             }
-                            return;
-                        }
-                    case ModifierKeys.None: //Translate
-                        {
-                            e.Handled = true;
-
-                            inputTextBox.IsReadOnly = true;
-                            this.model.ShowInputTranslateLoading = true;
-                            SetStatusText("Translating...");
-                            if (inputTranslator != null)
+                            if (CheckItCommandText(inputTextBox.Text, "/undo"))
                             {
-                                this.inputTranslateWork = inputTranslator.Translate(inputTextBox.Text, model.TranslateLanguage, "en", (translated) =>
+                                inputTextBox.Text = string.Empty;
+                                this.hooker.Command_Undo();
+                                return;
+                            }
+                            if (CheckItCommandText(inputTextBox.Text, "/retry"))
+                            {
+                                inputTextBox.Text = string.Empty;
+                                this.hooker.Command_Retry();
+                                return;
+                            }
+                        }
+                        #endregion
+
+                        var sendText = string.Format("/{0} {1}", this.writeMode, inputTextBox.Text);
+
+                        if (this.hooker != null)
+                        {
+                            if (this.hooker.SendText(sendText))
+                            {
+                                inputTextBox.Text = string.Empty;
+                            }
+                            else
+                            {
+                                this.SetStatusText("Cannot send text. hooker is busy");
+                            }
+                        }
+                    }
+                    return;
+                }else //Translate
+                {
+                    e.Handled = true;
+
+                    inputTextBox.IsReadOnly = true;
+                    this.model.ShowInputTranslateLoading = true;
+                    SetStatusText("Translating...");
+                    if (inputTranslator != null)
+                    {
+                        this.inputTranslateWork = inputTranslator.Translate(inputTextBox.Text, model.TranslateLanguage, "en", (translated) =>
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                inputTextBox.Text = translated;
+                                inputTextBox.CaretIndex = inputTextBox.Text.Length;
+                                SetStatusText(null);
+                            });
+                        },
+                        failed: (reason) =>
+                        {
+                            if (!inputTranslateWork.isAborted)
+                            {
+                                Dispatcher.Invoke(() =>
                                 {
-                                    Dispatcher.Invoke(() =>
-                                   {
-                                       inputTextBox.Text = translated;
-                                       inputTextBox.CaretIndex = inputTextBox.Text.Length;
-                                       SetStatusText(null);
-                                   });
-                                },
-                                failed: (reason) =>
-                                {
-                                    if (!inputTranslateWork.isAborted)
-                                    {
-                                        Dispatcher.Invoke(() =>
-                                        {
-                                            SetStatusText(string.Format("Translate error : {0}", reason));
-                                        });
-                                    }
-                                },
-                                finished: () =>
-                                {
-                                    Dispatcher.Invoke(() =>
-                                    {
-                                        this.model.ShowInputTranslateLoading = false;
-                                        inputTextBox.IsReadOnly = false;
-                                    });
-                                    this.inputTranslateWork = null;
+                                    SetStatusText(string.Format("Translate error : {0}", reason));
                                 });
                             }
-                            return;
-                        }
+                        },
+                        finished: () =>
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                this.model.ShowInputTranslateLoading = false;
+                                inputTextBox.IsReadOnly = false;
+                            });
+                            this.inputTranslateWork = null;
+                        });
+                    }
+                    return;
                 }
-                return;
             }
 
             SetStatusText(null);

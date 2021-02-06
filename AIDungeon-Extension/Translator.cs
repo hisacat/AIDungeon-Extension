@@ -209,7 +209,8 @@ namespace AIDungeon_Extension
                             }
                         }
 
-                        string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", HttpUtility.UrlEncode(targetText), string.Format("{0}|{1}", currentWork.From, currentWork.To));
+                        //string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", HttpUtility.UrlEncode(targetText), string.Format("{0}|{1}", currentWork.From, currentWork.To));
+                        string url = String.Format("https://translate.google.com/?sl={1}&tl={2}&text={0}&op=translate", HttpUtility.UrlEncode(targetText), currentWork.From, currentWork.To);
                         driver.Navigate().GoToUrl(url);
                         IWebElement translatedElement = null;
 
